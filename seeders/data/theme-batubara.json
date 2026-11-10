@@ -1,0 +1,188 @@
+{
+  "slug": "batubara",
+  "name": "Batubara",
+  "sector": "Energi",
+  "description": "Dari menggali batu bara sampai mengubahnya jadi listrik.",
+  "stages": [
+    {
+      "n": 1,
+      "name": "Kontraktor tambang",
+      "short": "Kontraktor",
+      "g": "Hulu",
+      "desc": "Dibayar jasa menggali, bukan menjual batu bara sendiri.",
+      "tks": [
+        "UNTR",
+        "DOID",
+        "PTRO",
+        "DEWA",
+        "ABMM"
+      ]
+    },
+    {
+      "n": 2,
+      "name": "Pemilik tambang termal",
+      "short": "Pemilik tambang",
+      "g": "Hulu",
+      "desc": "Punya konsesi dan menjual batu bara untuk pembangkit listrik.",
+      "tks": [
+        "BUMI",
+        "AADI",
+        "BYAN",
+        "ITMG",
+        "PTBA",
+        "GEMS",
+        "INDY",
+        "HRUM",
+        "BSSR",
+        "DSSA",
+        "TOBA",
+        "MBAP",
+        "KKGI",
+        "ABMM"
+      ]
+    },
+    {
+      "n": 3,
+      "name": "Tambang batu bara metalurgi",
+      "short": "Metalurgi",
+      "g": "Hulu",
+      "desc": "Batu bara kokas untuk bahan baku industri baja.",
+      "tks": [
+        "ADMR"
+      ]
+    },
+    {
+      "n": 4,
+      "name": "Logistik & pengapalan",
+      "short": "Logistik",
+      "g": "Tengah",
+      "desc": "Mengangkut batu bara lewat tongkang dan kapal ke pembeli.",
+      "tks": [
+        "AADI",
+        "TCPI",
+        "PSSI",
+        "ABMM"
+      ]
+    },
+    {
+      "n": 5,
+      "name": "Pembangkit listrik (PLTU)",
+      "short": "Pembangkit",
+      "g": "Hilir",
+      "desc": "Membakar batu bara menjadi listrik.",
+      "tks": [
+        "PTBA",
+        "INDY",
+        "TOBA",
+        "DSSA"
+      ]
+    }
+  ],
+  "companies": [
+    {
+      "ticker": "UNTR",
+      "name": "United Tractors Tbk",
+      "summary": "Kontraktor alat berat yang mengerjakan jasa penambangan untuk banyak pemilik tambang batu bara lewat anak usaha Pamapersada Nusantara (PAMA)."
+    },
+    {
+      "ticker": "DOID",
+      "name": "Delta Dunia Makmur Tbk",
+      "summary": "Induk Bukit Makmur Mandiri Utama (BUMA), salah satu kontraktor tambang batu bara terbesar di Indonesia."
+    },
+    {
+      "ticker": "PTRO",
+      "name": "Petrosea Tbk",
+      "summary": "Kontraktor pertambangan sekaligus penyedia jasa rekayasa (engineering) untuk tambang batu bara dan mineral."
+    },
+    {
+      "ticker": "DEWA",
+      "name": "Darma Henwa Tbk",
+      "summary": "Kontraktor jasa penambangan batu bara yang terafiliasi dengan Grup Bakrie."
+    },
+    {
+      "ticker": "ABMM",
+      "name": "ABM Investama Tbk",
+      "summary": "Grup energi terintegrasi: kontraktor tambang (Cipta Kridatama), tambang batu bara sendiri, dan jasa logistik."
+    },
+    {
+      "ticker": "BUMI",
+      "name": "Bumi Resources Tbk",
+      "summary": "Pemilik tambang batu bara lewat Kaltim Prima Coal & Arutmin — produsen batu bara termal terbesar di Indonesia."
+    },
+    {
+      "ticker": "AADI",
+      "name": "Adaro Andalan Indonesia Tbk",
+      "summary": "Hasil spin-off dari Adaro Energy (ADRO) akhir 2024, menaungi bisnis tambang dan logistik batu bara termal Grup Adaro."
+    },
+    {
+      "ticker": "BYAN",
+      "name": "Bayan Resources Tbk",
+      "summary": "Produsen batu bara termal besar dengan tambang utama di Kalimantan Timur dan biaya produksi yang rendah."
+    },
+    {
+      "ticker": "ITMG",
+      "name": "Indo Tambangraya Megah Tbk",
+      "summary": "Pemilik tambang batu bara berkalori lebih tinggi dari BUMI; sekitar 75% volume penjualannya diekspor."
+    },
+    {
+      "ticker": "PTBA",
+      "name": "Bukit Asam Tbk",
+      "summary": "BUMN di bawah holding MIND ID, pemilik tambang batu bara di Sumatra Selatan dengan kewajiban pasok domestik (DMO) ke PLN, plus PLTU mulut tambang."
+    },
+    {
+      "ticker": "GEMS",
+      "name": "Golden Energy Mines Tbk",
+      "summary": "Pemilik tambang batu bara di Kalimantan, bagian dari Grup Sinar Mas lewat DSSA."
+    },
+    {
+      "ticker": "INDY",
+      "name": "Indika Energy Tbk",
+      "summary": "Perusahaan energi yang tengah menjauh dari batu bara — menargetkan separuh pendapatan dari bisnis non-batubara, termasuk kendaraan listrik."
+    },
+    {
+      "ticker": "HRUM",
+      "name": "Harum Energy Tbk",
+      "summary": "Pemilik tambang batu bara di Kalimantan Timur yang belakangan ekspansi ke bisnis nikel."
+    },
+    {
+      "ticker": "BSSR",
+      "name": "Baramulti Suksessarana Tbk",
+      "summary": "Pemilik tambang batu bara di Kalimantan Selatan dengan fokus pasar ekspor."
+    },
+    {
+      "ticker": "DSSA",
+      "name": "Dian Swastatika Sentosa Tbk",
+      "summary": "Holding energi Grup Sinar Mas: punya tambang batu bara (lewat GEMS) dan bisnis pembangkit listrik."
+    },
+    {
+      "ticker": "TOBA",
+      "name": "TBS Energi Utama Tbk",
+      "summary": "Punya tambang batu bara dan PLTU, sambil beralih ke energi terbarukan dan pengelolaan limbah."
+    },
+    {
+      "ticker": "MBAP",
+      "name": "Mitrabara Adiperdana Tbk",
+      "summary": "Pemilik tambang batu bara di Kalimantan Utara."
+    },
+    {
+      "ticker": "KKGI",
+      "name": "Resource Alam Indonesia Tbk",
+      "summary": "Pemilik tambang batu bara skala menengah di Kalimantan Timur."
+    },
+    {
+      "ticker": "ADMR",
+      "name": "Alamtri Minerals Indonesia Tbk (d/h Adaro Minerals)",
+      "summary": "Fokus pada batu bara metalurgi (coking coal) plus proyek smelter aluminium untuk hilirisasi mineral."
+    },
+    {
+      "ticker": "TCPI",
+      "name": "Transcoal Pacific Tbk",
+      "summary": "Penyedia jasa angkutan laut batu bara: tongkang, kapal tunda, dan bongkar muat."
+    },
+    {
+      "ticker": "PSSI",
+      "name": "IMC Pelita Logistik Tbk",
+      "summary": "Penyedia jasa logistik laut untuk batu bara, dari tongkang sampai transshipment."
+    }
+  ]
+}

@@ -1,0 +1,352 @@
+[
+ {
+  "ticker": "BUMI",
+  "name": "Bumi Resources Tbk",
+  "sector": "Energi",
+  "summary": "Menambang dan menjual batu bara lewat anak usaha KPC dan Arutmin, plus mulai masuk ke mineral logam.",
+  "stage": "Hulu",
+  "theme": "Batubara",
+  "sizeClass": "large",
+  "hasReport": true
+ },
+ {
+  "ticker": "PTBA",
+  "name": "Bukit Asam Tbk",
+  "sector": "Energi",
+  "summary": "BUMN tambang batu bara yang lebih dari separuh penjualannya ke PLN, plus punya PLTU sendiri.",
+  "stage": "Hulu",
+  "theme": "Batubara",
+  "sizeClass": "medium",
+  "hasReport": false
+ },
+ {
+  "ticker": "AADI",
+  "name": "Adaro Andalan Indonesia Tbk",
+  "sector": "Energi",
+  "summary": "Tambang batu bara sekaligus armada tongkang dan pelabuhan sendiri untuk mengangkutnya.",
+  "stage": "Tengah",
+  "theme": "Batubara",
+  "sizeClass": "large",
+  "hasReport": false
+ },
+ {
+  "ticker": "ITMG",
+  "name": "Indo Tambangraya Megah Tbk",
+  "sector": "Energi",
+  "summary": "Produsen batu bara kalori tinggi yang sebagian besar diekspor ke Asia.",
+  "stage": "Hulu",
+  "theme": "Batubara",
+  "sizeClass": "medium",
+  "hasReport": false
+ },
+ {
+  "ticker": "UNTR",
+  "name": "United Tractors Tbk",
+  "sector": "Energi",
+  "summary": "Dibayar per volume galian lewat PAMA, ditambah bisnis alat berat Komatsu, emas, dan nikel.",
+  "stage": "Hulu",
+  "theme": "Batubara",
+  "sizeClass": "large",
+  "hasReport": false
+ },
+ {
+  "ticker": "INDY",
+  "name": "Indika Energy Tbk",
+  "sector": "Energi",
+  "summary": "Induk beberapa tambang batu bara yang mulai merambah kendaraan listrik dan energi surya.",
+  "stage": "Hilir",
+  "theme": "Batubara",
+  "sizeClass": "medium",
+  "hasReport": false
+ },
+ {
+  "ticker": "PGEO",
+  "name": "Pertamina Geothermal Energy Tbk",
+  "sector": "Energi",
+  "summary": "Mengelola pembangkit listrik panas bumi dan menjual uap atau listriknya ke PLN.",
+  "stage": "",
+  "theme": "Energi terbarukan",
+  "sizeClass": "large",
+  "hasReport": false
+ },
+ {
+  "ticker": "PGAS",
+  "name": "Perusahaan Gas Negara Tbk",
+  "sector": "Energi",
+  "summary": "Menyalurkan gas bumi lewat pipa ke industri, pembangkit, dan rumah tangga.",
+  "stage": "",
+  "theme": "Minyak & gas",
+  "sizeClass": "medium",
+  "hasReport": true
+ },
+ {
+  "ticker": "MEDC",
+  "name": "Medco Energi Internasional Tbk",
+  "sector": "Energi",
+  "summary": "Mencari dan memproduksi minyak dan gas, dengan tambahan bisnis listrik dan tambang tembaga.",
+  "stage": "",
+  "theme": "Minyak & gas",
+  "sizeClass": "medium",
+  "hasReport": false
+ },
+ {
+  "ticker": "CUAN",
+  "name": "Petrindo Jaya Kreasi Tbk",
+  "sector": "Energi",
+  "summary": "Pemilik tambang batu bara yang sedang memperluas bisnis ke mineral dan jasa tambang.",
+  "stage": "Hulu",
+  "theme": "Batubara",
+  "sizeClass": "large",
+  "hasReport": true
+ },
+ {
+  "ticker": "DEWA",
+  "name": "Darma Henwa Tbk",
+  "sector": "Energi",
+  "summary": "Kontraktor yang dibayar untuk mengupas tanah dan menggali batu bara milik perusahaan lain.",
+  "stage": "Hulu",
+  "theme": "Batubara",
+  "sizeClass": "small",
+  "hasReport": true
+ },
+ {
+  "ticker": "BBRI",
+  "name": "Bank Rakyat Indonesia Tbk",
+  "sector": "Keuangan",
+  "summary": "Bank BUMN dengan jaringan terluas, sebagian besar kreditnya ke usaha mikro dan kecil.",
+  "stage": "",
+  "theme": "Perbankan",
+  "sizeClass": "large",
+  "hasReport": true
+ },
+ {
+  "ticker": "BMRI",
+  "name": "Bank Mandiri Tbk",
+  "sector": "Keuangan",
+  "summary": "Bank BUMN terbesar dari sisi aset, kuat di kredit korporasi dan transaksi perusahaan.",
+  "stage": "",
+  "theme": "Perbankan",
+  "sizeClass": "large",
+  "hasReport": true
+ },
+ {
+  "ticker": "BBCA",
+  "name": "Bank Central Asia Tbk",
+  "sector": "Keuangan",
+  "summary": "Bank swasta yang hidup dari dana transaksi harian nasabah yang murah dan stabil.",
+  "stage": "",
+  "theme": "Perbankan",
+  "sizeClass": "large",
+  "hasReport": false
+ },
+ {
+  "ticker": "BBNI",
+  "name": "Bank Negara Indonesia Tbk",
+  "sector": "Keuangan",
+  "summary": "Bank BUMN dengan fokus korporasi dan jaringan cabang di luar negeri.",
+  "stage": "",
+  "theme": "Perbankan",
+  "sizeClass": "large",
+  "hasReport": false
+ },
+ {
+  "ticker": "PADI",
+  "name": "Minna Padi Investama Sekuritas Tbk",
+  "sector": "Keuangan",
+  "summary": "Perusahaan sekuritas kecil yang labanya banyak bergantung pada hasil trading sendiri.",
+  "stage": "",
+  "theme": "Perbankan",
+  "sizeClass": "small",
+  "hasReport": true
+ },
+ {
+  "ticker": "ICBP",
+  "name": "Indofood CBP Sukses Makmur Tbk",
+  "sector": "Barang konsumsi",
+  "summary": "Pembuat Indomie dan makanan kemasan lain, dengan pasar besar di Timur Tengah dan Afrika.",
+  "stage": "",
+  "theme": "Barang konsumsi",
+  "sizeClass": "large",
+  "hasReport": false
+ },
+ {
+  "ticker": "SIDO",
+  "name": "Industri Jamu Sido Muncul Tbk",
+  "sector": "Barang konsumsi",
+  "summary": "Pembuat jamu dan produk herbal seperti Tolak Angin, dengan margin laba tinggi.",
+  "stage": "",
+  "theme": "Barang konsumsi",
+  "sizeClass": "medium",
+  "hasReport": true
+ },
+ {
+  "ticker": "MYOR",
+  "name": "Mayora Indah Tbk",
+  "sector": "Barang konsumsi",
+  "summary": "Pembuat biskuit, permen, dan kopi kemasan yang dijual di dalam dan luar negeri.",
+  "stage": "",
+  "theme": "Barang konsumsi",
+  "sizeClass": "medium",
+  "hasReport": false
+ },
+ {
+  "ticker": "UNVR",
+  "name": "Unilever Indonesia Tbk",
+  "sector": "Barang konsumsi",
+  "summary": "Penjual sabun, sampo, dan kebutuhan rumah tangga merek Unilever di Indonesia.",
+  "stage": "",
+  "theme": "Barang konsumsi",
+  "sizeClass": "medium",
+  "hasReport": false
+ },
+ {
+  "ticker": "TAPG",
+  "name": "Triputra Agro Persada Tbk",
+  "sector": "Barang konsumsi",
+  "summary": "Perkebunan kelapa sawit yang mengolah sendiri buahnya menjadi minyak sawit mentah.",
+  "stage": "",
+  "theme": "Sawit",
+  "sizeClass": "medium",
+  "hasReport": true
+ },
+ {
+  "ticker": "INCO",
+  "name": "Vale Indonesia Tbk",
+  "sector": "Barang baku",
+  "summary": "Menambang dan mengolah nikel di Sulawesi untuk bahan baja tahan karat dan baterai.",
+  "stage": "",
+  "theme": "Nikel",
+  "sizeClass": "medium",
+  "hasReport": true
+ },
+ {
+  "ticker": "ANTM",
+  "name": "Aneka Tambang Tbk",
+  "sector": "Barang baku",
+  "summary": "BUMN tambang nikel, emas, dan bauksit, juga penjual emas batangan Logam Mulia.",
+  "stage": "",
+  "theme": "Nikel",
+  "sizeClass": "medium",
+  "hasReport": false
+ },
+ {
+  "ticker": "TLKM",
+  "name": "Telkom Indonesia Tbk",
+  "sector": "Infrastruktur",
+  "summary": "Operator telekomunikasi BUMN, pemilik Telkomsel, jaringan fiber, dan pusat data.",
+  "stage": "",
+  "theme": "Telekomunikasi",
+  "sizeClass": "large",
+  "hasReport": true
+ },
+ {
+  "ticker": "TOWR",
+  "name": "Sarana Menara Nusantara Tbk",
+  "sector": "Infrastruktur",
+  "summary": "Menyewakan menara dan jaringan fiber ke operator seluler dengan kontrak jangka panjang.",
+  "stage": "",
+  "theme": "Telekomunikasi",
+  "sizeClass": "medium",
+  "hasReport": false
+ },
+ {
+  "ticker": "JSMR",
+  "name": "Jasa Marga Tbk",
+  "sector": "Infrastruktur",
+  "summary": "BUMN pengelola jalan tol yang pendapatannya dari tarif kendaraan yang lewat.",
+  "stage": "",
+  "theme": "Jalan tol",
+  "sizeClass": "medium",
+  "hasReport": false
+ },
+ {
+  "ticker": "CDIA",
+  "name": "Chandra Daya Investasi Tbk",
+  "sector": "Infrastruktur",
+  "summary": "Pengelola infrastruktur listrik, air, pelabuhan, dan tangki untuk kawasan industri.",
+  "stage": "",
+  "theme": "Infrastruktur energi",
+  "sizeClass": "large",
+  "hasReport": true
+ },
+ {
+  "ticker": "GTSI",
+  "name": "GTS Internasional Tbk",
+  "sector": "Infrastruktur",
+  "summary": "Menyewakan kapal pengangkut dan penyimpanan gas alam cair (LNG).",
+  "stage": "",
+  "theme": "Logistik energi",
+  "sizeClass": "small",
+  "hasReport": true
+ },
+ {
+  "ticker": "GOTO",
+  "name": "GoTo Gojek Tokopedia Tbk",
+  "sector": "Teknologi",
+  "summary": "Aplikasi transportasi, pesan antar, dan pembayaran digital Gojek dan GoPay.",
+  "stage": "",
+  "theme": "Ekonomi digital",
+  "sizeClass": "large",
+  "hasReport": false
+ },
+ {
+  "ticker": "INET",
+  "name": "Sinergi Inti Andalan Prima Tbk",
+  "sector": "Teknologi",
+  "summary": "Penyedia jaringan dan layanan internet untuk rumah dan bisnis.",
+  "stage": "",
+  "theme": "Telekomunikasi",
+  "sizeClass": "small",
+  "hasReport": true
+ },
+ {
+  "ticker": "KLBF",
+  "name": "Kalbe Farma Tbk",
+  "sector": "Kesehatan",
+  "summary": "Produsen obat, suplemen, dan susu kemasan, plus distribusi produk kesehatan.",
+  "stage": "",
+  "theme": "Kesehatan",
+  "sizeClass": "medium",
+  "hasReport": false
+ },
+ {
+  "ticker": "MIKA",
+  "name": "Mitra Keluarga Karyasehat Tbk",
+  "sector": "Kesehatan",
+  "summary": "Jaringan rumah sakit swasta untuk pasien kelas menengah di kota besar.",
+  "stage": "",
+  "theme": "Kesehatan",
+  "sizeClass": "medium",
+  "hasReport": false
+ },
+ {
+  "ticker": "BSDE",
+  "name": "Bumi Serpong Damai Tbk",
+  "sector": "Properti",
+  "summary": "Mengembangkan dan menjual rumah, ruko, serta kawasan BSD City di Tangerang.",
+  "stage": "",
+  "theme": "Properti",
+  "sizeClass": "medium",
+  "hasReport": false
+ },
+ {
+  "ticker": "CTRA",
+  "name": "Ciputra Development Tbk",
+  "sector": "Properti",
+  "summary": "Pengembang perumahan dan kawasan kota mandiri di banyak kota di Indonesia.",
+  "stage": "",
+  "theme": "Properti",
+  "sizeClass": "medium",
+  "hasReport": false
+ },
+ {
+  "ticker": "ASII",
+  "name": "Astra International Tbk",
+  "sector": "Perindustrian",
+  "summary": "Konglomerasi otomotif Toyota dan Honda, pembiayaan, alat berat, dan agribisnis.",
+  "stage": "",
+  "theme": "Otomotif",
+  "sizeClass": "large",
+  "hasReport": false
+ }
+]
