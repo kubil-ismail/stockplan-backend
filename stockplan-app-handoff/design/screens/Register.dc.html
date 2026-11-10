@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>StockPlan — Daftar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+*{box-sizing:border-box}
+a{color:#1C1917}a:hover{color:#57534E}
+button,input,textarea,select{font-family:inherit}
+:focus-visible{outline:2px solid #1C1917;outline-offset:2px}
+.wrap{font-family:'Geist',system-ui,sans-serif;color:#1C1917;background:#FFFFFF;font-size:15px;line-height:1.55;min-height:100vh;display:flex;flex-wrap:wrap}
+.left{flex:1 1 560px;min-width:0;display:flex;flex-direction:column;padding:28px 40px}
+.brand{display:flex;align-items:center;gap:9px;text-decoration:none;color:#1C1917;font-weight:700;font-size:16px;letter-spacing:-0.01em}
+.brand>em{font-style:normal;font-size:11px;font-weight:600;color:#92400E;background:#FFF4E2;border:1px solid #FCDDA8;padding:0 6px;border-radius:6px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.top>span{font-size:14px;color:#716A65}
+.top>span>a{font-weight:600;color:#1C1917}
+.center{flex:1;display:flex;align-items:center;justify-content:center;padding:32px 0}
+.form{width:100%;max-width:400px;display:flex;flex-direction:column;gap:18px}
+.hd{display:flex;flex-direction:column;gap:6px}
+.hd h1{margin:0;font-size:28px;font-weight:700;letter-spacing:-0.02em;line-height:1.2}
+.hd p{margin:0;color:#716A65;font-size:15px}
+.fld{display:flex;flex-direction:column;gap:6px}
+.fld>label,.lbl-row>label{font-size:13.5px;font-weight:600;color:#1C1917}
+.lbl-row{display:flex;justify-content:space-between;align-items:baseline}
+.lbl-row>a{font-size:13px;font-weight:600;text-decoration:none;color:#92400E}
+.lbl-row>a:hover{text-decoration:underline;color:#78350F}
+.inp-w{position:relative;display:flex;align-items:center}
+.inp{width:100%;height:44px;border:1px solid #D6D3D1;border-radius:9px;padding:0 12px;font-size:15px;color:#1C1917;background:#FFFFFF}
+.inp::placeholder{color:#A8A29E}
+.inp:focus{outline:none;border-color:#1C1917;box-shadow:0 0 0 3px rgba(28,25,23,.1)}
+.inp-err{border-color:#DC2626}
+.inp-err:focus{border-color:#DC2626;box-shadow:0 0 0 3px rgba(220,38,38,.12)}
+.inp-pw{padding-right:76px}
+.eye{position:absolute;right:6px;height:32px;padding:0 10px;border:0;border-radius:7px;background:transparent;color:#57534E;font-size:13px;font-weight:600;cursor:pointer}
+.eye:hover{background:#F5F5F4;color:#1C1917}
+.err{font-size:13px;color:#B91C1C;display:flex;gap:6px;align-items:center}
+.help{font-size:12.5px;color:#716A65}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:9px;font-size:15px;font-weight:600;text-decoration:none;cursor:pointer;border:1px solid transparent;white-space:nowrap;width:100%}
+.btn-p{background:#FEA722;color:#1C1917}.btn-p:hover{background:#F59E0B;color:#1C1917}
+.btn-o{background:#FFFFFF;color:#1C1917;border-color:#E7E5E4}.btn-o:hover{background:#F5F5F4;color:#1C1917}
+.btn-d{background:#F5F5F4;color:#A8A29E;cursor:not-allowed}
+.btn-d:hover{background:#F5F5F4;color:#A8A29E}
+.spin{width:16px;height:16px;border-radius:999px;border:2px solid rgba(28,25,23,.25);border-top-color:#1C1917;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.or{display:flex;align-items:center;gap:12px;font-size:12.5px;color:#A8A29E}
+.or::before,.or::after{content:"";flex:1;height:1px;background:#E7E5E4}
+.alert{display:flex;gap:10px;align-items:flex-start;border-radius:10px;padding:10px 12px;font-size:13.5px;line-height:1.45}
+.alert-e{background:#FEF2F2;border:1px solid #FECACA;color:#991B1B}
+.alert-i{background:#FFF8EC;border:1px solid #FCDDA8;color:#78350F}
+.alert>svg{flex:none;margin-top:1px}
+.ck{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:#44403C;line-height:1.45;cursor:pointer;border:0;background:transparent;padding:0;text-align:left}
+.ck>.bx{width:18px;height:18px;border-radius:5px;border:1.5px solid #D6D3D1;flex:none;margin-top:1px;display:inline-flex;align-items:center;justify-content:center;color:transparent;background:#FFFFFF}
+.ck-on>.bx{background:#1C1917;border-color:#1C1917;color:#FFFFFF}
+.ck-err>.bx{border-color:#DC2626}
+.ck a{font-weight:600}
+.meter{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.meter>span{height:4px;border-radius:999px;background:#F0EEEC}
+.m-1{background:#DC2626 !important}.m-2{background:#F59E0B !important}.m-3{background:#FEA722 !important}.m-4{background:#15803D !important}
+.rules{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:#716A65}
+.rules>span{display:inline-flex;align-items:center;gap:5px}
+.rules>.ok{color:#15803D}
+.rules>.bad{color:#B91C1C}
+.foot{font-size:12px;color:#A8A29E;display:flex;gap:16px;flex-wrap:wrap}
+.foot a{color:#716A65;text-decoration:none}
+.foot a:hover{color:#1C1917;text-decoration:underline}
+.icon-big{width:56px;height:56px;border-radius:16px;display:inline-flex;align-items:center;justify-content:center}
+.ib-a{background:#FFF4E2;color:#92400E}.ib-g{background:#F0FDF4;color:#15803D}
+.mail{font-weight:600;color:#1C1917}
+.lnk{border:0;background:transparent;padding:0;font:inherit;font-weight:600;color:#1C1917;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.lnk:hover{color:#57534E}
+.muted{color:#A8A29E;font-weight:500}
+.steps{display:flex;flex-direction:column;gap:0;border:1px solid #E7E5E4;border-radius:12px;overflow:hidden}
+.steps>div{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-top:1px solid #F0EEEC;font-size:13.5px;color:#44403C;line-height:1.45}
+.steps>div:first-child{border-top:0}
+.steps b{width:22px;height:22px;border-radius:999px;background:#F5F5F4;color:#57534E;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.steps .s-on{background:#FFF4E2;color:#92400E}
+.steps .s-ok{background:#DCFCE7;color:#15803D}
+.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;text-decoration:none;color:#57534E;width:fit-content}
+.back:hover{color:#1C1917}
+/* right panel */
+.right{flex:1 1 520px;min-width:0;position:relative;overflow:hidden;background:#1C1917;color:#E7E5E4;display:flex;flex-direction:column;justify-content:space-between;padding:40px 48px}
+.dec{position:absolute;right:-90px;top:-70px;width:420px;height:420px;pointer-events:none;opacity:.9}
+.r-k{position:relative;display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:#FEA722;letter-spacing:.08em;text-transform:uppercase}
+.r-k>i{width:6px;height:6px;border-radius:999px;background:#FEA722;display:block}
+.r-h{position:relative;margin:14px 0 0;font-size:34px;font-weight:700;letter-spacing:-0.025em;line-height:1.15;color:#FFFFFF;max-width:460px}
+.r-h>span{color:#FEA722}
+.r-p{position:relative;margin:12px 0 0;font-size:15px;color:#A8A29E;max-width:440px;line-height:1.6}
+.tcard{position:relative;background:#FFFFFF;color:#1C1917;border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px;max-width:440px;box-shadow:0 30px 60px -30px rgba(0,0,0,.6)}
+.tc-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pill{font-size:11.5px;font-weight:600;padding:0 9px;line-height:22px;border-radius:999px;white-space:nowrap}
+.p-g{background:#DCFCE7;color:#15803D}.p-a{background:#FFF4E2;color:#92400E}.p-n{background:#F5F5F4;color:#57534E}
+.tc-t{font-size:16px;font-weight:700;line-height:1.35;letter-spacing:-0.01em}
+.tc-row{display:flex;gap:8px;flex-wrap:wrap}
+.tk{font-family:'Geist Mono',monospace;font-size:12px;font-weight:600;padding:0 8px;line-height:24px;border-radius:7px;border:1px solid #E7E5E4;background:#FAFAF9}
+.tc-l{display:flex;flex-direction:column;gap:6px;border-top:1px dashed #E7E5E4;padding-top:12px}
+.tc-l>small{font-size:10.5px;font-weight:700;color:#716A65;text-transform:uppercase;letter-spacing:.06em}
+.tc-l>span{display:flex;gap:8px;align-items:center;font-size:13px;color:#44403C}
+.tc-l>span>i{width:6px;height:6px;border-radius:999px;flex:none;display:block}
+.vals{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;max-width:520px}
+.vals>div{border:1px solid #38332F;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:4px}
+.vals b{font-size:13.5px;color:#FFFFFF;font-weight:600}
+.vals span{font-size:12.5px;color:#A8A29E;line-height:1.45}
+.r-f{position:relative;font-size:12px;color:#78716C;max-width:460px;line-height:1.5}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1C1917;color:#FFFFFF;padding:9px 16px;border-radius:999px;font-size:13.5px;z-index:60;box-shadow:0 12px 30px -10px rgba(0,0,0,.5)}
+</style>
+</helmet>
+<div class="wrap">
+<div class="left">
+<div class="top">
+<a class="brand" href="Login.dc.html" aria-label="StockPlan"><svg aria-hidden="true" viewBox="4 213 102 88" width="24" height="21"><g fill="#FEA722"><path d="M13.04,233.96c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.49s0-2.12,5.66-4.97l36.26-15.83c4.18-1.83,6.89-5.96,6.89-10.52v-16.89l-41.92,18.3Z"></path><path d="M96.89,280.81c4.18-1.83,6.89-5.96,6.89-10.52v-16.89h0v-2.49s0,2.12-5.66,4.97l-36.26,15.83c-4.18,1.83-6.89,5.960-6.89,10.52v16.89l41.92-18.3Z"></path><path d="M98.11,226.34l-36.26,15.83s-.07,.04-.1,.05l-48.71,21.26c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.79s0-2.12,5.66-4.97l36.26-15.83c.73-.32,1.4-.73,2.03-1.18l46.78-20.42c4.18-1.83,6.89-5.96,6.89-10.52h0v-16.89h0v-2.5s0,2.12-5.66,4.97Z"></path></g></svg>StockPlan<em>Beta</em></a>
+<span>Sudah punya akun? <a href="Login.dc.html">Masuk</a></span>
+</div>
+<main class="center">
+<form class="form" novalidate onSubmit="{{submit}}">
+<div class="hd">
+<h1>Buat akun StockPlan</h1>
+<p>Gratis selama beta. Tidak perlu kartu kredit.</p>
+</div>
+<button type="button" class="btn btn-o" onClick="{{google}}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.6 12.2c0-.8-.1-1.5-.2-2.2H12v4.2h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2.1-1.9 3.3-4.8 3.3-8z"></path><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.6-2.8c-1 .7-2.2 1.1-3.7 1.1-2.9 0-5.3-1.9-6.2-4.5H2.1v2.8A11 11 0 0 0 12 23z"></path><path fill="#FBBC05" d="M5.8 14.1a6.6 6.6 0 0 1 0-4.2V7.1H2.1a11 11 0 0 0 0 9.8z"></path><path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.7l3.2-3.2A11 11 0 0 0 2.1 7.1l3.7 2.8C6.7 7.3 9.1 5.4 12 5.4z"></path></svg>Daftar dengan Google</button>
+<div class="or">atau dengan email</div>
+<div class="fld">
+<label for="nm">Nama panggilan</label>
+<input id="nm" class="{{nmCls}}" type="text" autocomplete="given-name" placeholder="Contoh: Budi" value="{{name}}" onInput="{{setName}}" aria-describedby="nm-e">
+<sc-if value="{{hasNmErr}}" hint-placeholder-val="{{false}}"><span class="err" id="nm-e">{{nmErr}}</span></sc-if>
+</div>
+<div class="fld">
+<label for="em">Email</label>
+<input id="em" class="{{emCls}}" type="email" autocomplete="email" placeholder="nama@email.com" value="{{email}}" onInput="{{setEmail}}" aria-describedby="em-e">
+<sc-if value="{{hasEmErr}}" hint-placeholder-val="{{false}}"><span class="err" id="em-e">{{emErr}}</span></sc-if>
+</div>
+<div class="fld">
+<label for="pw">Password</label>
+<div class="inp-w"><input id="pw" class="{{pwCls}}" type="{{pwType}}" autocomplete="new-password" placeholder="Minimal 8 karakter" value="{{pw}}" onInput="{{setPw}}" aria-describedby="pw-r"><button type="button" class="eye" aria-label="{{pwAria}}" onClick="{{togglePw}}">{{pwLbl}}</button></div>
+<div class="meter" aria-hidden="true"><sc-for list="{{meter}}" as="m" hint-placeholder-count="4"><span class="{{m.cls}}"></span></sc-for></div>
+<div class="rules" id="pw-r"><sc-for list="{{rules}}" as="r" hint-placeholder-count="3"><span class="{{r.cls}}">{{r.ic}} {{r.l}}</span></sc-for><span style="margin-left: auto; font-weight: 600">{{strength}}</span></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<button type="button" class="ck {{agCls}}" role="checkbox" aria-checked="{{agree}}" onClick="{{toggleAg}}"><span class="bx" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l4 4 10-10"></path></svg></span><span>Saya setuju dengan <a href="SyaratLayanan.dc.html" target="_blank" rel="noopener">Syarat layanan</a> dan <a href="KebijakanPrivasi.dc.html" target="_blank" rel="noopener">Kebijakan privasi</a>.</span></button>
+<button type="button" class="ck {{nsCls}}" role="checkbox" aria-checked="{{notSaran}}" onClick="{{toggleNs}}"><span class="bx" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l4 4 10-10"></path></svg></span><span>Saya paham StockPlan adalah alat riset dan perencanaan, <b>bukan rekomendasi beli atau jual saham</b>.</span></button>
+<sc-if value="{{hasCkErr}}" hint-placeholder-val="{{false}}"><span class="err"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16h.01"></path></svg>Centang kedua pernyataan di atas untuk melanjutkan.</span></sc-if>
+</div>
+<sc-if value="{{notLoading}}" hint-placeholder-val="{{true}}"><button type="submit" class="btn btn-p">Buat akun</button></sc-if>
+<sc-if value="{{loading}}" hint-placeholder-val="{{false}}"><button type="button" class="btn btn-p" aria-busy="true" disabled><span class="spin" aria-hidden="true"></span>Membuat akun…</button></sc-if>
+</form>
+</main>
+<div class="foot"><span>© 2026 StockPlan</span><a href="SyaratLayanan.dc.html">Syarat layanan</a><a href="KebijakanPrivasi.dc.html">Kebijakan privasi</a><a href="BantuanPublik.dc.html">Bantuan</a></div>
+</div>
+<aside class="right" aria-label="Tentang StockPlan">
+<svg class="dec" viewBox="0 0 200 200" aria-hidden="true"><g fill="#FEA722"><path d="M20 55 L95 18 L95 55 L20 92 Z" opacity=".10"></path><path d="M50 100 L125 63 L125 100 L50 137 Z" opacity=".18"></path><path d="M80 145 L155 108 L155 145 L80 182 Z" opacity=".3"></path></g></svg>
+<div>
+<span class="r-k"><i aria-hidden="true"></i>Akses beta</span>
+<h2 class="r-h">Tiga langkah menuju portofolio yang <span>punya alasan</span>.</h2>
+<p class="r-p">Semua fitur terbuka selama beta. Langganan premium baru berlaku setelah rilis — Anda akan diberi tahu lebih dulu.</p>
+</div>
+<div class="vals" aria-hidden="false">
+<div><b>1. Pahami tema</b><span>Lihat siapa saja yang bermain di rantai nilai batubara, nikel, perbankan.</span></div>
+<div><b>2. Tulis tesis</b><span>Satu kalimat yang Anda yakini, plus kapan Anda anggap itu salah.</span></div>
+<div><b>3. Pantau</b><span>Kami rangkum perubahan bisnis dari keterbukaan informasi BEI.</span></div>
+</div>
+<p class="r-f">Data bersumber dari Bursa Efek Indonesia. StockPlan tidak memproses transaksi dan bukan rekomendasi saham.</p>
+</aside>
+</div>
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}"><div class="toast" role="status">{{toast}}</div></sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+constructor(p){ super(p); this.state = this.fresh(); }
+fresh(){ return { name: '', email: '', pw: '', show: false, agree: false, notSaran: false, tried: false, loading: false, toast: '' }; }
+renderVals(){
+const self = this, st = this.state, set = (o) => self.setState(o);
+const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const pw = st.pw;
+const rl = [
+{ l: '8+ karakter', ok: pw.length >= 8 },
+{ l: 'Huruf besar', ok: /[A-Z]/.test(pw) },
+{ l: 'Angka', ok: /[0-9]/.test(pw) }
+];
+let score = rl.filter(r => r.ok).length + (pw.length >= 12 ? 1 : 0);
+if (!pw) score = 0;
+const sLbl = !pw ? '' : ['Lemah', 'Lemah', 'Cukup', 'Kuat', 'Sangat kuat'][score];
+const nmErr = st.tried && !st.name.trim() ? 'Isi nama panggilan Anda.' : '';
+const emErr = !st.tried ? '' : (!st.email.trim() ? 'Isi email Anda.' : (!re.test(st.email.trim()) ? 'Format email belum benar. Contoh: nama@email.com' : (st.email.trim().toLowerCase() === 'ada@contoh.com' ? 'Email ini sudah terdaftar.' : '')));
+const pwBad = st.tried && !(rl[0].ok && rl[1].ok && rl[2].ok);
+const ckErr = st.tried && !(st.agree && st.notSaran);
+return {
+name: st.name, email: st.email, pw: st.pw,
+setName: (e) => set({ name: e.target.value }), setEmail: (e) => set({ email: e.target.value }), setPw: (e) => set({ pw: e.target.value }),
+nmCls: 'inp' + (nmErr ? ' inp-err' : ''), emCls: 'inp' + (emErr ? ' inp-err' : ''), pwCls: 'inp inp-pw' + (pwBad ? ' inp-err' : ''),
+hasNmErr: !!nmErr, nmErr, hasEmErr: !!emErr, emErr,
+pwType: st.show ? 'text' : 'password', pwLbl: st.show ? 'Sembunyi' : 'Lihat', pwAria: st.show ? 'Sembunyikan password' : 'Tampilkan password',
+togglePw: () => set({ show: !self.state.show }),
+meter: [1, 2, 3, 4].map(i => ({ cls: i <= score ? 'm-' + Math.max(1, score) : '' })),
+rules: rl.map(r => ({ l: r.l, ic: r.ok ? '✓' : '○', cls: r.ok ? 'ok' : (st.tried ? 'bad' : '') })),
+strength: sLbl,
+agree: st.agree ? 'true' : 'false', agCls: (st.agree ? 'ck-on' : '') + (ckErr && !st.agree ? ' ck-err' : ''),
+notSaran: st.notSaran ? 'true' : 'false', nsCls: (st.notSaran ? 'ck-on' : '') + (ckErr && !st.notSaran ? ' ck-err' : ''),
+toggleAg: () => set({ agree: !self.state.agree }), toggleNs: () => set({ notSaran: !self.state.notSaran }),
+hasCkErr: ckErr,
+loading: st.loading, notLoading: !st.loading,
+hasToast: !!st.toast, toast: st.toast,
+google: () => { set({ toast: 'Mengarahkan ke Google…' }); setTimeout(() => self.setState({ toast: '' }), 1800); },
+submit: (e) => {
+if (e && e.preventDefault) e.preventDefault();
+const s = self.state, em = s.email.trim().toLowerCase();
+const okPw = s.pw.length >= 8 && /[A-Z]/.test(s.pw) && /[0-9]/.test(s.pw);
+if (!s.name.trim() || !re.test(em) || em === 'ada@contoh.com' || !okPw || !s.agree || !s.notSaran) { set({ tried: true }); return; }
+set({ tried: true, loading: true });
+setTimeout(() => { self.setState({ loading: false, toast: 'Akun dibuat — cek email Anda untuk konfirmasi.' }); setTimeout(() => self.setState({ toast: '' }), 2200); }, 900);
+}
+};
+}
+}
+</script>
+</body>
+</html>

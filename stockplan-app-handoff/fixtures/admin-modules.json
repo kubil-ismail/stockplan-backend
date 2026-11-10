@@ -1,0 +1,99 @@
+[
+  {
+    "key": "dash",
+    "name": "Dashboard",
+    "desc": "Ringkasan dan antrian kerja",
+    "availableActions": [
+      "view"
+    ],
+    "superOnly": false
+  },
+  {
+    "key": "em",
+    "name": "Data emiten",
+    "desc": "Profil, sumber pendapatan, laporan keuangan, IPO",
+    "availableActions": [
+      "view",
+      "edit",
+      "publish",
+      "delete"
+    ],
+    "superOnly": false
+  },
+  {
+    "key": "tm",
+    "name": "Tema & rantai nilai",
+    "desc": "Tahap, emiten per tahap, porsi pendapatan",
+    "availableActions": [
+      "view",
+      "edit",
+      "publish",
+      "delete"
+    ],
+    "superOnly": false
+  },
+  {
+    "key": "usr",
+    "name": "Pengguna",
+    "desc": "Akun beta, undangan, tangguhkan akun",
+    "availableActions": [
+      "view",
+      "edit",
+      "delete"
+    ],
+    "superOnly": true
+  },
+  {
+    "key": "fb",
+    "name": "Masukan & laporan",
+    "desc": "Tiket dari form Bantuan",
+    "availableActions": [
+      "view",
+      "edit",
+      "delete"
+    ],
+    "superOnly": false
+  },
+  {
+    "key": "log",
+    "name": "Riwayat perubahan",
+    "desc": "Lihat dan kembalikan perubahan",
+    "availableActions": [
+      "view",
+      "edit"
+    ],
+    "superOnly": false
+  },
+  {
+    "key": "sync",
+    "name": "Sinkron data BEI",
+    "desc": "Jalankan sinkron, tinjau perubahan BEI",
+    "availableActions": [
+      "view",
+      "edit"
+    ],
+    "superOnly": false
+  },
+  {
+    "key": "set",
+    "name": "Pengaturan aplikasi",
+    "desc": "Merek, landing page, mode aplikasi",
+    "availableActions": [
+      "view",
+      "edit",
+      "publish"
+    ],
+    "superOnly": true
+  },
+  {
+    "key": "acc",
+    "name": "Akses & peran",
+    "desc": "Undang anggota, ubah peran dan izin",
+    "availableActions": [
+      "view",
+      "edit",
+      "delete"
+    ],
+    "superOnly": true
+  }
+]

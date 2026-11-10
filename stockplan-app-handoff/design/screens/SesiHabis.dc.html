@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>StockPlan — Sesi berakhir</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+*{box-sizing:border-box}
+a{color:#1C1917}a:hover{color:#57534E}
+button,input,textarea,select{font-family:inherit}
+:focus-visible{outline:2px solid #1C1917;outline-offset:2px}
+.nv{display:flex;align-items:center;gap:10px;min-height:40px;padding:0 10px;border-radius:8px;font-size:14px;color:#57534E;text-decoration:none;border:1px solid transparent}
+.nv:hover{background:#F5F5F4;color:#1C1917}
+.nv-on,.nv-on:hover{background:#FFFFFF;color:#1C1917;font-weight:600;border-color:#E7E5E4;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.sec{font-size:11px;font-weight:600;color:#716A65;padding:16px 10px 6px;text-transform:uppercase;letter-spacing:.06em}
+.srch{display:flex;align-items:center;gap:8px;height:40px;min-width:260px;border:1px solid #E7E5E4;border-radius:8px;padding:0 10px;background:#FFFFFF;color:#716A65;font-size:14px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.srch:hover{border-color:#D6D3D1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:0 12px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;cursor:pointer;border:1px solid transparent;white-space:nowrap}
+.btn-o{background:#FFFFFF;color:#1C1917;border-color:#E7E5E4}.btn-o:hover{background:#F5F5F4;color:#1C1917}
+.btn-g{background:transparent;color:#57534E}.btn-g:hover{background:#F5F5F4;color:#1C1917}
+.card{border:1px solid #E7E5E4;border-radius:12px;box-shadow:0 1px 2px rgba(0,0,0,.04);background:#FFFFFF}
+.ch{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:14px 16px}
+.h2{margin:0;font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
+.cnt{font-size:12px;font-weight:600;padding:0 7px;border-radius:999px;background:#F5F5F4;color:#44403C}
+.lnk{font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap}
+.grp{border-top:1px solid #E7E5E4;padding:12px 16px 4px;display:flex;flex-direction:column}
+.act{display:flex;gap:12px;align-items:flex-start;padding:10px 0 12px 44px;border-top:1px dashed #E7E5E4}
+.act:first-of-type{border-top:0}
+.chg{display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-top:1px solid #E7E5E4}
+.src{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#716A65}
+.seg{min-height:30px;font-size:12px;font-weight:500;color:#57534E;padding:0 10px;border-radius:6px;border:0;background:transparent;cursor:pointer}
+.seg-on{font-weight:600;color:#1C1917;background:#FFFFFF;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.alc{display:flex;align-items:center;gap:8px;min-height:36px;padding:4px 8px;border-radius:8px;text-decoration:none;color:#1C1917;font-size:13px}
+.alc:hover{background:#F5F5F4;color:#1C1917}
+.cond{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.45}
+.hic{width:26px;height:26px;border-radius:8px;flex:none;display:inline-flex;align-items:center;justify-content:center}
+.hic-a{background:#FFF4E2;color:#92400E}
+.hic-b{background:#EFF6FF;color:#1D4ED8}
+.hic-g{background:#F0FDF4;color:#15803D}
+.hic-s{background:#F5F5F4;color:#57534E}
+.ipo-i{display:flex;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid #E7E5E4;text-decoration:none;color:#1C1917}
+.ipo-i:hover{background:#FAFAF9;color:#1C1917}
+.ipo-lg{width:32px;height:32px;border-radius:8px;background:#1C1917;color:#FEA722;font-family:'Geist Mono',monospace;font-size:11px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;flex:none}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.dot-live{animation:pulse 2s ease-in-out infinite}
+
+.btn-p{background:#FEA722;color:#1C1917}.btn-p:hover{background:#F59E0B;color:#1C1917}
+.scrim{position:fixed;inset:0;background:rgba(28,25,23,.45);backdrop-filter:blur(2px);display:flex;align-items:flex-start;justify-content:center;padding-top:140px;z-index:50;font-family:'Geist',system-ui,sans-serif}
+.mdl{width:100%;max-width:420px;background:#FFFFFF;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:14px;box-shadow:0 30px 80px -20px rgba(0,0,0,.45);color:#1C1917}
+.mdl-i{width:48px;height:48px;border-radius:14px;background:#FFF4E2;color:#92400E;display:inline-flex;align-items:center;justify-content:center}
+.mdl h2{margin:0;font-size:20px;font-weight:700;letter-spacing:-0.01em}
+.mdl p{margin:0;font-size:14px;color:#57534E;line-height:1.55}
+.mdl-u{display:flex;align-items:center;gap:10px;border:1px solid #E7E5E4;border-radius:10px;padding:8px 10px;font-size:14px}
+.mdl-u>span:first-child{width:30px;height:30px;border-radius:999px;background:#1C1917;color:#FEA722;font-weight:600;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
+.mdl label{font-size:13.5px;font-weight:600}
+.mdl-in{width:100%;height:44px;border:1px solid #D6D3D1;border-radius:9px;padding:0 12px;font-size:15px;font-family:inherit}
+.mdl-in:focus{outline:none;border-color:#1C1917;box-shadow:0 0 0 3px rgba(28,25,23,.1)}
+.mdl-err{border-color:#DC2626}
+.mdl .btn{width:100%;min-height:44px;font-size:15px}
+.mdl-e{font-size:13px;color:#B91C1C}
+.mdl-n{font-size:12.5px;color:#716A65;display:flex;gap:6px;align-items:flex-start}
+.mdl-l{display:flex;justify-content:space-between;font-size:13.5px}
+.mdl-l a{font-weight:600}
+</style>
+</helmet>
+<div style="font-family: 'Geist', system-ui, sans-serif; color: #1C1917; background: #FFFFFF; font-size: 15px; line-height: 1.55; min-height: 100vh; display: flex; flex-wrap: wrap; align-items: stretch">
+
+<aside aria-label="Navigasi aplikasi" style="flex: 0 0 240px; border-right: 1px solid #E7E5E4; background: #FAFAF9; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px">
+<a href="Main.dc.html" aria-label="StockPlan, ke beranda" style="display: flex; align-items: center; gap: 8px; padding: 6px 10px 18px; text-decoration: none; color: #1C1917">
+<svg aria-hidden="true" viewBox="4 213 102 88" width="22" height="19"><g fill="#FEA722"><path d="M13.04,233.96c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.49s0-2.12,5.66-4.97l36.26-15.83c4.18-1.83,6.89-5.96,6.89-10.52v-16.89l-41.92,18.3Z"></path><path d="M96.89,280.81c4.18-1.83,6.89-5.96,6.89-10.52v-16.89h0v-2.49s0,2.12-5.66,4.97l-36.26,15.83c-4.18,1.83-6.89,5.96-6.89,10.52v16.89l41.92-18.3Z"></path><path d="M98.11,226.34l-36.26,15.83s-.07,.04-.1,.05l-48.71,21.26c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.79s0-2.12,5.66-4.97l36.26-15.83c.73-.32,1.4-.73,2.03-1.18l46.78-20.42c4.18-1.83,6.89-5.96,6.89-10.52h0v-16.89h0v-2.5s0,2.12-5.66,4.97Z"></path></g></svg>
+<span style="font-weight: 700; font-size: 15px; letter-spacing: -0.01em">StockPlan</span>
+<span style="margin-left: auto; font-size: 11px; font-weight: 600; color: #92400E; background: #FFF4E2; border: 1px solid #FCDDA8; padding: 0 6px; border-radius: 6px">Beta</span>
+</a>
+<a class="nv nv-on" href="Main.dc.html" aria-current="page"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>Beranda</a>
+<span class="sec">Riset</span>
+<a class="nv" href="Tema.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="2.2"></circle><circle cx="19" cy="6" r="2.2"></circle><circle cx="19" cy="18" r="2.2"></circle><path d="M7 11l10-4M7 13l10 4"></path></svg>Tema bisnis</a>
+<a class="nv" href="Emiten.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"></rect><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1"></path></svg>Emiten</a>
+<span class="sec">Perencanaan</span>
+<a class="nv" href="Tesis.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg>Tesis saya</a>
+<a class="nv" href="Portofolio.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>Portofolio</a>
+<a class="nv" href="Watchlist.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"></path></svg>Watchlist</a>
+<div style="margin-top: auto; padding-top: 24px; display: flex; flex-direction: column; gap: 8px">
+<div style="border: 1px solid #E7E5E4; background: #FFFFFF; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 13px; font-weight: 600">Akses beta tester</span>
+<span style="font-size: 12px; color: #716A65; line-height: 1.45">Semua fitur terbuka selama beta. Langganan premium berlaku setelah rilis.</span>
+</div>
+<a class="nv" href="#pengaturan"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"></path></svg>Pengaturan</a>
+</div>
+</aside>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+<header style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 28px; border-bottom: 1px solid #E7E5E4">
+<nav aria-label="Breadcrumb" style="font-size: 13px; color: #716A65">Beranda</nav>
+<button type="button" class="srch" style="margin-left: auto"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg><span>Cari tema atau emiten…</span><span style="margin-left: auto; font-family: 'Geist Mono', monospace; font-size: 11px; border: 1px solid #E7E5E4; background: #FAFAF9; border-radius: 4px; padding: 0 5px; color: #57534E">⌘K</span></button>
+<a href="LayoutNotif.dc.html" aria-label="Notifikasi, 5 belum dibaca" style="position: relative; width: 40px; height: 40px; border-radius: 999px; border: 1px solid #E7E5E4; background: #FFFFFF; color: #44403C; display: inline-flex; align-items: center; justify-content: center; flex: none; text-decoration: none"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg><span aria-hidden="true" style="position: absolute; top: -4px; right: -5px; min-width: 19px; height: 19px; padding: 0 5px; box-sizing: border-box; border-radius: 999px; background: #DC2626; color: #FFFFFF; border: 2px solid #FFFFFF; font-family: 'Geist Mono', monospace; font-size: 10.5px; font-weight: 700; line-height: 15px; text-align: center">5</span></a>
+<button type="button" aria-label="Akun dan langganan" style="width: 40px; height: 40px; border-radius: 999px; border: 1px solid #E7E5E4; background: #1C1917; color: #FEA722; font-weight: 600; font-size: 14px; cursor: pointer">B</button>
+</header>
+
+<main style="padding: 28px; display: flex; flex-direction: column; gap: 20px; max-width: 1240px; width: 100%">
+<div style="position: relative; overflow: hidden; border-radius: 16px; background: linear-gradient(120deg, #FFF8EC 0%, #FFFFFF 70%); border: 1px solid #F3E7D1; padding: 20px 24px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap">
+<div aria-hidden="true" style="position: absolute; top: -34px; right: -24px; width: 170px; height: 170px; pointer-events: none">
+<svg viewBox="0 0 170 170" width="170" height="170"><g fill="#FEA722"><path d="M15 45 L80 15 L80 45 L15 75 Z" opacity=".14"></path><path d="M40 85 L105 55 L105 85 L40 115 Z" opacity=".24"></path><path d="M65 125 L130 95 L130 125 L65 155 Z" opacity=".4"></path></g></svg>
+</div>
+<div style="position: relative; display: flex; flex-direction: column; gap: 4px">
+<h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em">Halo, B 👋</h1>
+<p style="margin: 0; color: #716A65">{{headline}}</p>
+</div>
+<span style="position: relative; font-size: 13px; color: #716A65; display: inline-flex; align-items: center; gap: 6px"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><ellipse cx="12" cy="6" rx="8" ry="3"></ellipse><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"></path></svg>Data BEI per 3 Nov 2026</span>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+
+<div style="flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+
+<section class="card" aria-labelledby="h-act" style="overflow: hidden">
+<div class="ch">
+<h2 id="h-act" class="h2"><span class="hic hic-a" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h8l-1 8 10-12h-8l1-8Z"></path></svg></span>Perlu tindakan<span class="cnt dot-live">{{actCount}}</span></h2>
+<span style="font-size: 12px; color: #716A65">Hanya yang menuntut keputusan Anda</span>
+</div>
+<sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
+<div class="grp">
+<div style="display: flex; align-items: center; gap: 12px; padding-bottom: 6px">
+<img src="{{g.logo}}" alt="" width="32" height="32" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #E7E5E4; flex: none">
+<a href="Emiten.dc.html" style="font-family: 'Geist Mono', monospace; font-weight: 600; font-size: 14px; text-decoration: none">{{g.tk}}</a>
+<span style="font-size: 12px; color: #716A65">{{g.countText}}</span>
+</div>
+<sc-for list="{{g.items}}" as="x" hint-placeholder-count="1">
+<div class="act">
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
+<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+<span style="{{x.badge}}">{{x.kind}}</span>
+<span style="font-size: 12px; color: #716A65">{{x.when}}</span>
+</div>
+<span style="font-size: 15px; font-weight: 600; line-height: 1.4">{{x.title}}</span>
+<sc-if value="{{x.hasBars}}" hint-placeholder-val="{{false}}">
+<div style="display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 6px 10px; align-items: center; font-size: 12px; color: #716A65; margin: 4px 0; max-width: 420px">
+<span>Q3 2025</span>
+<span aria-hidden="true" style="display: flex; height: 10px; border-radius: 999px; overflow: hidden; gap: 2px"><span style="width: 48%; background: #1C1917"></span><span style="width: 38%; background: #FEA722"></span><span style="flex: 1; background: #E7E5E4"></span></span>
+<span>Q3 2026</span>
+<span aria-hidden="true" style="display: flex; height: 10px; border-radius: 999px; overflow: hidden; gap: 2px"><span style="width: 39%; background: #1C1917"></span><span style="width: 47%; background: #FEA722"></span><span style="flex: 1; background: #E7E5E4"></span></span>
+</div>
+<div style="display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: #57534E">
+<span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 3px; background: #1C1917"></span>Jasa penambangan batubara</span>
+<span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 3px; background: #FEA722"></span>Penjualan mesin konstruksi</span>
+</div>
+</sc-if>
+<span style="font-size: 13px; color: #57534E">{{x.why}}</span>
+<span class="src"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><ellipse cx="12" cy="6" rx="8" ry="3"></ellipse><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"></path></svg>{{x.src}}</span>
+</div>
+<div style="display: flex; gap: 4px; flex: none; align-items: center; flex-wrap: wrap; justify-content: flex-end">
+<a class="btn btn-o" href="{{x.href}}">{{x.cta}}</a>
+<button type="button" class="btn btn-g" aria-label="{{x.doneLabel}}" onClick="{{x.done}}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Selesai</button>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-for>
+<sc-if value="{{actEmpty}}" hint-placeholder-val="{{false}}">
+<div style="border-top: 1px solid #E7E5E4; padding: 28px 16px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center">
+<span aria-hidden="true" style="width: 40px; height: 40px; border-radius: 999px; background: #F0FDF4; color: #15803D; display: inline-flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>
+<span style="font-weight: 600">Tidak ada yang perlu dilakukan</span>
+<span style="font-size: 13px; color: #716A65">Tesis Anda masih berjalan. Tidak perlu memantau setiap hari.</span>
+<button type="button" class="btn btn-g" onClick="{{resetActs}}">Tampilkan contoh lagi</button>
+</div>
+</sc-if>
+<div style="border-top: 1px solid #E7E5E4; background: #FAFAF9; padding: 10px 16px; font-size: 12px; color: #716A65; display: flex; gap: 6px; align-items: center; flex-wrap: wrap">
+<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>
+<span>Jadwal mendatang: <strong style="color: #44403C; font-weight: 600">AADI cum date dividen · 18 Nov</strong> · ABNU tercatat di BEI · 12 Nov · Evaluasi tesis Energi · 3 Feb</span>
+</div>
+</section>
+
+<section class="card" aria-labelledby="h-chg" style="overflow: hidden">
+<div class="ch">
+<h2 id="h-chg" class="h2"><span class="hic hic-b" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"></path><path d="M8 9h8M8 13h8M8 17h5"></path></svg></span>Perubahan bisnis</h2>
+<span style="font-size: 12px; color: #716A65">Perubahan pada emiten yang Anda pegang</span>
+</div>
+<sc-for list="{{changes}}" as="c" hint-placeholder-count="2">
+<article class="chg">
+<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
+<img src="{{c.logo}}" alt="" width="24" height="24" style="width: 24px; height: 24px; border-radius: 6px; border: 1px solid #E7E5E4">
+<span style="font-family: 'Geist Mono', monospace; font-weight: 600; font-size: 13px">{{c.tk}}</span>
+<span style="font-size: 12px; color: #716A65">{{c.kind}}</span>
+<span style="margin-left: auto; font-size: 12px; color: #716A65">{{c.when}}</span>
+</div>
+<span style="font-size: 15px; font-weight: 600; line-height: 1.4">{{c.title}}</span>
+<span style="font-size: 13px; color: #57534E">{{c.why}}</span>
+<span class="src"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><ellipse cx="12" cy="6" rx="8" ry="3"></ellipse><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"></path></svg>{{c.src}}</span>
+</article>
+</sc-for>
+</section>
+</div>
+
+<div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+
+<section class="card" aria-labelledby="h-ipo" style="overflow: hidden">
+<div class="ch">
+<h2 id="h-ipo" class="h2"><span class="hic hic-b" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg></span>IPO mendatang<span class="cnt">2</span></h2>
+<span style="font-size: 12px; color: #716A65">14 hari ke depan</span>
+</div>
+<sc-for list="{{ipos}}" as="p" hint-placeholder-count="2">
+<a class="ipo-i" href="{{p.href}}">
+<span class="ipo-lg" aria-hidden="true">{{p.ini}}</span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
+<span style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap"><b style="font-family: 'Geist Mono', monospace; font-size: 13.5px">{{p.tk}}</b><span style="{{p.badge}}">{{p.stage}}</span></span>
+<span style="font-size: 13px; color: #44403C; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{p.name}}</span>
+<span style="font-size: 12px; color: #716A65">{{p.when}}</span>
+<sc-if value="{{p.hasWhy}}" hint-placeholder-val="{{true}}"><span style="font-size: 12px; color: #92400E; font-weight: 500">{{p.why}}</span></sc-if>
+</span>
+<span aria-hidden="true" style="color: #A8A29E; font-size: 18px; line-height: 1">›</span>
+</a>
+</sc-for>
+<div style="border-top: 1px solid #E7E5E4; background: #FAFAF9; padding: 10px 16px; font-size: 12px; color: #716A65">Info jadwal dari BEI, bukan ajakan ikut IPO.</div>
+</section>
+
+<section class="card" aria-labelledby="h-th" style="overflow: hidden">
+<div class="ch">
+<h2 id="h-th" class="h2"><span class="hic hic-g" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg></span>Kesehatan tesis</h2>
+<a class="lnk" href="Tesis.dc.html">Kelola</a>
+</div>
+<div style="border-top: 1px solid #E7E5E4; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px">
+<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<span style="font-size: 14px; font-weight: 600; line-height: 1.4">Kebutuhan energi Indonesia terus naik dalam 5 tahun.</span>
+<span style="font-size: 12px; color: #716A65">Energi · PTBA, AADI, UNTR</span>
+</span>
+<span style="{{thBadge}}">{{thStatus}}</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12px; font-weight: 600; color: #716A65">Kondisi pembatalan</span>
+<sc-for list="{{conds}}" as="k" hint-placeholder-count="3">
+<div class="cond">
+<span aria-hidden="true" style="{{k.icon}}">{{k.mark}}</span>
+<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<span style="{{k.textStyle}}">{{k.text}}</span>
+<span style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap"><span style="{{k.modeStyle}}">{{k.mode}}</span><span style="font-size: 12px; color: #716A65">{{k.note}}</span></span>
+</span>
+</div>
+</sc-for>
+</div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="h-alok" style="padding: 14px 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+<h2 id="h-alok" class="h2"><span class="hic hic-s" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 3v9l6.5 4.2"></path></svg></span>Alokasi</h2>
+<div role="tablist" aria-label="Kelompokkan alokasi" style="display: inline-flex; background: #F5F5F4; border-radius: 8px; padding: 3px; gap: 2px">
+<sc-for list="{{modes}}" as="m" hint-placeholder-count="3">
+<button type="button" role="tab" class="{{m.cls}}" aria-selected="{{m.on}}" onClick="{{m.pick}}">{{m.label}}</button>
+</sc-for>
+</div>
+</div>
+<div style="display: flex; align-items: center; gap: 12px">
+<svg aria-hidden="true" width="104" height="104" viewBox="0 0 120 120" style="flex: none">
+<circle cx="60" cy="60" r="48" fill="none" stroke="#F5F5F4" stroke-width="18"></circle>
+<g transform="rotate(-90 60 60)">
+<sc-for list="{{alloc}}" as="a" hint-placeholder-count="3">
+<circle cx="60" cy="60" r="48" fill="none" stroke="{{a.c}}" stroke-width="18" stroke-dasharray="{{a.dash}}" stroke-dashoffset="{{a.offset}}"></circle>
+</sc-for>
+</g>
+<text x="60" y="57" text-anchor="middle" style="font-family: 'Geist', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #1C1917">Rp 42,0jt</text>
+<text x="60" y="73" text-anchor="middle" style="font-family: 'Geist', system-ui, sans-serif; font-size: 11px; fill: #716A65">3 emiten</text>
+<sc-if value="{{actEmpty}}" hint-placeholder-val="{{false}}"><circle cx="97" cy="23" r="3.5" fill="#15803D"></circle></sc-if>
+<sc-if value="{{hasOpenAct}}" hint-placeholder-val="{{true}}"><circle class="dot-live" cx="97" cy="23" r="3.5" fill="#FEA722"></circle></sc-if>
+</svg>
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+<sc-for list="{{alloc}}" as="a" hint-placeholder-count="3">
+<a class="alc" href="{{a.href}}">
+<span aria-hidden="true" style="{{a.dot}}"></span>
+<span style="{{a.labelStyle}}">{{a.label}}</span>
+<span style="margin-left: auto; font-weight: 600; font-variant-numeric: tabular-nums">{{a.pct}}</span>
+</a>
+</sc-for>
+</div>
+</div>
+<sc-if value="{{concWarn}}" hint-placeholder-val="{{true}}">
+<p style="margin: 0; font-size: 12px; color: #92400E; background: #FFFBEB; border: 1px solid #FCDDA8; border-radius: 8px; padding: 8px 10px; line-height: 1.45">{{concText}}</p>
+</sc-if>
+<span style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap">
+<span class="src">Lot Anda × harga penutupan BEI</span>
+<a class="lnk" href="Portofolio.dc.html" style="font-size: 12px">Detail →</a>
+</span>
+</section>
+</div>
+</div>
+<p style="margin: 0; font-size: 12px; color: #716A65">Contoh tampilan dengan angka ilustratif. Nama dalam kurung siku diisi dari data BEI. Bukan rekomendasi saham.</p>
+</main>
+</div>
+</div>
+<sc-if value="{{sesOpen}}" hint-placeholder-val="{{true}}"><div class="scrim"><div class="mdl" role="dialog" aria-modal="true" aria-labelledby="ses-h"><span class="mdl-i" aria-hidden="true"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></span><h2 id="ses-h">Sesi Anda berakhir</h2><p>Demi keamanan, Anda keluar otomatis setelah 24 jam aktif. Masukkan password untuk melanjutkan. Halaman ini tetap terbuka seperti sebelumnya.</p><div class="mdl-u"><span aria-hidden="true">B</span>budi@email.com</div><div style="display: flex; flex-direction: column; gap: 6px"><label for="ses-pw">Password</label><input id="ses-pw" class="{{sesCls}}" type="password" autocomplete="current-password" value="{{sesPw}}" onInput="{{sesSetPw}}" placeholder="Password Anda"><sc-if value="{{sesHasErr}}" hint-placeholder-val="{{false}}"><span class="mdl-e" role="alert">{{sesErr}}</span></sc-if></div><button type="button" class="btn btn-p" onClick="{{sesGo}}">{{sesBtn}}</button><div class="mdl-l"><a href="Login.dc.html">Masuk dengan akun lain</a><a href="LupaPassword.dc.html">Lupa password?</a></div><span class="mdl-n"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"></path><path d="M14 3v5h5"></path></svg>Draf tesis yang belum disimpan tetap ada di perangkat ini.</span></div></div></sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1420}}'>
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { mode: 'emiten', done: [], sesPw: '', sesErr: '', sesOk: false, sesBusy: false };
+}
+renderVals() {
+var self = this;
+var st = this.state;
+var L = {
+PTBA: '/_blob/a7814f85d9b69b78f4edb98dc5be88d5',
+AADI: '/_blob/fee486793ba6867b5b69aaf44de9f6e7',
+UNTR: '/_blob/f5a059270c2b05fcd6c975eb7bbd11d3'
+};
+var badge = function (fg, bg, bd) { return 'font-size: 11px; font-weight: 600; padding: 0 7px; border-radius: 6px; border: 1px solid ' + bd + '; color: ' + fg + '; background: ' + bg; };
+var K = {
+red: badge('#991B1B', '#FEF2F2', '#FECACA'),
+amber: badge('#92400E', '#FFF4E2', '#FCDDA8'),
+blue: badge('#1D4ED8', '#EFF6FF', '#BFDBFE')
+};
+var actSeed = [
+{ id: 1, tk: 'UNTR', tone: 'red', kind: 'Suspensi', when: 'Hari ini', title: 'Perdagangan saham UNTR dihentikan sementara', why: 'Saham tidak bisa dijual atau dibeli selama suspensi. Baca alasan di pengumuman sebelum memutuskan apa pun.', src: 'Pengumuman Bursa · BEI', cta: 'Baca pengumuman', href: 'Emiten.dc.html' },
+{ id: 2, tk: 'UNTR', tone: 'amber', kind: 'Kondisi tesis terpicu', when: 'Lapkeu Q3 2026', title: 'Batubara bukan lagi pendapatan terbesar UNTR', why: 'Ini kondisi pembatalan yang Anda tulis di tesis Energi. Putuskan: tetap, kurangi, atau keluarkan dari tesis.', src: 'Catatan pendapatan, laporan keuangan XBRL · BEI', cta: 'Tinjau tesis', href: 'Tesis.dc.html', hasBars: true },
+{ id: 3, tk: 'PTBA', tone: 'blue', kind: 'Bobot melenceng', when: 'Batas ±5 poin', title: 'PTBA 46% dari portofolio, target 40%', why: 'Porsinya 6 poin di atas rencana. Wajar kalau disengaja, perlu dicek kalau tidak.', src: 'Lot Anda × harga penutupan · BEI', cta: 'Lihat alokasi', href: 'Portofolio.dc.html' }
+];
+var done = st.done;
+var open = actSeed.filter(function (x) { return done.indexOf(x.id) < 0; });
+var order = [];
+open.forEach(function (x) { if (order.indexOf(x.tk) < 0) { order.push(x.tk); } });
+var groups = order.map(function (tk) {
+var items = open.filter(function (x) { return x.tk === tk; }).map(function (x) {
+return Object.assign({ hasBars: false }, x, {
+badge: K[x.tone],
+doneLabel: 'Tandai selesai: ' + x.title,
+done: function () { self.setState({ done: done.concat([x.id]) }); }
+});
+});
+return { tk: tk, logo: L[tk], items: items, countText: items.length + ' hal' };
+});
+var changes = [
+{ tk: 'PTBA', kind: 'Pemegang saham', when: '28 Okt', title: 'Komposisi pemegang saham utama berubah', why: '[Nama pemegang saham] naik dari [x]% ke [y]%. Perubahan pemilik besar bisa mengubah arah strategi perusahaan.', src: 'Profil perusahaan tercatat · BEI' },
+{ tk: 'AADI', kind: 'Anak usaha', when: 'Lapkeu Q3 2026', title: 'Anak usaha baru tercatat', why: '[Nama anak usaha] di bidang [bidang usaha]. Cek apakah ini menambah tahap baru di rantai nilai AADI.', src: 'Profil perusahaan tercatat · BEI' },
+{ tk: 'PTBA', kind: 'Manajemen', when: '21 Okt', title: 'Susunan direksi berubah', why: '[Nama] menggantikan [Nama] sebagai [jabatan]. Pergantian pimpinan bisa memengaruhi arah bisnis.', src: 'Keterbukaan informasi · BEI' }
+].map(function (c) { return Object.assign({}, c, { logo: L[c.tk] }); });
+
+var condSeed = [
+{ text: 'Batubara bukan lagi pendapatan terbesar emiten', auto: true, hit: true, note: 'Terpicu di UNTR · Q3 2026' },
+{ text: 'Konsumsi listrik nasional turun 2 tahun berturut-turut', auto: false, note: 'Data di luar BEI · cek saat evaluasi 3 Feb' },
+{ text: 'Pemerintah membatasi ekspor batubara', auto: false, note: 'Data di luar BEI · cek saat evaluasi 3 Feb' }
+];
+var iconBase = 'width: 18px; height: 18px; border-radius: 999px; flex: none; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; margin-top: 1px; ';
+var conds = condSeed.map(function (k) {
+var icon, mark;
+if (k.hit) { icon = iconBase + 'background: #FEA722; color: #1C1917'; mark = '!'; }
+else if (k.auto) { icon = iconBase + 'background: #F0FDF4; color: #15803D; border: 1px solid #BBF7D0'; mark = '✓'; }
+else { icon = iconBase + 'background: #F5F5F4; color: #57534E; border: 1px dashed #A8A29E'; mark = '?'; }
+return Object.assign({}, k, {
+icon: icon, mark: mark,
+textStyle: k.hit ? 'font-weight: 600' : 'color: #44403C',
+mode: k.auto ? 'Otomatis' : 'Cek manual',
+modeStyle: 'font-size: 11px; font-weight: 600; padding: 0 6px; border-radius: 6px; ' + (k.auto ? 'color: #1D4ED8; background: #EFF6FF; border: 1px solid #BFDBFE' : 'color: #57534E; background: #F5F5F4; border: 1px solid #E7E5E4')
+});
+});
+var trig = condSeed.filter(function (k) { return k.hit; }).length;
+
+var allocSeed;
+var concText = '';
+if (st.mode === 'emiten') {
+allocSeed = [
+{ label: 'PTBA', p: 46, c: '#1C1917', href: 'Emiten.dc.html', mono: true },
+{ label: 'AADI', p: 32, c: '#FEA722', href: 'Emiten.dc.html', mono: true },
+{ label: 'UNTR', p: 22, c: '#A8A29E', href: 'Emiten.dc.html', mono: true }
+];
+concText = 'PTBA 46%: lebih dari 40% portofolio di satu emiten.';
+} else if (st.mode === 'tema') {
+allocSeed = [{ label: 'Batubara', p: 100, c: '#1C1917', href: 'TemaDetail.dc.html' }];
+concText = '100% portofolio di satu tema. Satu kebijakan soal batubara bisa memengaruhi seluruh portofolio.';
+} else {
+allocSeed = [{ label: 'Energi · 5 tahun', p: 100, c: '#1C1917', href: 'Tesis.dc.html' }];
+}
+var C = 2 * Math.PI * 48;
+var cum = 0;
+var alloc = allocSeed.map(function (a) {
+var d = (a.p / 100) * C;
+var r = Object.assign({}, a, {
+dash: d.toFixed(2) + ' ' + (C - d).toFixed(2),
+offset: (C - cum).toFixed(2),
+pct: a.p + '%',
+dot: 'width: 10px; height: 10px; border-radius: 3px; flex: none; background: ' + a.c,
+labelStyle: a.mono ? "font-family: 'Geist Mono', monospace; font-weight: 600" : 'font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis'
+});
+cum += d;
+return r;
+});
+var ipos = [
+{ tk: 'ABNU', ini: 'AB', name: 'Andalan Baterai Nusantara Tbk', stage: 'Penawaran umum', tone: 'amber', when: 'Pesan s.d. 10 Nov · tercatat 12 Nov', why: '', href: 'EmitenIPO.dc.html' },
+{ tk: '[KODE]', ini: '··', name: '[Nama perusahaan] · Batubara', stage: 'Bookbuilding', tone: 'blue', when: 'Bookbuilding 10–17 Nov · tercatat 28 Nov', why: 'Satu tema dengan portofolio Anda', href: 'EmitenIPO.dc.html' }
+].map(function (p) { return Object.assign({}, p, { badge: K[p.tone], hasWhy: !!p.why }); });
+var modeDefs = [['emiten', 'Emiten'], ['tema', 'Tema'], ['tesis', 'Tesis']];
+return {
+headline: open.length ? open.length + ' hal perlu keputusan Anda, di ' + groups.length + ' emiten. Sisanya berjalan sesuai rencana.' : 'Semua berjalan sesuai rencana.',
+groups: groups,
+actCount: String(open.length),
+actEmpty: open.length === 0,
+hasOpenAct: open.length > 0,
+resetActs: function () { self.setState({ done: [] }); },
+changes: changes,
+conds: conds,
+thStatus: trig > 0 ? 'Perlu ditinjau' : 'Sejalan',
+thBadge: 'flex: none; ' + (trig > 0 ? badge('#92400E', '#FFFBEB', '#FCDDA8') : badge('#15803D', '#F0FDF4', '#BBF7D0')),
+modes: modeDefs.map(function (m) {
+var on = st.mode === m[0];
+return { label: m[1], on: on, cls: on ? 'seg seg-on' : 'seg', pick: function () { self.setState({ mode: m[0] }); } };
+}),
+ipos: ipos,
+alloc: alloc,
+concWarn: concText !== '',
+concText: concText,
+sesOpen: !st.sesOk, sesPw: st.sesPw, sesSetPw: function (e) { self.setState({ sesPw: e.target.value, sesErr: '' }); },
+sesCls: 'mdl-in' + (st.sesErr ? ' mdl-err' : ''), sesHasErr: !!st.sesErr, sesErr: st.sesErr,
+sesBtn: st.sesBusy ? 'Memeriksa…' : 'Lanjutkan',
+sesGo: function () { if (self.state.sesBusy) return; if (self.state.sesPw.length < 8) { self.setState({ sesErr: 'Password salah. Coba lagi atau atur ulang password.' }); return; } self.setState({ sesBusy: true }); setTimeout(function () { self.setState({ sesBusy: false, sesOk: true }); }, 800); }
+};
+}
+}
+</script>
+</body>
+</html>

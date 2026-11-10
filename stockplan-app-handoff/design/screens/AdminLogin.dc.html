@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>StockPlan Admin — Masuk</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F5F5F4}
+*{box-sizing:border-box}
+a{color:#1C1917}
+button,input{font-family:inherit}
+:focus-visible{outline:2px solid #1C1917;outline-offset:2px}
+.wrap{font-family:'Geist',system-ui,sans-serif;color:#1C1917;font-size:15px;line-height:1.55;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 16px;background:#F5F5F4;background-image:radial-gradient(#E7E5E4 1px,transparent 1px);background-size:22px 22px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:17px;letter-spacing:-0.01em;margin-bottom:22px}
+.adm{font-size:11.5px;font-weight:600;color:#FFFFFF;background:#1C1917;padding:0 8px;border-radius:6px;line-height:22px}
+.box{width:100%;max-width:420px;background:#FFFFFF;border:1px solid #E7E5E4;border-radius:16px;padding:28px;display:flex;flex-direction:column;gap:18px;box-shadow:0 20px 50px -30px rgba(0,0,0,.35)}
+.hd{display:flex;flex-direction:column;gap:4px}
+.hd h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-0.02em}
+.hd p{margin:0;font-size:14px;color:#716A65}
+.fld{display:flex;flex-direction:column;gap:6px}
+.fld>label{font-size:13.5px;font-weight:600}
+.iw{position:relative;display:flex;align-items:center}
+.inp{width:100%;height:44px;border:1px solid #D6D3D1;border-radius:9px;padding:0 12px;font-size:15px;color:#1C1917;background:#FFFFFF}
+.inp:focus{outline:none;border-color:#1C1917;box-shadow:0 0 0 3px rgba(28,25,23,.1)}
+.inp-err{border-color:#DC2626}
+.inp-pw{padding-right:76px}
+.eye{position:absolute;right:6px;height:32px;padding:0 10px;border:0;border-radius:7px;background:transparent;color:#57534E;font-size:13px;font-weight:600;cursor:pointer}
+.eye:hover{background:#F5F5F4}
+.otp{height:56px;font-family:'Geist Mono',monospace;font-size:26px;letter-spacing:.5em;text-align:center;padding:0 0 0 .5em}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:9px;font-size:15px;font-weight:600;cursor:pointer;border:1px solid transparent;width:100%;text-decoration:none}
+.btn-k{background:#1C1917;color:#FFFFFF}.btn-k:hover{background:#292524;color:#FFFFFF}
+.btn-d{background:#F5F5F4;color:#A8A29E;cursor:not-allowed}
+.spin{width:16px;height:16px;border-radius:999px;border:2px solid rgba(255,255,255,.3);border-top-color:#FFFFFF;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.alert{display:flex;gap:10px;align-items:flex-start;border-radius:10px;padding:10px 12px;font-size:13.5px;line-height:1.45}
+.alert-e{background:#FEF2F2;border:1px solid #FECACA;color:#991B1B}
+.alert-i{background:#FAFAF9;border:1px solid #E7E5E4;color:#44403C}
+.alert>svg{flex:none;margin-top:2px}
+.help{font-size:13px;color:#716A65}
+.lnk{border:0;background:transparent;padding:0;font:inherit;font-size:13.5px;font-weight:600;color:#1C1917;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.ck{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;color:#44403C;cursor:pointer}
+.step{display:flex;gap:6px}
+.step>i{flex:1;height:4px;border-radius:999px;background:#E7E5E4}
+.step>.on{background:#1C1917}
+.who{display:flex;align-items:center;gap:10px;border:1px solid #E7E5E4;border-radius:10px;padding:8px 10px;font-size:13.5px}
+.who>span:first-child{width:30px;height:30px;border-radius:999px;background:#1C1917;color:#FEA722;font-weight:600;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
+.who>b{font-weight:600}
+.who>.lnk{margin-left:auto;font-size:13px}
+.ok{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:8px 0}
+.ok>span{width:52px;height:52px;border-radius:999px;background:#DCFCE7;color:#15803D;display:inline-flex;align-items:center;justify-content:center}
+.foot{margin-top:18px;font-size:12.5px;color:#716A65;max-width:420px;line-height:1.5;display:flex;align-items:flex-start;gap:6px}
+.foot>svg{flex:none;margin-top:3px}
+</style>
+</helmet>
+<div class="wrap">
+<div class="brand"><svg aria-hidden="true" viewBox="4 213 102 88" width="26" height="22"><g fill="#FEA722"><path d="M13.04,233.96c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.49s0-2.12,5.66-4.97l36.26-15.83c4.18-1.83,6.89-5.96,6.89-10.52v-16.89l-41.92,18.3Z"></path><path d="M96.89,280.81c4.18-1.83,6.89-5.96,6.89-10.52v-16.89h0v-2.49s0,2.12-5.66,4.97l-36.26,15.83c-4.18,1.83-6.89,5.96-6.89,10.52v16.89l41.92-18.3Z"></path><path d="M98.11,226.34l-36.26,15.83s-.07,.04-.1,.05l-48.71,21.26c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.79s0-2.12,5.66-4.97l36.26-15.83c.73-.32,1.4-.73,2.03-1.18l46.78-20.42c4.18-1.83,6.89-5.96,6.89-10.52h0v-16.89h0v-2.5s0,2.12-5.66,4.97Z"></path></g></svg>StockPlan<span class="adm">Admin</span></div>
+<main class="box" aria-labelledby="h1">
+
+<sc-if value="{{s1}}" hint-placeholder-val="{{true}}">
+<div class="step" aria-hidden="true"><i class="on"></i><i></i></div>
+<div class="hd"><h1 id="h1">Masuk ke panel admin</h1><p>Khusus tim StockPlan. Gunakan email kerja Anda.</p></div>
+<sc-if value="{{hasErr}}" hint-placeholder-val="{{false}}"><div class="{{errCls}}" role="alert"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20z"></path><path d="M12 10v4M12 17h.01"></path></svg><span>{{err}}</span></div></sc-if>
+<div class="fld"><label for="em">Email kerja</label><input id="em" class="{{emCls}}" type="email" autocomplete="username" value="{{email}}" onInput="{{setEmail}}" placeholder="nama@stockplan.id"></div>
+<div class="fld"><div class="row"><label for="pw" style="font-size: 13.5px; font-weight: 600">Password</label></div><div class="iw"><input id="pw" class="{{pwCls}}" type="{{pwType}}" autocomplete="current-password" value="{{pw}}" onInput="{{setPw}}" placeholder="Minimal 10 karakter"><button type="button" class="eye" onClick="{{togglePw}}" aria-label="{{eyeLbl}}">{{eyeTxt}}</button></div></div>
+<button type="button" class="{{btn1Cls}}" aria-disabled="{{locked}}" onClick="{{submit1}}"><sc-if value="{{busy}}" hint-placeholder-val="{{false}}"><span class="spin" aria-hidden="true"></span></sc-if>{{btn1}}</button>
+<p class="help" style="margin: 0">Lupa password? Admin tidak bisa mengatur ulang sendiri. Minta super admin mengirim tautan atur ulang.</p>
+</sc-if>
+
+<sc-if value="{{s2}}" hint-placeholder-val="{{false}}">
+<div class="step" aria-hidden="true"><i class="on"></i><i class="on"></i></div>
+<div class="hd"><h1 id="h1">Verifikasi dua langkah</h1><p>Masukkan 6 digit kode dari aplikasi autentikator Anda.</p></div>
+<div class="who"><span aria-hidden="true">{{ini}}</span><b>{{email}}</b><button type="button" class="lnk" onClick="{{back}}">Ganti akun</button></div>
+<sc-if value="{{hasErr2}}" hint-placeholder-val="{{false}}"><div class="alert alert-e" role="alert"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20z"></path><path d="M12 10v4M12 17h.01"></path></svg><span>{{err2}}</span></div></sc-if>
+<div class="fld"><label for="otp">{{otpLbl}}</label><input id="otp" class="{{otpCls}}" inputmode="numeric" autocomplete="one-time-code" value="{{otp}}" onInput="{{setOtp}}" placeholder="{{otpPh}}"></div>
+<label class="ck"><input type="checkbox" checked="{{trust}}" onChange="{{toggleTrust}}">Percayai perangkat ini selama 7 hari</label>
+<button type="button" class="{{btn2Cls}}" onClick="{{submit2}}"><sc-if value="{{busy}}" hint-placeholder-val="{{false}}"><span class="spin" aria-hidden="true"></span></sc-if>Verifikasi &amp; masuk</button>
+<div class="row"><button type="button" class="lnk" onClick="{{toggleBackup}}">{{backupLbl}}</button><span class="help">Kode berganti tiap 30 detik</span></div>
+</sc-if>
+
+<sc-if value="{{s3}}" hint-placeholder-val="{{false}}">
+<div class="ok"><span aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"></path></svg></span><h1 id="h1" style="margin: 0; font-size: 20px">Berhasil masuk</h1><p class="help" style="margin: 0">Masuk sebagai {{email}} dari Chrome · Jakarta. Sesi berakhir otomatis setelah 30 menit tidak aktif.</p></div>
+<a class="btn btn-k" href="AdminDashboard.dc.html">Buka dashboard</a>
+</sc-if>
+</main>
+<p class="foot"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>Setiap percobaan masuk dicatat di Riwayat perubahan beserta alamat IP dan perangkatnya.</p>
+</div>
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}"><div style="position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #1C1917; color: #FFFFFF; padding: 9px 16px; border-radius: 999px; font-size: 13.5px">{{toast}}</div></sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+constructor(p){ super(p); this.state = { step: 1, email: 'rina@stockplan.id', pw: '', show: false, fails: 0, err: '', busy: false, otp: '', err2: '', backup: false, trust: true, toast: '' }; }
+renderVals(){
+const self = this, st = this.state, set = (o) => self.setState(o);
+const MAX = 5;
+const locked = st.fails >= MAX;
+const work = /@stockplan\.id$/i.test(st.email.trim());
+const otpOk = st.backup ? /^[a-z0-9]{4}-[a-z0-9]{4}$/i.test(st.otp.trim()) : /^\d{6}$/.test(st.otp.trim());
+return {
+s1: st.step === 1, s2: st.step === 2, s3: st.step === 3,
+email: st.email, setEmail: (e) => set({ email: e.target.value, err: '' }),
+pw: st.pw, setPw: (e) => set({ pw: e.target.value, err: '' }),
+pwType: st.show ? 'text' : 'password', eyeTxt: st.show ? 'Sembunyi' : 'Lihat', eyeLbl: st.show ? 'Sembunyikan password' : 'Tampilkan password', togglePw: () => set({ show: !self.state.show }),
+emCls: 'inp' + (st.err && !work ? ' inp-err' : ''), pwCls: 'inp inp-pw' + (st.err && work ? ' inp-err' : ''),
+hasErr: !!st.err || locked, err: locked ? 'Terlalu banyak percobaan. Akun dikunci 15 menit dan super admin sudah diberi tahu.' : st.err, errCls: 'alert alert-e',
+locked: locked ? 'true' : 'false', busy: st.busy,
+btn1: locked ? 'Akun dikunci sementara' : (st.busy ? 'Memeriksa…' : 'Lanjut'), btn1Cls: 'btn ' + (locked ? 'btn-d' : 'btn-k'),
+submit1: () => {
+  if (locked || self.state.busy) return;
+  if (!work) { set({ err: 'Gunakan email kerja @stockplan.id.' }); return; }
+  if (self.state.pw.length < 10) { const f = self.state.fails + 1; set({ fails: f, err: f >= MAX ? '' : 'Email atau password salah. Sisa ' + (MAX - f) + ' percobaan sebelum akun dikunci.' }); return; }
+  set({ busy: true }); setTimeout(() => self.setState({ busy: false, step: 2, err: '' }), 700);
+},
+ini: st.email.trim()[0] ? st.email.trim()[0].toUpperCase() : 'R',
+back: () => set({ step: 1, otp: '', err2: '', pw: '' }),
+otp: st.otp, setOtp: (e) => set({ otp: st.backup ? e.target.value.slice(0, 9) : e.target.value.replace(/\D/g, '').slice(0, 6), err2: '' }),
+otpCls: 'inp ' + (st.backup ? '' : 'otp') + (st.err2 ? ' inp-err' : ''), otpPh: st.backup ? 'xxxx-xxxx' : '000000',
+otpLbl: st.backup ? 'Kode cadangan' : 'Kode verifikasi',
+hasErr2: !!st.err2, err2: st.err2,
+backupLbl: st.backup ? 'Pakai aplikasi autentikator' : 'Pakai kode cadangan', toggleBackup: () => set({ backup: !self.state.backup, otp: '', err2: '' }),
+trust: st.trust, toggleTrust: () => set({ trust: !self.state.trust }),
+btn2Cls: 'btn btn-k',
+submit2: () => {
+  if (!otpOk) { set({ err2: st.backup ? 'Format kode cadangan: xxxx-xxxx.' : 'Kode harus 6 digit angka.' }); return; }
+  if (!st.backup && st.otp === '000000') { set({ err2: 'Kode salah atau sudah kedaluwarsa. Coba kode terbaru.' }); return; }
+  set({ busy: true }); setTimeout(() => self.setState({ busy: false, step: 3 }), 700);
+},
+hasToast: !!st.toast, toast: st.toast
+};
+}
+}
+</script>
+</body>
+</html>

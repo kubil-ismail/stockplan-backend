@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>StockPlan — Mobile</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Geist+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#1C1917}a:hover{color:#57534E}
+*{box-sizing:border-box}
+summary{cursor:pointer;list-style:none}
+summary::-webkit-details-marker{display:none}
+details[open] .faq-chev{transform:rotate(180deg)}
+.faq-chev{transition:transform .2s ease;flex:none}
+button,input{font-family:inherit}
+:focus-visible{outline:2px solid #1C1917;outline-offset:2px}
+.tk{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border-radius:8px;border:1px solid transparent;background:transparent;cursor:pointer;text-align:left;color:#1C1917;min-height:48px}
+.tk-on{background:#FFF7E8;border-color:#FEA722;box-shadow:0 0 0 3px rgba(254,167,34,.18)}
+.inp{width:100%;height:48px;border:1px solid #D6D3D1;border-radius:8px;padding:0 12px;font-size:16px;color:#1C1917;background:#FFFFFF}
+.inp::placeholder{color:#8A837D}
+.inp:focus{outline:none;border-color:#1C1917;box-shadow:0 0 0 3px rgba(28,25,23,.12)}
+.inp[aria-invalid="true"]{border-color:#DC2626;box-shadow:0 0 0 3px rgba(220,38,38,.12)}
+
+.dm-band{display:flex;align-items:center;gap:8px;padding:6px 12px;font-size:11px;border-left:3px solid;border-radius:0 8px 8px 0}
+.dm-band>b{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase}
+.dm-band>span{color:#716A65}
+.dm-b-Hulu{background:#FFF8EC;border-left-color:#FEA722}.dm-b-Hulu>b{color:#92400E}
+.dm-b-Tengah{background:#EFF6FF;border-left-color:#3B82F6}.dm-b-Tengah>b{color:#1D4ED8}
+.dm-b-Hilir{background:#F0FDF4;border-left-color:#22C55E}.dm-b-Hilir>b{color:#15803D}
+.dm-st{display:flex;flex-direction:column;gap:6px;padding:2px 2px 4px}
+.dm-st>div:first-child{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.dm-st>div:first-child>b{font-size:13px}
+.dm-st>div:first-child>span{font-size:11px;color:#716A65;white-space:nowrap}
+.dm-rr{display:flex;flex-wrap:wrap;gap:4px 0}
+.dm-tk{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;width:50px;min-height:48px;padding:3px 0;border:0;background:transparent;cursor:pointer;border-radius:8px;font-family:inherit;color:#1C1917}
+.dm-tk>small{font-family:'Geist Mono',monospace;font-size:10px;font-weight:600}
+.dm-c{width:32px;height:32px;border-radius:999px;color:#FFFFFF;font-family:'Geist Mono',monospace;font-size:10.5px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;overflow:hidden;background:#FFFFFF}
+.dm-c>img{width:32px;height:32px;display:block;border-radius:999px;border:1px solid #E7E5E4}
+.dm-m .dm-c{box-shadow:0 0 0 2px #FFFFFF,0 0 0 3.5px #93C5FD}
+.dm-on .dm-c{box-shadow:0 0 0 2px #FFFFFF,0 0 0 4px #FEA722}
+.dm-on{background:#FFF8EC}
+.dm-n{position:absolute;top:0;right:6px;min-width:15px;height:15px;border-radius:999px;background:#2563EB;color:#FFFFFF;font-size:9px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid #FFFFFF}
+.dm-det{border:1px solid #E7E5E4;border-radius:12px;background:#FAFAF9;display:flex;flex-direction:column}
+.dm-dh{padding:12px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid #E7E5E4}
+.dm-dh>div{display:flex;align-items:center;gap:10px}
+.dm-dc{width:38px;height:38px;border-radius:10px;color:#FFFFFF;font-family:'Geist Mono',monospace;font-size:12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;flex:none;overflow:hidden}
+.dm-dc>img{width:38px;height:38px;display:block;border:1px solid #E7E5E4;border-radius:10px}
+.dm-dn{display:flex;flex-direction:column;line-height:1.3;min-width:0}
+.dm-dn>b{font-family:'Geist Mono',monospace;font-size:15px}
+.dm-dn>span{font-size:12px;color:#716A65}
+.dm-tags{display:flex;gap:5px;flex-wrap:wrap}
+.dm-tag{font-size:11px;font-weight:600;padding:0 7px;border-radius:6px;line-height:19px;background:#FFF4E2;color:#92400E;border:1px solid #FCDDA8}
+.dm-tag-Tengah{background:#EFF6FF;color:#1D4ED8;border-color:#BFDBFE}.dm-tag-Hilir{background:#F0FDF4;color:#15803D;border-color:#BBF7D0}
+.dm-note{margin:0;font-size:12px;color:#1D4ED8;background:#EFF6FF;border-radius:8px;padding:7px 9px;line-height:1.45}
+.dm-ds{padding:10px 12px;display:flex;flex-direction:column;gap:6px;border-bottom:1px solid #E7E5E4}
+.dm-ds>small{font-size:10.5px;font-weight:700;color:#716A65;text-transform:uppercase;letter-spacing:.06em}
+.dm-ds>p{margin:0;font-size:13px;color:#44403C;line-height:1.5}
+.dm-bar{display:flex;height:8px;border-radius:999px;overflow:hidden;background:#E7E5E4}
+.dm-bar>span{display:block;height:100%}
+.dm-leg{display:flex;flex-direction:column;gap:3px}
+.dm-leg>span{display:flex;align-items:center;gap:6px;font-size:12px;color:#44403C}
+.dm-leg i{width:8px;height:8px;border-radius:2px;flex:none;display:block}
+.dm-leg b{margin-left:auto;font-family:'Geist Mono',monospace;font-size:11.5px}
+.dm-df{padding:9px 12px;font-size:11.5px;color:#716A65}
+.dm-subs{display:flex;flex-wrap:wrap;gap:5px}
+.dm-subs>span{font-size:12px;border:1px solid #E7E5E4;border-radius:6px;padding:0 7px;line-height:22px;color:#44403C;background:#FFFFFF}
+.pat{-webkit-mask-image:linear-gradient(to top,#000 0%,rgba(0,0,0,.5) 14%,transparent 34%);mask-image:linear-gradient(to top,#000 0%,rgba(0,0,0,.5) 14%,transparent 34%)}
+
+.ft{position:relative;overflow:hidden;background:#1C1917;color:#D6D3D1;border-top:3px solid #FEA722}
+.ft-glow{position:absolute;left:50%;top:-220px;width:760px;height:440px;transform:translateX(-50%);background:radial-gradient(closest-side,rgba(254,167,34,.30),rgba(254,167,34,.08) 55%,transparent);pointer-events:none}
+.ft-in{position:relative;max-width:1064px;margin:0 auto;padding:72px 24px 28px;display:flex;flex-direction:column;align-items:center;gap:36px;text-align:center}
+.ft-brand{display:flex;flex-direction:column;align-items:center;gap:12px}
+.ft-brand>a{display:flex;color:#FFFFFF}
+.ft-brand>p{margin:0;font-size:14px;color:#A8A29E}
+.ft-nav{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.ft-nav>a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid #44403C;background:rgba(41,37,36,.6);color:#E7E5E4;font-size:14px;font-weight:500;text-decoration:none;transition:border-color .15s,background .15s}
+.ft-nav>a:hover{border-color:#78716C;background:#292524;color:#FFFFFF}
+.ft-card{width:100%;border:1px solid #38332F;background:rgba(28,25,23,.7);border-radius:16px;padding:32px 32px 28px;display:flex;flex-direction:column;gap:24px}
+.ft-k{display:inline-flex;align-items:center;justify-content:center;gap:9px;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#FFFFFF}
+.ft-k>svg{color:#FEA722}
+.ft-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;text-align:left}
+.ft-it{border:1px solid #38332F;background:#211E1C;border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.ft-ic{width:36px;height:36px;border-radius:9px;background:rgba(254,167,34,.16);color:#FEA722;display:inline-flex;align-items:center;justify-content:center}
+.ft-it>b{font-size:15px;color:#FFFFFF;font-weight:600}
+.ft-it>p{margin:0;font-size:13.5px;color:#A8A29E;line-height:1.65}
+.ft-src{margin:0;font-size:13px;color:#A8A29E;line-height:1.6}
+.ft-lang{display:inline-flex;gap:2px;padding:3px;border-radius:999px;border:1px solid #38332F;background:#211E1C}
+.ft-lang>button{min-width:56px;height:38px;border-radius:999px;border:0;background:transparent;color:#A8A29E;font-size:12.5px;font-weight:700;letter-spacing:.04em;cursor:pointer;font-family:inherit}
+.ft-lang>button:hover{color:#FFFFFF}
+.ft-lang>.on,.ft-lang>.on:hover{background:#FEA722;color:#1C1917}
+.ft-bot{width:100%;border-top:1px solid #292524;padding-top:22px;display:flex;justify-content:space-between;gap:12px 20px;flex-wrap:wrap;font-size:12.5px;color:#78716C}
+.ft-bot>div{display:flex;gap:18px;flex-wrap:wrap}
+.ft-bot a{color:#A8A29E;text-decoration:none}
+.ft-bot a:hover{color:#FFFFFF;text-decoration:underline}
+
+.ft-glow{width:520px;top:-200px}
+.ft-in{padding:56px 20px 24px;gap:28px}
+.ft-nav{gap:8px}
+.ft-nav>a{padding:0 14px;font-size:13.5px}
+.ft-card{padding:24px 18px 20px;gap:18px;border-radius:14px}
+.ft-k{font-size:12px}
+.ft-grid{grid-template-columns:1fr;gap:12px}
+.ft-it{padding:16px}
+.ft-src{font-size:12.5px}
+.ft-bot{flex-direction:column;align-items:center;text-align:center}
+.ft-bot>div{justify-content:center}
+</style>
+</helmet>
+<div style="width: 390px; font-family: 'Geist', system-ui, sans-serif; color: #1C1917; background: #FFFFFF; font-size: 16px; line-height: 1.6">
+
+<!-- NAV -->
+<header style="border-bottom: 1px solid #E7E5E4; background: #FFFFFF; position: relative">
+<nav aria-label="Navigasi utama" style="padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px">
+<a href="#m-top" aria-label="StockPlan, ke beranda" style="display: flex; align-items: center; color: #1C1917; text-decoration: none; min-height: 44px">
+<svg viewBox="4 218 502 82" width="128" height="21" role="img" aria-label="StockPlan">
+<g fill="currentColor">
+<path d="M175.68,236.07c-.63-.74-1.47-1.45-2.52-2.13-1.05-.68-2.24-1.3-3.55-1.85-1.31-.55-2.75-1-4.3-1.34-1.55-.34-3.17-.51-4.85-.51-4.31,0-7.49,.81-9.54,2.44-2.05,1.63-3.08,3.85-3.08,6.68,0,1.99,.52,3.56,1.58,4.72,1.05,1.15,2.67,2.1,4.85,2.83,2.18,.73,4.95,1.49,8.32,2.28,3.89,.84,7.25,1.86,10.09,3.07s5.02,2.82,6.54,4.83c1.52,2.02,2.29,4.7,2.29,8.06,0,2.67-.51,4.99-1.54,6.96-1.02,1.97-2.46,3.59-4.3,4.88-1.84,1.28-4,2.23-6.47,2.83-2.47,.6-5.15,.9-8.04,.9s-5.61-.3-8.32-.91c-2.71-.6-5.27-1.48-7.69-2.64-2.42-1.16-4.68-2.6-6.78-4.34l3.39-5.99c.84,.89,1.93,1.77,3.27,2.64s2.87,1.67,4.57,2.41c1.71,.74,3.56,1.33,5.56,1.77,2,.45,4.05,.67,6.15,.67,4,0,7.1-.72,9.31-2.16,2.21-1.44,3.31-3.54,3.31-6.32,0-2.1-.62-3.77-1.85-5.03s-3.06-2.31-5.48-3.15-5.36-1.68-8.83-2.52c-3.79-.94-6.97-1.98-9.54-3.11-2.58-1.13-4.51-2.61-5.8-4.44-1.29-1.83-1.93-4.22-1.93-7.16,0-3.57,.87-6.58,2.6-9.04,1.73-2.46,4.13-4.33,7.18-5.58,3.05-1.26,6.49-1.89,10.33-1.89,2.52,0,4.88,.26,7.06,.79,2.18,.53,4.22,1.26,6.11,2.21s3.63,2.08,5.2,3.39l-3.31,5.76Z"></path>
+<path d="M210.22,278.5c-.58,.26-1.37,.6-2.37,1.02-1,.42-2.16,.79-3.47,1.1-1.31,.32-2.71,.47-4.18,.47-1.68,0-3.23-.3-4.65-.91-1.42-.6-2.55-1.55-3.39-2.84-.84-1.29-1.26-2.9-1.26-4.85v-27.68h-5.6v-5.44h5.6v-13.72h6.94v13.72h9.23v5.44h-9.23v25.55c.1,1.47,.6,2.56,1.5,3.27,.89,.71,1.94,1.06,3.15,1.06,1.37,0,2.63-.24,3.79-.71,1.16-.47,1.92-.81,2.29-1.03l1.66,5.52Z"></path>
+<path d="M234.11,281.1c-3.1,0-5.91-.56-8.44-1.68s-4.71-2.66-6.54-4.62c-1.84-1.96-3.26-4.21-4.26-6.77-1-2.56-1.5-5.24-1.5-8.06s.5-5.58,1.5-8.14c1-2.56,2.42-4.81,4.26-6.77,1.84-1.96,4.03-3.5,6.58-4.62,2.55-1.12,5.38-1.68,8.48-1.68s5.84,.56,8.36,1.68c2.52,1.12,4.72,2.66,6.58,4.62,1.87,1.96,3.3,4.21,4.3,6.77,1,2.56,1.5,5.27,1.5,8.14s-.5,5.51-1.5,8.06c-1,2.56-2.42,4.81-4.26,6.77-1.84,1.96-4.04,3.5-6.58,4.62-2.550,1.12-5.38,1.68-8.48,1.68Zm-13.64-21.06c0,2.81,.62,5.36,1.85,7.65,1.23,2.29,2.88,4.1,4.93,5.42,2.05,1.33,4.34,1.99,6.86,1.99s4.82-.68,6.9-2.03c2.08-1.35,3.73-3.19,4.97-5.5,1.23-2.32,1.85-4.88,1.85-7.69s-.62-5.36-1.85-7.65c-1.24-2.29-2.89-4.11-4.97-5.46-2.08-1.35-4.38-2.03-6.9-2.03s-4.81,.69-6.86,2.07c-2.05,1.38-3.69,3.21-4.93,5.5-1.24,2.29-1.85,4.87-1.85,7.73Z"></path>
+<path d="M281.59,281.1c-3.1,0-5.93-.56-8.48-1.68-2.55-1.12-4.76-2.67-6.62-4.66-1.87-1.98-3.31-4.25-4.34-6.81-1.03-2.56-1.54-5.27-1.54-8.14,0-3.86,.87-7.38,2.6-10.57,1.73-3.18,4.18-5.73,7.33-7.63,3.15-1.91,6.81-2.86,10.96-2.86s7.58,.91,10.61,2.72c3.02,1.81,5.27,4.25,6.74,7.29l-6.78,2.13c-1.05-1.94-2.52-3.46-4.42-4.53-1.89-1.08-4-1.62-6.31-1.62-2.52,0-4.82,.65-6.9,1.95-2.08,1.3-3.72,3.08-4.93,5.35-1.21,2.26-1.81,4.85-1.81,7.76s.62,5.45,1.85,7.77c1.23,2.32,2.89,4.15,4.97,5.5,2.08,1.35,4.38,2.03,6.9,2.03,1.63,0,3.19-.29,4.69-.87,1.5-.58,2.81-1.35,3.94-2.33,1.13-.97,1.91-2.04,2.33-3.19l6.78,2.05c-.84,2-2.12,3.77-3.83,5.32-1.71,1.55-3.73,2.77-6.07,3.67-2.34,.89-4.9,1.34-7.69,1.34Z"></path>
+<path d="M336.08,280.31l-14.27-19.95-7.81,7.31v12.65h-6.94v-57.57h6.94v37.69l21.29-21.05h7.49l-16.4,16.97,17.19,23.96h-7.49Z"></path>
+<path d="M371.72,281.1c-3.37,0-6.36-.83-8.99-2.51-2.63-1.67-4.71-3.78-6.23-6.34v24.85h-6.94v-57.72h6.15v7.74c1.63-2.5,3.76-4.53,6.39-6.07,2.63-1.54,5.49-2.31,8.59-2.31,2.84,0,5.44,.57,7.81,1.72,2.37,1.15,4.42,2.71,6.15,4.7,1.74,1.98,3.09,4.24,4.06,6.77,.97,2.53,1.46,5.18,1.46,7.95,0,3.86-.78,7.41-2.33,10.65s-3.72,5.81-6.5,7.71c-2.79,1.9-5.99,2.86-9.62,2.86Zm-2.13-5.99c2.05,0,3.9-.43,5.56-1.29,1.66-.86,3.08-2,4.26-3.43,1.18-1.43,2.09-3.06,2.72-4.88,.63-1.82,.95-3.69,.95-5.62,0-2.03-.35-3.95-1.06-5.78s-1.71-3.43-3-4.84c-1.29-1.4-2.79-2.51-4.49-3.32-1.71-.81-3.56-1.21-5.56-1.21-1.26,0-2.56,.23-3.9,.7-1.34,.47-2.62,1.13-3.83,1.99-1.21,.86-2.23,1.83-3.08,2.92-.84,1.09-1.39,2.26-1.66,3.51v11.66c.79,1.77,1.84,3.38,3.15,4.83,1.31,1.45,2.84,2.61,4.57,3.47,1.73,.86,3.52,1.28,5.36,1.28Z"></path>
+<path d="M398.84,222.75h6.94v47.13c0,2.27,.32,3.67,.95,4.2,.63,.53,1.39,.79,2.29,.79,1.1,0,2.15-.12,3.15-.35,1-.24,1.84-.49,2.52-.75l1.1,5.68c-1.16,.47-2.52,.87-4.1,1.18s-2.97,.47-4.18,.47c-2.68,0-4.8-.77-6.35-2.3-1.55-1.53-2.33-3.67-2.33-6.42v-49.64Z"></path>
+<path d="M418.01,268.48c0-2.61,.75-4.87,2.25-6.78,1.5-1.91,3.56-3.38,6.19-4.43,2.63-1.04,5.68-1.57,9.15-1.57,1.84,0,3.79,.15,5.83,.43,2.05,.29,3.86,.72,5.44,1.3v-2.98c0-3.11-.95-5.56-2.84-7.35s-4.57-2.68-8.04-2.68c-2.26,0-4.43,.41-6.51,1.22-2.08,.82-4.27,1.99-6.58,3.51l-2.52-4.89c2.68-1.84,5.36-3.22,8.04-4.14,2.68-.92,5.47-1.38,8.36-1.38,5.26,0,9.41,1.45,12.46,4.34,3.05,2.89,4.57,6.92,4.57,12.08v17.28c0,.83,.17,1.45,.51,1.84,.34,.39,.91,.61,1.7,.66v5.36c-.68,.1-1.28,.18-1.77,.24-.5,.05-.91,.08-1.22,.08-1.63,0-2.85-.45-3.67-1.34-.82-.89-1.28-1.84-1.38-2.84l-.16-2.6c-1.79,2.31-4.13,4.1-7.02,5.36-2.89,1.26-5.76,1.89-8.59,1.89s-5.18-.56-7.33-1.68c-2.16-1.12-3.84-2.64-5.05-4.55-1.21-1.91-1.81-4.04-1.81-6.39Zm26.81,2.88c.63-.73,1.13-1.47,1.5-2.22,.37-.75,.55-1.39,.55-1.91v-5.08c-1.63-.62-3.34-1.1-5.13-1.44-1.79-.34-3.55-.51-5.28-.51-3.52,0-6.38,.69-8.56,2.07-2.18,1.38-3.27,3.27-3.27,5.66,0,1.3,.35,2.56,1.06,3.79,.71,1.22,1.76,2.22,3.15,3.01,1.39,.78,3.11,1.17,5.17,1.17,2.16,0,4.21-.43,6.15-1.29,1.94-.86,3.5-1.94,4.65-3.24Z"></path>
+<path d="M500.65,280.31h-6.94v-22.82c0-4.32-.67-7.49-2.01-9.5s-3.38-3.01-6.11-3.01c-1.89,0-3.77,.47-5.64,1.4-1.87,.94-3.52,2.19-4.97,3.78-1.45,1.58-2.48,3.42-3.12,5.49v24.65h-6.94v-40.93h6.31v8.84c1.1-1.93,2.52-3.6,4.26-5.01,1.73-1.41,3.71-2.5,5.91-3.29,2.21-.78,4.52-1.17,6.94-1.17s4.35,.43,5.95,1.29c1.6,.86,2.86,2.06,3.79,3.6,.92,1.54,1.58,3.35,1.97,5.44,.39,2.09,.59,4.36,.59,6.81v24.42Z"></path>
+</g>
+<g fill="#FEA722">
+<path d="M13.04,233.96c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.49s0-2.12,5.66-4.97l36.26-15.83c4.18-1.83,6.89-5.96,6.89-10.52v-16.89l-41.92,18.3Z"></path>
+<path d="M96.89,280.81c4.18-1.83,6.89-5.96,6.89-10.52v-16.89h0v-2.49s0,2.12-5.66,4.97l-36.26,15.83c-4.18,1.83-6.89,5.96-6.89,10.52v16.89l41.92-18.3Z"></path>
+<path d="M98.11,226.34l-36.26,15.83s-.07,.04-.1,.05l-48.71,21.26c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.79s0-2.12,5.66-4.97l36.26-15.83c.73-.32,1.4-.73,2.03-1.18l46.78-20.42c4.18-1.83,6.89-5.96,6.89-10.52h0v-16.89h0v-2.5s0,2.12-5.66,4.97Z"></path>
+</g>
+</svg>
+</a>
+<div style="display: flex; align-items: center; gap: 6px">
+
+<button type="button" onClick="{{toggleMenu}}" aria-expanded="{{menuOpen}}" aria-controls="m-menu" aria-label="Buka menu" style="width: 44px; height: 44px; border: 1px solid #E7E5E4; border-radius: 8px; background: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: #1C1917">
+<sc-if value="{{menuClosed}}" hint-placeholder-val="{{true}}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"></path></svg></sc-if>
+<sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></sc-if>
+</button>
+</div>
+</nav>
+<sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}">
+<div id="m-menu" style="border-top: 1px solid #E7E5E4; padding: 8px 16px 16px; display: flex; flex-direction: column; background: #FFFFFF; box-shadow: 0 16px 24px -16px rgba(28,25,23,.2)">
+<a href="#m-cara" onClick="{{closeMenu}}" style="color: #1C1917; text-decoration: none; font-weight: 500; font-size: 16px; padding: 12px 4px; border-bottom: 1px solid #F5F5F4">Cara kerja</a>
+<a href="#m-fitur" onClick="{{closeMenu}}" style="color: #1C1917; text-decoration: none; font-weight: 500; font-size: 16px; padding: 12px 4px; border-bottom: 1px solid #F5F5F4">Fitur</a>
+<a href="#m-faq" onClick="{{closeMenu}}" style="color: #1C1917; text-decoration: none; font-weight: 500; font-size: 16px; padding: 12px 4px">FAQ</a>
+<a href="#m-beta" onClick="{{closeMenu}}" style="margin-top: 8px; background: #1C1917; color: #FFFFFF; text-decoration: none; font-weight: 600; font-size: 15px; height: 48px; border-radius: 8px; display: flex; align-items: center; justify-content: center">Ikut beta tester</a>
+</div>
+</sc-if>
+</header>
+
+<!-- HERO -->
+<section id="m-top" style="padding: 48px 20px 28px; display: flex; flex-direction: column; align-items: flex-start; gap: 18px">
+<a href="#m-beta" style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: #1C1917; text-decoration: none; border: 1px solid #E7E5E4; padding: 4px 12px 4px 4px; border-radius: 999px; box-shadow: 0 1px 2px rgba(0,0,0,.05)">
+<span style="background: #FFF4E2; color: #92400E; font-weight: 600; padding: 1px 9px; border-radius: 999px; border: 1px solid #FCDDA8">Beta</span>Antrian beta tester dibuka
+</a>
+<h1 style="margin: 0; font-weight: 700; font-size: 38px; line-height: 1.06; letter-spacing: -0.04em">Pahami bisnisnya dulu, baru pilih sahamnya.</h1>
+<p style="margin: 0; font-size: 16px; color: #716A65">StockPlan memetakan emiten BEI berdasarkan bisnis yang sebenarnya. Cari sebuah tema, lihat siapa saja yang bermain dari hulu sampai hilir, lalu susun portofolio sesuai tesis Anda.</p>
+<div style="display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 4px">
+<a href="#m-beta" style="background: #FEA722; color: #1C1917; text-decoration: none; font-weight: 600; font-size: 16px; height: 48px; border-radius: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 2px rgba(0,0,0,.06)">Ikut beta tester</a>
+<a href="#m-cara" style="background: #FFFFFF; color: #1C1917; text-decoration: none; font-weight: 600; font-size: 16px; height: 48px; border-radius: 8px; border: 1px solid #E7E5E4; display: flex; align-items: center; justify-content: center">Lihat cara kerjanya</a>
+</div>
+<p style="margin: 0; font-size: 13px; color: #716A65">Bukan aplikasi trading. Tanpa sinyal beli-jual, tanpa prediksi harga.</p>
+</section>
+
+<!-- PRODUCT PREVIEW -->
+<section style="padding: 0 16px 56px; position: relative">
+<div aria-hidden="true" style="position: absolute; left: 15%; right: 15%; top: 40px; height: 50%; background: #FEA722; opacity: .16; filter: blur(60px); border-radius: 999px"></div>
+<figure style="margin: 0; position: relative; background: #FFFFFF; border: 1px solid #E7E5E4; border-radius: 16px; box-shadow: 0 20px 48px -20px rgba(28,25,23,.28), 0 1px 2px rgba(0,0,0,.05); overflow: hidden">
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid #E7E5E4; background: #FAFAF9">
+<div style="display: flex; align-items: center; gap: 8px">
+<svg aria-hidden="true" viewBox="4 213 102 88" width="20" height="17"><g fill="#FEA722"><path d="M13.04,233.96c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.49s0-2.12,5.66-4.97l36.26-15.83c4.18-1.83,6.89-5.96,6.89-10.52v-16.89l-41.92,18.3Z"></path><path d="M96.89,280.81c4.18-1.83,6.89-5.96,6.89-10.52v-16.89h0v-2.49s0,2.12-5.66,4.97l-36.26,15.83c-4.18,1.83-6.89,5.96-6.89,10.52v16.89l41.92-18.3Z"></path><path d="M98.11,226.34l-36.26,15.83s-.07,.04-.1,.05l-48.71,21.26c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.79s0-2.12,5.66-4.97l36.26-15.83c.73-.32,1.4-.73,2.03-1.18l46.78-20.42c4.18-1.83,6.89-5.96,6.89-10.52h0v-16.89h0v-2.5s0,2.12-5.66,4.97Z"></path></g></svg>
+<span style="font-size: 13px; color: #716A65">Tema bisnis / <span style="color: #1C1917; font-weight: 500">Batubara</span></span>
+</div>
+<span aria-hidden="true" style="width: 32px; height: 32px; border: 1px solid #E7E5E4; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; background: #FFFFFF"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1C1917" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-5.2-5.2M10.5 18a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15Z"></path></svg></span>
+</div>
+<div style="padding: 14px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; align-items: center; gap: 7px; flex-wrap: wrap"><span style="font-size: 22px; font-weight: 700; letter-spacing: -0.02em">Batubara</span><span style="font-size: 11px; font-weight: 600; border: 1px solid #E7E5E4; padding: 0 7px; border-radius: 999px; line-height: 19px">5 tahap</span><span style="font-size: 11px; font-weight: 600; border: 1px solid #E7E5E4; padding: 0 7px; border-radius: 999px; line-height: 19px">21 emiten</span></div>
+<span style="font-size: 13px; color: #716A65">Dari menggali batu bara sampai mengubahnya jadi listrik.</span>
+</div>
+<div aria-hidden="true" style="display: flex; background: #F5F5F4; border-radius: 8px; padding: 3px; gap: 2px"><span style="flex: 1; text-align: center; font-size: 13px; font-weight: 600; background: #FFFFFF; padding: 5px 4px; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,.08)">Rantai nilai</span><span style="flex: 1; text-align: center; font-size: 13px; font-weight: 500; color: #57534E; padding: 5px 4px; border-radius: 6px">Tabel</span></div>
+<sc-for list="{{bands}}" as="g" hint-placeholder-count="3">
+<div class="{{g.cls}}"><b>{{g.label}}</b><span>{{g.desc}}</span></div>
+<sc-for list="{{g.stages}}" as="s" hint-placeholder-count="2">
+<div class="dm-st"><div><b>{{s.name}}</b><span>{{s.count}} emiten</span></div><div class="dm-rr"><sc-for list="{{s.tks}}" as="t" hint-placeholder-count="5"><button type="button" class="{{t.cls}}" onClick="{{t.pick}}" aria-pressed="{{t.on}}" aria-label="{{t.aria}}"><span class="dm-c" style="background: {{t.c}}"><sc-if value="{{t.hasLogo}}" hint-placeholder-val="{{false}}"><img src="{{t.logo}}" alt=""></sc-if><sc-if value="{{t.noLogo}}" hint-placeholder-val="{{true}}">{{t.ini}}</sc-if></span><small>{{t.tk}}</small><sc-if value="{{t.multi}}" hint-placeholder-val="{{false}}"><span class="dm-n" aria-hidden="true">{{t.mc}}</span></sc-if></button></sc-for></div></div>
+</sc-for>
+</sc-for>
+<div class="dm-det" aria-live="polite">
+<div class="dm-dh">
+<div><span class="dm-dc" style="background: {{selC}}"><sc-if value="{{selHasLogo}}" hint-placeholder-val="{{false}}"><img src="{{selLogo}}" alt=""></sc-if><sc-if value="{{selNoLogo}}" hint-placeholder-val="{{true}}">{{selIni}}</sc-if></span><span class="dm-dn"><b>{{sel}}</b><span>{{selName}}</span></span></div>
+<div class="dm-tags"><sc-for list="{{selStages}}" as="b" hint-placeholder-count="2"><span class="{{b.cls}}">{{b.label}}</span></sc-for></div>
+<sc-if value="{{selMulti}}" hint-placeholder-val="{{true}}"><p class="dm-note">Muncul di {{selMc}} tahap rantai nilai, jadi tidak dikurung dalam satu kategori.</p></sc-if>
+</div>
+<div class="dm-ds"><small>Ringkasan bisnis</small><p>{{selSummary}}</p></div>
+<sc-if value="{{selHasRev}}" hint-placeholder-val="{{true}}"><div class="dm-ds"><small>Sumber pendapatan</small><div class="dm-bar" aria-hidden="true"><sc-for list="{{selRev}}" as="r" hint-placeholder-count="2"><span style="width: {{r.w}}; background: {{r.c}}"></span></sc-for></div><div class="dm-leg"><sc-for list="{{selRev}}" as="r" hint-placeholder-count="2"><span><i style="background: {{r.c}}"></i>{{r.l}}<b>{{r.p}}</b></span></sc-for></div></div></sc-if>
+<sc-if value="{{selHasSubs}}" hint-placeholder-val="{{true}}"><div class="dm-ds"><small>Anak usaha</small><div class="dm-subs"><sc-for list="{{selSubs}}" as="x" hint-placeholder-count="2"><span>{{x}}</span></sc-for></div></div></sc-if>
+<div class="dm-df">Sumber: Bursa Efek Indonesia</div>
+</div>
+</div>
+</figure>
+<p style="margin: 12px 0 0; font-size: 13px; color: #716A65; text-align: center; position: relative">Ketuk logo emiten untuk melihat detailnya. Tampilan bersifat ilustratif.</p>
+</section>
+
+<!-- PROBLEM -->
+<section style="background: #FAFAF9; border-top: 1px solid #E7E5E4; border-bottom: 1px solid #E7E5E4; padding: 56px 20px; display: flex; flex-direction: column; gap: 14px">
+<span style="align-self: flex-start; font-size: 12px; font-weight: 600; border: 1px solid #E7E5E4; background: #FFFFFF; padding: 2px 10px; border-radius: 6px">Masalahnya</span>
+<h2 style="margin: 0; font-weight: 700; font-size: 28px; line-height: 1.15; letter-spacing: -0.03em">Lebih dari 960 emiten. Berapa yang benar-benar Anda pahami bisnisnya?</h2>
+<p style="margin: 0; color: #716A65; font-size: 15px">Untuk tahu dari mana perusahaan mendapat uang, biasanya Anda harus membaca laporan keuangan. Tidak semua orang punya waktu untuk itu.</p>
+<div style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px">
+<div style="background: #FFFFFF; border: 1px solid #E7E5E4; border-radius: 12px; padding: 16px; display: flex; gap: 14px">
+<span style="font-family: 'Geist Mono', monospace; font-weight: 600; font-size: 13px; color: #92400E; flex: none; padding-top: 2px">01</span>
+<div><h3 style="margin: 0 0 2px; font-size: 15px; font-weight: 600">Memilih dari nama dan sektor di permukaan</h3><p style="margin: 0; color: #716A65; font-size: 14px">Kategori resmi sering berbeda dengan sumber pemasukan terbesarnya.</p></div>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #E7E5E4; border-radius: 12px; padding: 16px; display: flex; gap: 14px">
+<span style="font-family: 'Geist Mono', monospace; font-weight: 600; font-size: 13px; color: #92400E; flex: none; padding-top: 2px">02</span>
+<div><h3 style="margin: 0 0 2px; font-size: 15px; font-weight: 600">Peluang di lapisan lain tidak terlihat</h3><p style="margin: 0; color: #716A65; font-size: 14px">Jasa, logistik, pengolahan, dan pembangkit dalam satu tema sulit ditemukan.</p></div>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #E7E5E4; border-radius: 12px; padding: 16px; display: flex; gap: 14px">
+<span style="font-family: 'Geist Mono', monospace; font-weight: 600; font-size: 13px; color: #92400E; flex: none; padding-top: 2px">03</span>
+<div><h3 style="margin: 0 0 2px; font-size: 15px; font-weight: 600">Portofolio tidak konsisten dengan keyakinan</h3><p style="margin: 0; color: #716A65; font-size: 14px">Tanpa tesis tertulis, portofolio mudah bergeser mengikuti ramai pasar.</p></div>
+</div>
+</div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="m-cara" style="padding: 56px 20px; display: flex; flex-direction: column; gap: 14px">
+<span style="align-self: flex-start; font-size: 12px; font-weight: 600; border: 1px solid #E7E5E4; padding: 2px 10px; border-radius: 6px">Cara kerja</span>
+<h2 style="margin: 0; font-weight: 700; font-size: 28px; line-height: 1.15; letter-spacing: -0.03em">Dari tema, ke rantai nilai, ke portofolio.</h2>
+<ol style="margin: 10px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 0">
+<li style="display: flex; gap: 14px">
+<div style="display: flex; flex-direction: column; align-items: center"><span style="width: 36px; height: 36px; border-radius: 8px; background: #FEA722; display: inline-flex; align-items: center; justify-content: center; flex: none"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1C1917" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-5.2-5.2M10.5 18a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15Z"></path></svg></span><span aria-hidden="true" style="width: 1px; flex: 1; background: #E7E5E4; margin: 6px 0"></span></div>
+<div style="padding-bottom: 22px"><h3 style="margin: 4px 0 2px; font-size: 16px; font-weight: 600">Cari tema bisnis</h3><p style="margin: 0; color: #716A65; font-size: 14px">Ketik tema yang Anda minati, misalnya batubara. Tidak perlu tahu kode sahamnya lebih dulu.</p></div>
+</li>
+<li style="display: flex; gap: 14px">
+<div style="display: flex; flex-direction: column; align-items: center"><span style="width: 36px; height: 36px; border-radius: 8px; background: #FEA722; display: inline-flex; align-items: center; justify-content: center; flex: none"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1C1917" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="2.2"></circle><circle cx="19" cy="6" r="2.2"></circle><circle cx="19" cy="18" r="2.2"></circle><path d="M7 11l10-4M7 13l10 4"></path></svg></span><span aria-hidden="true" style="width: 1px; flex: 1; background: #E7E5E4; margin: 6px 0"></span></div>
+<div style="padding-bottom: 22px"><h3 style="margin: 4px 0 2px; font-size: 16px; font-weight: 600">Lihat peta rantai nilainya</h3><p style="margin: 0; color: #716A65; font-size: 14px">Emiten dikelompokkan per tahap, dari kontraktor dan pemilik tambang sampai logistik dan pembangkit listrik.</p></div>
+</li>
+<li style="display: flex; gap: 14px">
+<div style="display: flex; flex-direction: column; align-items: center"><span style="width: 36px; height: 36px; border-radius: 8px; background: #FEA722; display: inline-flex; align-items: center; justify-content: center; flex: none"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1C1917" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"></path></svg></span></div>
+<div><h3 style="margin: 4px 0 2px; font-size: 16px; font-weight: 600">Susun portofolio dari tesis</h3><p style="margin: 0; color: #716A65; font-size: 14px">Tulis tesis investasi Anda, pilih emiten yang sesuai, lalu pantau apakah portofolio tetap sejalan.</p></div>
+</li>
+</ol>
+</section>
+
+<!-- FEATURES -->
+<section id="m-fitur" style="background: #FAFAF9; border-top: 1px solid #E7E5E4; border-bottom: 1px solid #E7E5E4; padding: 56px 20px; display: flex; flex-direction: column; gap: 14px">
+<span style="align-self: flex-start; font-size: 12px; font-weight: 600; border: 1px solid #E7E5E4; background: #FFFFFF; padding: 2px 10px; border-radius: 6px">Fitur</span>
+<h2 style="margin: 0; font-weight: 700; font-size: 28px; line-height: 1.15; letter-spacing: -0.03em">Semua yang Anda butuhkan untuk riset dan perencanaan.</h2>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 6px">
+<div style="background: #FFFFFF; border: 1px solid #E7E5E4; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+<span style="width: 32px; height: 32px; border-radius: 8px; background: #F5F5F4; border: 1px solid #E7E5E4; display: inline-flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C1917" stroke-width="1.8" stroke-linecap="round"><path d="M3 5h18M6 12h12M10 19h4"></path></svg></span>
+<h3 style="margin: 0; font-size: 14px; font-weight: 600; line-height: 1.3">Screening berbasis tema</h3>
+<p style="margin: 0; color: #716A65; font-size: 13px; line-height: 1.45">Temukan emiten lewat bisnis yang dijalankan.</p>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #E7E5E4; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+<span style="width: 32px; height: 32px; border-radius: 8px; background: #F5F5F4; border: 1px solid #E7E5E4; display: inline-flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C1917" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V8l8-5 8 5v13"></path><path d="M9 21v-6h6v6"></path></svg></span>
+<h3 style="margin: 0; font-size: 14px; font-weight: 600; line-height: 1.3">Halaman bisnis perusahaan</h3>
+<p style="margin: 0; color: #716A65; font-size: 13px; line-height: 1.45">Usaha, anak usaha, dan manajemen dalam satu halaman.</p>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #E7E5E4; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+<span style="width: 32px; height: 32px; border-radius: 8px; background: #F5F5F4; border: 1px solid #E7E5E4; display: inline-flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C1917" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><path d="M14 3v6h6M8 13h8M8 17h5"></path></svg></span>
+<h3 style="margin: 0; font-size: 14px; font-weight: 600; line-height: 1.3">Tesis &amp; portofolio</h3>
+<p style="margin: 0; color: #716A65; font-size: 13px; line-height: 1.45">Portofolio terhubung ke tesis yang Anda tulis.</p>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #E7E5E4; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+<span style="width: 32px; height: 32px; border-radius: 8px; background: #F5F5F4; border: 1px solid #E7E5E4; display: inline-flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C1917" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
+<h3 style="margin: 0; font-size: 14px; font-weight: 600; line-height: 1.3">Watchlist</h3>
+<p style="margin: 0; color: #716A65; font-size: 13px; line-height: 1.45">Simpan emiten yang sedang Anda pelajari.</p>
+</div>
+</div>
+</section>
+
+<!-- THESIS -->
+<section style="padding: 56px 20px; display: flex; flex-direction: column; gap: 14px">
+<span style="align-self: flex-start; font-size: 12px; font-weight: 600; border: 1px solid #E7E5E4; padding: 2px 10px; border-radius: 6px">Portofolio berbasis tesis</span>
+<h2 style="margin: 0; font-weight: 700; font-size: 28px; line-height: 1.15; letter-spacing: -0.03em">Tulis alasan Anda berinvestasi. Biarkan portofolio mengikutinya.</h2>
+<p style="margin: 0; color: #716A65; font-size: 15px">Tesis adalah keyakinan yang Anda tulis. StockPlan membantu memilih emiten yang sesuai dan menunjukkan tema apa saja yang ada di portofolio Anda.</p>
+<figure style="margin: 8px 0 0; background: #FFFFFF; border: 1px solid #E7E5E4; border-radius: 14px; box-shadow: 0 16px 36px -18px rgba(28,25,23,.25), 0 1px 2px rgba(0,0,0,.05); overflow: hidden">
+<div style="padding: 16px; border-bottom: 1px solid #E7E5E4; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px"><span style="font-size: 12px; font-weight: 600; color: #15803D; background: #F0FDF4; border: 1px solid #BBF7D0; padding: 0 8px; border-radius: 6px">Aktif</span><span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #92400E"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 999px; background: #F59E0B"></span>Evaluasi dalam 20 hari</span></div>
+<span style="font-weight: 700; font-size: 16px; line-height: 1.35">Kebutuhan energi Indonesia terus naik dalam 5 tahun ke depan.</span>
+<div style="display: flex; gap: 6px; flex-wrap: wrap"><span style="font-size: 12px; font-weight: 500; color: #44403C; border: 1px solid #E7E5E4; padding: 1px 8px; border-radius: 999px; display: inline-flex; align-items: center; gap: 5px; background: #FFF4E2; color: #92400E; border-color: #FCDDA8; font-weight: 600">Tema Batubara</span><span style="font-size: 12px; font-weight: 500; color: #44403C; border: 1px solid #E7E5E4; padding: 1px 8px; border-radius: 999px; display: inline-flex; align-items: center; gap: 5px">3–5 tahun</span><span style="font-size: 12px; font-weight: 500; color: #44403C; border: 1px solid #E7E5E4; padding: 1px 8px; border-radius: 999px; display: inline-flex; align-items: center; gap: 5px">Evaluasi tiap 3 bulan</span></div>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid #F5F5F4;">
+<img src="/_blob/a7814f85d9b69b78f4edb98dc5be88d5" alt="" width="32" height="32" style="width: 32px; height: 32px; border-radius: 7px; border: 1px solid #E7E5E4; display: block; flex: none">
+<div style="display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0"><span style="display: flex; align-items: baseline; gap: 6px"><span style="font-family: 'Geist Mono', monospace; font-weight: 600; font-size: 14px">PTBA</span><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #716A65">40%</span></span><span style="display: flex; gap: 4px; flex-wrap: wrap"><span style="font-size: 11px; font-weight: 600; padding: 0 7px; border-radius: 6px; line-height: 19px; background: #FFF4E2; color: #92400E; border: 1px solid #FCDDA8">Pemilik tambang</span><span style="font-size: 11px; font-weight: 600; padding: 0 7px; border-radius: 6px; line-height: 19px; background: #F0FDF4; color: #15803D; border: 1px solid #BBF7D0">Pembangkit</span></span></div>
+<span style="font-size: 12px; font-weight: 600; color: #15803D; background: #F0FDF4; border: 1px solid #BBF7D0; padding: 1px 8px; border-radius: 6px; white-space: nowrap">Sesuai tesis</span>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid #F5F5F4;">
+<img src="/_blob/fee486793ba6867b5b69aaf44de9f6e7" alt="" width="32" height="32" style="width: 32px; height: 32px; border-radius: 7px; border: 1px solid #E7E5E4; display: block; flex: none">
+<div style="display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0"><span style="display: flex; align-items: baseline; gap: 6px"><span style="font-family: 'Geist Mono', monospace; font-weight: 600; font-size: 14px">AADI</span><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #716A65">35%</span></span><span style="display: flex; gap: 4px; flex-wrap: wrap"><span style="font-size: 11px; font-weight: 600; padding: 0 7px; border-radius: 6px; line-height: 19px; background: #FFF4E2; color: #92400E; border: 1px solid #FCDDA8">Pemilik tambang</span><span style="font-size: 11px; font-weight: 600; padding: 0 7px; border-radius: 6px; line-height: 19px; background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE">Logistik</span></span></div>
+<span style="font-size: 12px; font-weight: 600; color: #15803D; background: #F0FDF4; border: 1px solid #BBF7D0; padding: 1px 8px; border-radius: 6px; white-space: nowrap">Sesuai tesis</span>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 12px 16px;">
+<img src="/_blob/f5a059270c2b05fcd6c975eb7bbd11d3" alt="" width="32" height="32" style="width: 32px; height: 32px; border-radius: 7px; border: 1px solid #E7E5E4; display: block; flex: none">
+<div style="display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0"><span style="display: flex; align-items: baseline; gap: 6px"><span style="font-family: 'Geist Mono', monospace; font-weight: 600; font-size: 14px">UNTR</span><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #716A65">25%</span></span><span style="display: flex; gap: 4px; flex-wrap: wrap"><span style="font-size: 11px; font-weight: 600; padding: 0 7px; border-radius: 6px; line-height: 19px; background: #FFF4E2; color: #92400E; border: 1px solid #FCDDA8">Kontraktor tambang</span></span></div>
+<span style="font-size: 12px; font-weight: 600; color: #92400E; background: #FFFBEB; border: 1px solid #FDE68A; padding: 1px 8px; border-radius: 6px; white-space: nowrap">Perlu ditinjau</span>
+</div>
+</figure>
+<p style="margin: 0; font-size: 13px; color: #716A65">Contoh tampilan. Bukan rekomendasi saham.</p>
+</section>
+
+<!-- POSITIONING + DATA -->
+<section style="background: #FAFAF9; border-top: 1px solid #E7E5E4; border-bottom: 1px solid #E7E5E4; padding: 48px 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="background: #FFFFFF; border: 1px solid #E7E5E4; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-weight: 700; font-size: 20px; line-height: 1.25; letter-spacing: -0.02em">Yang sengaja tidak kami kerjakan</h2>
+<p style="margin: 0; color: #716A65; font-size: 14px">StockPlan adalah alat riset dan perencanaan. Transaksi tetap di sekuritas pilihan Anda.</p>
+<ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 15px">
+<li style="display: flex; gap: 10px; align-items: center"><span style="width: 20px; height: 20px; border-radius: 999px; background: #F5F5F4; display: inline-flex; align-items: center; justify-content: center; flex: none"><svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#57534E" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></span>Jual beli saham</li>
+<li style="display: flex; gap: 10px; align-items: center"><span style="width: 20px; height: 20px; border-radius: 999px; background: #F5F5F4; display: inline-flex; align-items: center; justify-content: center; flex: none"><svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#57534E" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></span>Harga dan chart real time</li>
+<li style="display: flex; gap: 10px; align-items: center"><span style="width: 20px; height: 20px; border-radius: 999px; background: #F5F5F4; display: inline-flex; align-items: center; justify-content: center; flex: none"><svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#57534E" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></span>Prediksi harga dan sinyal beli-jual</li>
+</ul>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #E7E5E4; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-weight: 700; font-size: 20px; line-height: 1.25; letter-spacing: -0.02em">Data bersumber dari BEI</h2>
+<p style="margin: 0; color: #716A65; font-size: 14px">Pemetaan dibangun di atas data resmi Bursa Efek Indonesia.</p>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<span style="font-size: 12px; font-weight: 500; border: 1px solid #E7E5E4; padding: 3px 10px; border-radius: 6px">Profil perusahaan</span>
+<span style="font-size: 12px; font-weight: 500; border: 1px solid #E7E5E4; padding: 3px 10px; border-radius: 6px">Kinerja saham</span>
+<span style="font-size: 12px; font-weight: 500; border: 1px solid #E7E5E4; padding: 3px 10px; border-radius: 6px">Category index</span>
+<span style="font-size: 12px; font-weight: 500; border: 1px solid #E7E5E4; padding: 3px 10px; border-radius: 6px">Anak usaha</span>
+<span style="font-size: 12px; font-weight: 500; border: 1px solid #E7E5E4; padding: 3px 10px; border-radius: 6px">Manajemen</span>
+</div>
+</div>
+</section>
+
+<!-- FAQ -->
+<section id="m-faq" style="padding: 56px 20px; display: flex; flex-direction: column; gap: 18px">
+<h2 style="margin: 0; font-weight: 700; font-size: 28px; line-height: 1.15; letter-spacing: -0.03em">Pertanyaan yang sering diajukan</h2>
+<div style="border-top: 1px solid #E7E5E4">
+<details style="border-bottom: 1px solid #E7E5E4">
+<summary style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 0; font-weight: 500; font-size: 15px; min-height: 44px">Apakah StockPlan bisa dipakai untuk membeli saham?<svg class="faq-chev" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C1917" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></summary>
+<p style="margin: 0 0 16px; color: #716A65; font-size: 14px">Tidak. StockPlan membantu riset dan perencanaan. Transaksi tetap dilakukan di aplikasi sekuritas Anda.</p>
+</details>
+<details style="border-bottom: 1px solid #E7E5E4">
+<summary style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 0; font-weight: 500; font-size: 15px; min-height: 44px">Apa itu rantai nilai?<svg class="faq-chev" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C1917" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></summary>
+<p style="margin: 0 0 16px; color: #716A65; font-size: 14px">Urutan bisnis yang terlibat dalam satu tema, dari hulu ke hilir. Untuk batubara: kontraktor tambang, pemilik tambang, logistik, pengolahan, sampai pembangkit listrik.</p>
+</details>
+<details style="border-bottom: 1px solid #E7E5E4">
+<summary style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 0; font-weight: 500; font-size: 15px; min-height: 44px">Saya baru mulai investasi. Apakah cocok?<svg class="faq-chev" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C1917" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></summary>
+<p style="margin: 0 0 16px; color: #716A65; font-size: 14px">Ya. StockPlan dirancang untuk investor pemula yang ingin berinvestasi jangka panjang, dengan istilah yang selalu dijelaskan.</p>
+</details>
+<details style="border-bottom: 1px solid #E7E5E4">
+<summary style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 0; font-weight: 500; font-size: 15px; min-height: 44px">Dari mana datanya?<svg class="faq-chev" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C1917" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></summary>
+<p style="margin: 0 0 16px; color: #716A65; font-size: 14px">Seluruh data bersumber dari Bursa Efek Indonesia, termasuk profil perusahaan, anak usaha, dan manajemen.</p>
+</details>
+<details style="border-bottom: 1px solid #E7E5E4">
+<summary style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 0; font-weight: 500; font-size: 15px; min-height: 44px">Apa yang didapat beta tester?<svg class="faq-chev" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C1917" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></summary>
+<p style="margin: 0 0 16px; color: #716A65; font-size: 14px">Anda mencoba StockPlan lebih dulu sebelum dibuka untuk umum, dan masukan Anda ikut membentuk produknya.</p>
+</details>
+</div>
+</section>
+
+<!-- BETA CTA -->
+<section id="m-beta" style="background: #FEA722; position: relative; overflow: hidden">
+<svg class="pat" aria-hidden="true" style="position: absolute; inset: 0; width: 100%; height: 100%">
+<defs>
+<pattern id="spm-motif" x="0" y="0" width="96" height="84" patternUnits="userSpaceOnUse">
+<g transform="translate(12 12) scale(0.32) translate(-6 -213)" fill="#FFFFFF" opacity="0.32">
+<path d="M13.04,233.96c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.49s0-2.12,5.66-4.97l36.26-15.83c4.18-1.83,6.89-5.96,6.89-10.52v-16.89l-41.92,18.3Z"></path>
+<path d="M96.89,280.81c4.18-1.83,6.89-5.96,6.89-10.52v-16.89h0v-2.49s0,2.12-5.66,4.97l-36.26,15.83c-4.18,1.83-6.89,5.96-6.89,10.52v16.89l41.92-18.3Z"></path>
+<path d="M98.11,226.34l-36.26,15.83s-.07,.04-.1,.05l-48.71,21.26c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.79s0-2.12,5.66-4.97l36.26-15.83c.73-.32,1.4-.73,2.03-1.18l46.78-20.42c4.18-1.83,6.89-5.96,6.89-10.52h0v-16.89h0v-2.5s0,2.12-5.66,4.97Z"></path>
+</g>
+<g transform="translate(60 54) scale(0.2) translate(-6 -213)" fill="#1C1917" opacity="0.05">
+<path d="M98.11,226.34l-36.26,15.83s-.07,.04-.1,.05l-48.71,21.26c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.79s0-2.12,5.66-4.97l36.26-15.83c.73-.32,1.4-.73,2.03-1.18l46.78-20.42c4.18-1.83,6.89-5.96,6.89-10.52h0v-16.89h0v-2.5s0,2.12-5.66,4.97Z"></path>
+</g>
+<circle cx="74" cy="20" r="2" fill="#FFFFFF" opacity="0.4"></circle>
+</pattern>
+</defs>
+<rect width="100%" height="100%" fill="url(#spm-motif)"></rect>
+</svg>
+<div style="position: relative; padding: 56px 16px 64px; display: flex; flex-direction: column; gap: 14px">
+<span style="align-self: flex-start; font-size: 12px; font-weight: 600; background: #1C1917; color: #FEA722; padding: 3px 10px; border-radius: 6px; margin-left: 4px">Beta tester</span>
+<h2 style="margin: 0 4px; font-weight: 700; font-size: 32px; line-height: 1.08; letter-spacing: -0.035em; color: #1C1917">Jadi yang pertama mencoba StockPlan.</h2>
+<p style="margin: 0 4px; color: #292524; font-size: 16px">Tinggalkan nama dan email Anda, kami kabari saat giliran Anda tiba.</p>
+<div style="margin-top: 8px; background: #FFFFFF; border: 1px solid #E7E5E4; border-radius: 14px; box-shadow: 0 20px 40px -16px rgba(28,25,23,.35); overflow: hidden">
+<sc-if value="{{isForm}}" hint-placeholder-val="{{true}}">
+<form onSubmit="{{submit}}" novalidate="" style="padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="mbt-name" style="font-size: 14px; font-weight: 500">Nama</label>
+<input id="mbt-name" class="inp" type="text" autocomplete="name" placeholder="Nama lengkap" value="{{name}}" onChange="{{onName}}" aria-invalid="{{nameErr}}" aria-describedby="mbt-name-err">
+<sc-if value="{{nameErr}}" hint-placeholder-val="{{false}}"><span id="mbt-name-err" style="font-size: 13px; color: #B91C1C">Nama wajib diisi.</span></sc-if>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="mbt-email" style="font-size: 14px; font-weight: 500">Email</label>
+<input id="mbt-email" class="inp" type="email" inputmode="email" autocomplete="email" placeholder="nama@email.com" value="{{email}}" onChange="{{onEmail}}" aria-invalid="{{emailErr}}" aria-describedby="mbt-email-err">
+<sc-if value="{{emailErr}}" hint-placeholder-val="{{false}}"><span id="mbt-email-err" style="font-size: 13px; color: #B91C1C">Masukkan alamat email yang valid.</span></sc-if>
+</div>
+<button type="submit" style="height: 48px; border: none; border-radius: 8px; background: #1C1917; color: #FFFFFF; font-weight: 600; font-size: 16px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px">Daftar ke antrian<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 4.5 21 12l-7.5 7.5M21 12H3"></path></svg></button>
+<p style="margin: 0; font-size: 12px; color: #716A65; text-align: center">Kami tidak akan mengirim spam.</p>
+</form>
+</sc-if>
+<sc-if value="{{isDone}}" hint-placeholder-val="{{false}}">
+<div role="status" style="padding: 28px 20px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px">
+<span style="width: 52px; height: 52px; border-radius: 999px; background: #FEA722; display: inline-flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1C1917" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.75 6 6 9-13.5"></path></svg></span>
+<h3 style="margin: 4px 0 0; font-size: 19px; font-weight: 700; letter-spacing: -0.02em">Anda sudah di antrian, {{firstName}}!</h3>
+<p style="margin: 0; font-size: 14px; color: #716A65">Undangan beta akan kami kirim ke <strong style="color: #1C1917; font-weight: 600; word-break: break-all">{{email}}</strong> saat giliran Anda tiba.</p>
+<button type="button" onClick="{{reset}}" style="margin-top: 6px; width: 100%; height: 48px; border: 1px solid #E7E5E4; border-radius: 8px; background: #FFFFFF; color: #1C1917; font-weight: 600; font-size: 15px; cursor: pointer">Daftarkan email lain</button>
+</div>
+</sc-if>
+</div>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer class="ft">
+<div class="ft-glow" aria-hidden="true"></div>
+<div class="ft-in">
+<div class="ft-brand"><a href="#m-top" aria-label="StockPlan, ke atas"><svg viewBox="4 218 502 82" width="150" height="25" role="img" aria-label="StockPlan">
+<g fill="currentColor">
+<path d="M175.68,236.07c-.63-.74-1.47-1.45-2.52-2.13-1.05-.68-2.24-1.3-3.55-1.85-1.31-.55-2.75-1-4.3-1.34-1.55-.34-3.17-.51-4.85-.51-4.31,0-7.49,.81-9.54,2.44-2.05,1.63-3.08,3.85-3.08,6.68,0,1.99,.52,3.56,1.58,4.72,1.05,1.15,2.67,2.1,4.85,2.83,2.18,.73,4.95,1.49,8.32,2.28,3.89,.84,7.25,1.86,10.09,3.07s5.02,2.82,6.54,4.83c1.52,2.02,2.29,4.7,2.29,8.06,0,2.67-.51,4.99-1.54,6.96-1.02,1.97-2.46,3.59-4.3,4.88-1.84,1.28-4,2.23-6.47,2.83-2.47,.6-5.15,.9-8.04,.9s-5.61-.3-8.32-.91c-2.71-.6-5.27-1.48-7.69-2.64-2.42-1.16-4.68-2.6-6.78-4.34l3.39-5.99c.84,.89,1.93,1.77,3.27,2.64s2.87,1.67,4.57,2.41c1.71,.74,3.56,1.33,5.56,1.77,2,.45,4.05,.67,6.15,.67,4,0,7.1-.72,9.31-2.16,2.21-1.44,3.31-3.54,3.31-6.32,0-2.1-.62-3.77-1.85-5.03s-3.06-2.31-5.48-3.15-5.36-1.68-8.83-2.52c-3.79-.94-6.97-1.98-9.54-3.11-2.58-1.13-4.51-2.61-5.8-4.44-1.29-1.83-1.93-4.22-1.93-7.16,0-3.57,.87-6.58,2.6-9.04,1.73-2.46,4.13-4.33,7.18-5.58,3.05-1.26,6.49-1.89,10.33-1.89,2.52,0,4.88,.26,7.06,.79,2.18,.53,4.22,1.26,6.11,2.21s3.63,2.08,5.2,3.39l-3.31,5.76Z"></path>
+<path d="M210.22,278.5c-.58,.26-1.37,.6-2.37,1.02-1,.42-2.16,.79-3.47,1.1-1.31,.32-2.71,.47-4.18,.47-1.68,0-3.23-.3-4.65-.91-1.42-.6-2.55-1.55-3.39-2.84-.84-1.29-1.26-2.9-1.26-4.85v-27.68h-5.6v-5.44h5.6v-13.72h6.94v13.72h9.23v5.44h-9.23v25.55c.1,1.47,.6,2.56,1.5,3.27,.89,.71,1.94,1.06,3.15,1.06,1.37,0,2.63-.24,3.79-.71,1.16-.47,1.92-.81,2.29-1.03l1.66,5.52Z"></path>
+<path d="M234.11,281.1c-3.1,0-5.91-.56-8.44-1.68s-4.71-2.66-6.54-4.62c-1.84-1.96-3.26-4.21-4.26-6.77-1-2.56-1.5-5.24-1.5-8.06s.5-5.58,1.5-8.14c1-2.56,2.42-4.81,4.26-6.77,1.84-1.96,4.03-3.5,6.58-4.62,2.55-1.12,5.38-1.68,8.48-1.68s5.84,.56,8.36,1.68c2.52,1.12,4.72,2.66,6.58,4.62,1.87,1.96,3.3,4.21,4.3,6.77,1,2.56,1.5,5.27,1.5,8.14s-.5,5.51-1.5,8.06c-1,2.56-2.42,4.81-4.26,6.77-1.84,1.96-4.04,3.5-6.58,4.62-2.550,1.12-5.38,1.68-8.48,1.68Zm-13.64-21.06c0,2.81,.62,5.36,1.85,7.65,1.23,2.29,2.88,4.1,4.93,5.42,2.05,1.33,4.34,1.99,6.86,1.99s4.82-.68,6.9-2.03c2.08-1.35,3.73-3.19,4.97-5.5,1.23-2.32,1.85-4.88,1.85-7.69s-.62-5.36-1.85-7.65c-1.24-2.29-2.89-4.11-4.97-5.46-2.08-1.35-4.38-2.03-6.9-2.03s-4.81,.69-6.86,2.07c-2.05,1.38-3.69,3.21-4.93,5.5-1.24,2.29-1.85,4.87-1.85,7.73Z"></path>
+<path d="M281.59,281.1c-3.1,0-5.93-.56-8.48-1.68-2.55-1.12-4.76-2.67-6.62-4.66-1.87-1.98-3.31-4.25-4.34-6.81-1.03-2.56-1.54-5.27-1.54-8.14,0-3.86,.87-7.38,2.6-10.57,1.73-3.18,4.18-5.73,7.33-7.63,3.15-1.91,6.81-2.86,10.96-2.86s7.58,.91,10.61,2.72c3.02,1.81,5.27,4.25,6.74,7.29l-6.78,2.13c-1.05-1.94-2.52-3.46-4.42-4.53-1.89-1.08-4-1.62-6.31-1.62-2.52,0-4.82,.65-6.9,1.95-2.08,1.3-3.72,3.08-4.93,5.35-1.21,2.26-1.81,4.85-1.81,7.76s.62,5.45,1.85,7.77c1.23,2.32,2.89,4.15,4.97,5.5,2.08,1.35,4.38,2.03,6.9,2.03,1.63,0,3.19-.29,4.69-.87,1.5-.58,2.81-1.35,3.94-2.33,1.13-.97,1.91-2.04,2.33-3.19l6.78,2.05c-.84,2-2.12,3.77-3.83,5.32-1.71,1.55-3.73,2.77-6.07,3.67-2.34,.89-4.9,1.34-7.69,1.34Z"></path>
+<path d="M336.08,280.31l-14.27-19.95-7.81,7.31v12.65h-6.94v-57.57h6.94v37.69l21.29-21.05h7.49l-16.4,16.97,17.19,23.96h-7.49Z"></path>
+<path d="M371.72,281.1c-3.37,0-6.36-.83-8.99-2.51-2.63-1.67-4.71-3.78-6.23-6.34v24.85h-6.94v-57.72h6.15v7.74c1.63-2.5,3.76-4.53,6.39-6.07,2.63-1.54,5.49-2.31,8.59-2.31,2.84,0,5.44,.57,7.81,1.72,2.37,1.15,4.42,2.71,6.15,4.7,1.74,1.98,3.09,4.24,4.06,6.77,.97,2.53,1.46,5.18,1.46,7.95,0,3.86-.78,7.41-2.33,10.65s-3.72,5.81-6.5,7.71c-2.79,1.9-5.99,2.86-9.62,2.86Zm-2.13-5.99c2.05,0,3.9-.43,5.56-1.29,1.66-.86,3.08-2,4.26-3.43,1.18-1.43,2.09-3.06,2.72-4.88,.63-1.82,.95-3.69,.95-5.62,0-2.03-.35-3.95-1.06-5.78s-1.71-3.43-3-4.84c-1.29-1.4-2.79-2.51-4.49-3.32-1.71-.81-3.56-1.21-5.56-1.21-1.26,0-2.56,.23-3.9,.7-1.34,.47-2.62,1.13-3.83,1.99-1.21,.86-2.23,1.83-3.08,2.92-.84,1.09-1.39,2.26-1.66,3.51v11.66c.79,1.77,1.84,3.38,3.15,4.83,1.31,1.45,2.84,2.61,4.57,3.47,1.73,.86,3.52,1.28,5.36,1.28Z"></path>
+<path d="M398.84,222.75h6.94v47.13c0,2.27,.32,3.67,.95,4.2,.63,.53,1.39,.79,2.29,.79,1.1,0,2.15-.12,3.15-.35,1-.24,1.84-.49,2.52-.75l1.1,5.68c-1.16,.47-2.52,.87-4.1,1.18s-2.97,.47-4.18,.47c-2.68,0-4.8-.77-6.35-2.3-1.55-1.53-2.33-3.67-2.33-6.42v-49.64Z"></path>
+<path d="M418.01,268.48c0-2.61,.75-4.87,2.25-6.78,1.5-1.91,3.56-3.38,6.19-4.43,2.63-1.04,5.68-1.57,9.15-1.57,1.84,0,3.79,.15,5.83,.43,2.05,.29,3.86,.72,5.44,1.3v-2.98c0-3.11-.95-5.56-2.84-7.35s-4.57-2.68-8.04-2.68c-2.26,0-4.43,.41-6.51,1.22-2.08,.82-4.27,1.99-6.58,3.51l-2.52-4.89c2.68-1.84,5.36-3.22,8.04-4.14,2.68-.92,5.47-1.38,8.36-1.38,5.26,0,9.41,1.45,12.46,4.34,3.05,2.89,4.57,6.92,4.57,12.08v17.28c0,.83,.17,1.45,.51,1.84,.34,.39,.91,.61,1.7,.66v5.36c-.68,.1-1.28,.18-1.77,.24-.5,.05-.91,.08-1.22,.08-1.63,0-2.85-.45-3.67-1.34-.82-.89-1.28-1.84-1.38-2.84l-.16-2.6c-1.79,2.31-4.13,4.1-7.02,5.36-2.89,1.26-5.76,1.89-8.59,1.89s-5.18-.56-7.33-1.68c-2.16-1.12-3.84-2.64-5.05-4.55-1.21-1.91-1.81-4.04-1.81-6.39Zm26.81,2.88c.63-.73,1.13-1.47,1.5-2.22,.37-.75,.55-1.39,.55-1.91v-5.08c-1.63-.62-3.34-1.1-5.13-1.44-1.79-.34-3.55-.51-5.28-.51-3.52,0-6.38,.69-8.56,2.07-2.18,1.38-3.27,3.27-3.27,5.66,0,1.3,.35,2.56,1.06,3.79,.71,1.22,1.76,2.22,3.15,3.01,1.39,.78,3.11,1.17,5.17,1.17,2.16,0,4.21-.43,6.15-1.29,1.94-.86,3.5-1.94,4.65-3.24Z"></path>
+<path d="M500.65,280.31h-6.94v-22.82c0-4.32-.67-7.49-2.01-9.5s-3.38-3.01-6.11-3.01c-1.89,0-3.77,.47-5.64,1.4-1.87,.94-3.52,2.19-4.97,3.78-1.45,1.58-2.48,3.42-3.12,5.49v24.65h-6.94v-40.93h6.31v8.84c1.1-1.93,2.52-3.6,4.26-5.01,1.73-1.41,3.71-2.5,5.91-3.29,2.21-.78,4.52-1.17,6.94-1.17s4.35,.43,5.95,1.29c1.6,.86,2.86,2.06,3.79,3.6,.92,1.54,1.58,3.35,1.97,5.44,.39,2.09,.59,4.36,.59,6.81v24.42Z"></path>
+</g>
+<g fill="#FEA722">
+<path d="M13.04,233.96c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.49s0-2.12,5.66-4.97l36.26-15.83c4.18-1.83,6.89-5.96,6.89-10.52v-16.89l-41.92,18.3Z"></path>
+<path d="M96.89,280.81c4.18-1.83,6.89-5.96,6.89-10.52v-16.89h0v-2.49s0,2.12-5.66,4.97l-36.26,15.83c-4.18,1.83-6.89,5.96-6.89,10.52v16.89l41.92-18.3Z"></path>
+<path d="M98.11,226.34l-36.26,15.83s-.07,.04-.1,.05l-48.71,21.26c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.79s0-2.12,5.66-4.97l36.26-15.83c.73-.32,1.4-.73,2.03-1.18l46.78-20.42c4.18-1.83,6.89-5.96,6.89-10.52h0v-16.89h0v-2.5s0,2.12-5.66,4.97Z"></path>
+</g>
+</svg></a><p>Pahami bisnisnya dulu, baru pilih sahamnya.</p></div>
+<nav class="ft-nav" aria-label="Navigasi footer"><a href="#m-cara">Cara kerja</a><a href="#m-fitur">Fitur</a><a href="#m-faq">FAQ</a><a href="#m-beta">Ikut beta tester</a></nav>
+<section class="ft-card" aria-labelledby="ft-k">
+<span class="ft-k" id="ft-k"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"></path><path d="m9 12 2 2 4-4"></path></svg>Penting untuk diketahui</span>
+<div class="ft-grid">
+<div class="ft-it"><span class="ft-ic"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9l10-5 10 5-10 5z"></path><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5M22 9v6"></path></svg></span><b>Edukasi dan informasi</b><p>Pemetaan tema, rantai nilai, dan contoh portofolio bukan saran investasi, penawaran jual-beli efek, atau rekomendasi untuk membeli atau menjual efek tertentu.</p></div>
+<div class="ft-it"><span class="ft-ic"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18L12 4z"></path><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"></path></svg></span><b>Bukan lembaga keuangan</b><p>StockPlan bukan perusahaan sekuritas atau manajer investasi, dan tidak terdaftar sebagai penasihat investasi di OJK.</p></div>
+<div class="ft-it"><span class="ft-ic"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 2.5 20h19z"></path><path d="M12 10v4M12 17h.01"></path></svg></span><b>Risiko ada pada Anda</b><p>Investasi saham dapat menghilangkan sebagian atau seluruh modal, dan kinerja masa lalu tidak menjamin hasil di masa depan. Keputusan sepenuhnya tanggung jawab pengguna.</p></div>
+</div>
+<p class="ft-src">Data bersumber dari Bursa Efek Indonesia dan dapat berubah atau tertunda. Konsultasikan dengan penasihat keuangan terdaftar sebelum berinvestasi.</p>
+</section>
+<div class="ft-lang" role="group" aria-label="Bahasa"><button type="button" class="{{idCls}}" aria-pressed="{{idOn}}" onClick="{{setId}}">ID</button><button type="button" class="{{enCls}}" aria-pressed="{{enOn}}" onClick="{{setEn}}">EN</button></div>
+<div class="ft-bot"><span>© 2026 StockPlan. Semua hak dilindungi.</span><div><a href="SyaratLayanan.dc.html">Syarat layanan</a><a href="KebijakanPrivasi.dc.html">Kebijakan privasi</a><a href="BantuanPublik.dc.html">Bantuan</a></div></div>
+</div>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":8200}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { menu: false, sel: 'AADI', done: false, name: '', email: '', tried: false };
+  }
+  renderVals() {
+    var s = this.state;
+    var self = this;
+    var DL = {
+      UNTR: '/_blob/f5a059270c2b05fcd6c975eb7bbd11d3', BUMI: '/_blob/d05174a2155f04e81025859fef041f66', ITMG: '/_blob/cd0894862a9546ef41964447ba7224e5',
+      PTBA: '/_blob/a7814f85d9b69b78f4edb98dc5be88d5', AADI: '/_blob/fee486793ba6867b5b69aaf44de9f6e7', INDY: '/_blob/8feb111705443327d88bc0d6249f7c1e'
+    };
+    var DN = {
+      UNTR: 'United Tractors Tbk', DOID: 'Delta Dunia Makmur Tbk', PTRO: 'Petrosea Tbk', DEWA: 'Darma Henwa Tbk', ABMM: 'ABM Investama Tbk',
+      BUMI: 'Bumi Resources Tbk', AADI: 'Adaro Andalan Indonesia Tbk', BYAN: 'Bayan Resources Tbk', ITMG: 'Indo Tambangraya Megah Tbk',
+      PTBA: 'Bukit Asam Tbk', GEMS: 'Golden Energy Mines Tbk', INDY: 'Indika Energy Tbk', HRUM: 'Harum Energy Tbk',
+      BSSR: 'Baramulti Suksessarana Tbk', DSSA: 'Dian Swastatika Sentosa Tbk', TOBA: 'TBS Energi Utama Tbk',
+      MBAP: 'Mitrabara Adiperdana Tbk', KKGI: 'Resource Alam Indonesia Tbk', ADMR: 'Alamtri Minerals Indonesia Tbk',
+      TCPI: 'Transcoal Pacific Tbk', PSSI: 'IMC Pelita Logistik Tbk'
+    };
+    var DST = [
+      { n: 1, name: 'Kontraktor tambang', g: 'Hulu', tks: ['UNTR', 'DOID', 'PTRO', 'DEWA', 'ABMM'] },
+      { n: 2, name: 'Pemilik tambang termal', g: 'Hulu', tks: ['BUMI', 'AADI', 'BYAN', 'ITMG', 'PTBA', 'GEMS', 'INDY', 'HRUM', 'BSSR', 'DSSA', 'TOBA', 'MBAP', 'KKGI', 'ABMM'] },
+      { n: 3, name: 'Tambang batu bara metalurgi', g: 'Hulu', tks: ['ADMR'] },
+      { n: 4, name: 'Logistik & pengapalan', g: 'Tengah', tks: ['AADI', 'TCPI', 'PSSI', 'ABMM'] },
+      { n: 5, name: 'Pembangkit listrik (PLTU)', g: 'Hilir', tks: ['PTBA', 'INDY', 'TOBA', 'DSSA'] }
+    ];
+    var DSUM = {
+      UNTR: 'Kontraktor alat berat yang mengerjakan jasa penambangan untuk banyak pemilik tambang lewat anak usaha Pamapersada Nusantara (PAMA).',
+      DOID: 'Induk Bukit Makmur Mandiri Utama (BUMA), salah satu kontraktor tambang batu bara terbesar di Indonesia.',
+      PTRO: 'Kontraktor pertambangan sekaligus penyedia jasa rekayasa untuk tambang batu bara dan mineral.',
+      DEWA: 'Kontraktor jasa penambangan batu bara yang terafiliasi dengan Grup Bakrie.',
+      ABMM: 'Grup energi terintegrasi: kontraktor tambang, tambang batu bara sendiri, dan jasa logistik.',
+      BUMI: 'Pemilik tambang lewat Kaltim Prima Coal & Arutmin — produsen batu bara termal terbesar di Indonesia.',
+      AADI: 'Hasil spin-off dari Adaro Energy akhir 2024, menaungi bisnis tambang dan logistik batu bara termal Grup Adaro.',
+      BYAN: 'Produsen batu bara termal besar dengan tambang utama di Kalimantan Timur dan biaya produksi rendah.',
+      ITMG: 'Pemilik tambang batu bara berkalori lebih tinggi; sekitar 75% volume penjualannya diekspor.',
+      PTBA: 'BUMN di bawah holding MIND ID dengan kewajiban pasok domestik (DMO) ke PLN, plus PLTU mulut tambang.',
+      GEMS: 'Pemilik tambang batu bara di Kalimantan, bagian dari Grup Sinar Mas lewat DSSA.',
+      INDY: 'Perusahaan energi yang tengah menjauh dari batu bara, termasuk masuk ke bisnis kendaraan listrik.',
+      HRUM: 'Pemilik tambang batu bara di Kalimantan Timur yang belakangan ekspansi ke nikel.',
+      BSSR: 'Pemilik tambang batu bara di Kalimantan Selatan dengan fokus pasar ekspor.',
+      DSSA: 'Holding energi Grup Sinar Mas: punya tambang batu bara (lewat GEMS) dan pembangkit listrik.',
+      TOBA: 'Punya tambang batu bara dan PLTU, sambil beralih ke energi terbarukan.',
+      MBAP: 'Pemilik tambang batu bara di Kalimantan Utara.',
+      KKGI: 'Pemilik tambang batu bara skala menengah di Kalimantan Timur.',
+      ADMR: 'Fokus pada batu bara metalurgi (coking coal) plus proyek smelter aluminium.',
+      TCPI: 'Penyedia jasa angkutan laut batu bara: tongkang, kapal tunda, dan bongkar muat.',
+      PSSI: 'Penyedia jasa logistik laut untuk batu bara, dari tongkang sampai transshipment.'
+    };
+    var DREV = {
+      UNTR: [['Jasa pertambangan (PAMA)', 62], ['Alat berat & suku cadang', 38]], BUMI: [['Penjualan ekspor', 52], ['Penjualan domestik', 48]],
+      ITMG: [['Ekspor batu bara', 75], ['Penjualan domestik', 25]], PTBA: [['Penjualan ke PLN (DMO)', 55], ['Komersial & ekspor', 45]],
+      AADI: [['Penjualan batu bara termal', 72], ['Jasa logistik & pelabuhan', 28]], ADMR: [['Batu bara metalurgi', 70], ['Proyek aluminium', 30]],
+      INDY: [['Pembangkit & tambang', 50], ['Non-batubara (EV, energi baru)', 50]]
+    };
+    var DSUB = {
+      UNTR: ['Pamapersada Nusantara'], DOID: ['BUMA'], BUMI: ['Kaltim Prima Coal', 'Arutmin Indonesia'], ITMG: ['Indominco Mandiri', 'Trubaindo Coal Mining'],
+      PTBA: ['Bukit Asam Prima'], AADI: ['Adaro Logistics'], DSSA: ['Golden Energy Mines'], INDY: ['Indika Indonesia Resources']
+    };
+    var DGD = { Hulu: 'Menggali batu bara dari dalam tanah.', Tengah: 'Mengangkut hasil tambang ke pembeli.', Hilir: 'Mengubah batu bara jadi listrik.' };
+    var AVC = ['#1C1917', '#92400E', '#1D4ED8', '#15803D', '#6D28D9', '#BE185D', '#0F766E', '#B45309'];
+    var ORD = ['UNTR', 'DOID', 'PTRO', 'DEWA', 'ABMM', 'BUMI', 'AADI', 'BYAN', 'ITMG', 'PTBA', 'GEMS', 'INDY', 'HRUM', 'BSSR', 'DSSA', 'TOBA', 'MBAP', 'KKGI', 'ADMR', 'TCPI', 'PSSI'];
+    var avc = function (tk) { return DL[tk] ? '#FFFFFF' : AVC[ORD.indexOf(tk) % AVC.length]; };
+    var dcount = {};
+    DST.forEach(function (st) { st.tks.forEach(function (tk) { dcount[tk] = (dcount[tk] || 0) + 1; }); });
+    var dsel = DN[s.sel] ? s.sel : 'AADI';
+    var bands = ['Hulu', 'Tengah', 'Hilir'].map(function (g) {
+      var sts = DST.filter(function (st) { return st.g === g; });
+      var uniq = {}; sts.forEach(function (st) { st.tks.forEach(function (t) { uniq[t] = 1; }); });
+      return {
+        label: g, desc: DGD[g], cls: 'dm-band dm-b-' + g, meta: sts.length + ' tahap · ' + Object.keys(uniq).length + ' emiten',
+        stages: sts.map(function (st) {
+          return {
+            n: st.n, name: st.name, count: st.tks.length,
+            tks: st.tks.map(function (tk) {
+              var on = tk === dsel, m = dcount[tk] > 1;
+              return {
+                tk: tk, ini: tk.slice(0, 2), c: avc(tk), logo: DL[tk] || '', hasLogo: !!DL[tk], noLogo: !DL[tk],
+                multi: m, mc: dcount[tk], on: on ? 'true' : 'false', aria: tk + ', ' + DN[tk],
+                cls: 'dm-tk' + (m ? ' dm-m' : '') + (on ? ' dm-on' : ''),
+                pick: function () { self.setState({ sel: tk }); }
+              };
+            })
+          };
+        })
+      };
+    });
+    var dRev = DREV[dsel] || [];
+    var demo = {
+      bands: bands, sel: dsel, selName: DN[dsel], selIni: dsel.slice(0, 2), selC: avc(dsel), selLogo: DL[dsel] || '', selHasLogo: !!DL[dsel], selNoLogo: !DL[dsel],
+      selStages: DST.filter(function (st) { return st.tks.indexOf(dsel) >= 0; }).map(function (st) { return { label: st.name, cls: 'dm-tag dm-tag-' + st.g }; }),
+      selMulti: dcount[dsel] > 1, selMc: dcount[dsel], selSummary: DSUM[dsel],
+      selHasRev: dRev.length > 0, selRev: dRev.map(function (r, i) { return { l: r[0], p: r[1] + '%', w: r[1] + '%', c: i === 0 ? '#FEA722' : '#A8A29E' }; }),
+      selHasSubs: !!DSUB[dsel], selSubs: DSUB[dsel] || []
+    };
+
+    var names = {
+      UNTR: 'United Tractors Tbk', BUMI: 'Bumi Resources Tbk', ITMG: 'Indo Tambangraya Megah Tbk',
+      PTBA: 'Bukit Asam Tbk', AADI: 'Adaro Andalan Indonesia Tbk', ADMR: 'Alamtri Minerals Indonesia Tbk',
+      INDY: 'Indika Energy Tbk'
+    };
+    var logos = {
+      UNTR: '/_blob/5fe7795b9f23c3b384b7b06421611d30', ITMG: '/_blob/764f4e13145e319cbf1d6360a61d1493',
+      PTBA: '/_blob/da7831b0e59962eb0a7fdd1b603ab74f', ADMR: '/_blob/24ad02433efeedb468cbd20891da6633',
+      INDY: '/_blob/10bcbc719bdb4e91775449141fe09be2', BUMI: '/_blob/7f4a72ae087f7e2173cc10252a095648',
+      AADI: '/_blob/24ad02433efeedb468cbd20891da6633'
+    };
+    var stageDefs = [
+      { n: 1, g: 'Hulu', name: 'Kontraktor tambang', t: ['UNTR'] },
+      { n: 2, g: 'Hulu', name: 'Pemilik tambang', t: ['BUMI', 'ITMG', 'PTBA'] },
+      { n: 3, g: 'Tengah', name: 'Transportasi & logistik', t: ['AADI'] },
+      { n: 4, g: 'Tengah', name: 'Pengolahan batu bara', t: ['ADMR'] },
+      { n: 5, g: 'Hilir', name: 'Pembangkit listrik', t: ['AADI'] },
+      { n: 6, g: 'Hilir', name: 'Energi terintegrasi', t: ['INDY'] }
+    ];
+    var count = {};
+    stageDefs.forEach(function (st) { st.t.forEach(function (tk) { count[tk] = (count[tk] || 0) + 1; }); });
+    var groups = ['Hulu', 'Tengah', 'Hilir'].map(function (g) {
+      return {
+        label: g,
+        stages: stageDefs.filter(function (st) { return st.g === g; }).map(function (st) {
+          return {
+            n: st.n, name: st.name,
+            rows: st.t.map(function (tk) {
+              var on = tk === s.sel;
+              return { tk: tk, name: names[tk], logo: logos[tk], multi: count[tk] > 1, on: on, cls: on ? 'tk tk-on' : 'tk', pick: function () { self.setState({ sel: tk }); } };
+            })
+          };
+        })
+      };
+    });
+    var selStages = stageDefs.filter(function (st) { return st.t.indexOf(s.sel) >= 0; }).map(function (st) { return { label: st.name }; });
+    var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.email.trim());
+    var nameOk = s.name.trim().length > 0;
+    var __r = {
+      menuOpen: s.menu, menuClosed: !s.menu,
+      toggleMenu: function () { self.setState({ menu: !self.state.menu }); },
+      closeMenu: function () { self.setState({ menu: false }); },
+      groups: groups, sel: s.sel, selName: names[s.sel], selLogo: logos[s.sel], selStages: selStages,
+      isForm: !s.done, isDone: s.done,
+      name: s.name, email: s.email,
+      nameErr: s.tried && !nameOk, emailErr: s.tried && !emailOk,
+      onName: function (e) { self.setState({ name: e.target.value }); },
+      onEmail: function (e) { self.setState({ email: e.target.value }); },
+      submit: function (e) { if (e && e.preventDefault) e.preventDefault(); if (nameOk && emailOk) self.setState({ done: true, tried: false }); else self.setState({ tried: true }); },
+      reset: function () { self.setState({ done: false, name: '', email: '', tried: false }); },
+      firstName: s.name.trim().split(' ')[0] || ''
+    };
+    return Object.assign(__r, demo, this.footVals());
+  }
+
+  footVals() {
+    var self = this, l = this.state.lang || 'id';
+    return {
+      idCls: l === 'id' ? 'on' : '', enCls: l === 'en' ? 'on' : '',
+      idOn: l === 'id' ? 'true' : 'false', enOn: l === 'en' ? 'true' : 'false',
+      setId: function () { self.setState({ lang: 'id' }); },
+      setEn: function () { self.setState({ lang: 'en' }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>StockPlan — ABNU (masa IPO)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+*{box-sizing:border-box}
+a{color:#1C1917}a:hover{color:#57534E}
+button,input,textarea,select{font-family:inherit}
+:focus-visible{outline:2px solid #1C1917;outline-offset:2px}
+.nv{display:flex;align-items:center;gap:10px;min-height:40px;padding:0 10px;border-radius:8px;font-size:14px;color:#57534E;text-decoration:none;border:1px solid transparent}
+.nv:hover{background:#F5F5F4;color:#1C1917}
+.nv-on,.nv-on:hover{background:#FFFFFF;color:#1C1917;font-weight:600;border-color:#E7E5E4;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.sec{font-size:11px;font-weight:600;color:#716A65;padding:16px 10px 6px;text-transform:uppercase;letter-spacing:.06em}
+.srch{display:flex;align-items:center;gap:8px;height:40px;min-width:260px;border:1px solid #E7E5E4;border-radius:8px;padding:0 10px;background:#FFFFFF;color:#716A65;font-size:14px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 14px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer;border:1px solid transparent}
+.btn-p{background:#FEA722;color:#1C1917}.btn-p:hover{background:#F59E0B;color:#1C1917}
+.btn-o{background:#FFFFFF;color:#1C1917;border-color:#E7E5E4}.btn-o:hover{background:#F5F5F4;color:#1C1917}
+.btn-in{background:#1C1917;color:#FFFFFF;border-color:#1C1917}.btn-in:hover{background:#292524;color:#FFFFFF}
+.mono{font-family:'Geist Mono',monospace}
+
+.hero{position:relative;overflow:hidden;border-radius:16px;background:linear-gradient(120deg,#FFF8EC 0%,#FFFFFF 70%);border:1px solid #F3E7D1;padding:20px 24px}
+.hero-dec{position:absolute;top:-34px;right:-24px;width:170px;height:170px;pointer-events:none}
+.pill2{font-size:12px;font-weight:600;border:1px solid #E7E5E4;padding:1px 8px;border-radius:6px;background:#FFFFFF;color:#44403C;white-space:nowrap}
+.stchip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;background:#FFF4E2;color:#92400E;border:1px solid #FCDDA8;padding:1px 8px;border-radius:6px;text-decoration:none;white-space:nowrap}
+.stchip:hover{background:#FDE9C6;color:#92400E}
+.fresh{display:flex;align-items:center;gap:7px;font-size:12.5px;color:#716A65;background:#FAFAF9;border:1px solid #E7E5E4;border-radius:999px;padding:5px 12px 5px 10px;align-self:flex-start;flex-wrap:wrap}
+.fresh b{color:#1C1917;font-weight:600}
+.fresh svg{flex:none;color:#A8A29E}
+
+.jumpnav{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid #E7E5E4;padding-bottom:8px}
+.jump{display:inline-flex;align-items:center;min-height:36px;padding:0 12px;border-radius:8px;font-size:13px;font-weight:500;color:#57534E;text-decoration:none}
+.jump:hover{background:#F5F5F4;color:#1C1917}
+.jump[aria-current="true"]{background:#F5F5F4;color:#1C1917;font-weight:600}
+
+.box{border:1px solid #E7E5E4;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:14px;box-shadow:0 1px 2px rgba(0,0,0,.04);background:#FFFFFF;scroll-margin-top:16px}
+.h2{margin:0;font-size:16px;font-weight:600}
+.bh{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline}
+.src{font-size:12px;color:#716A65}
+.lead{margin:0;color:#44403C}
+
+/* key numbers strip */
+.kn{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));border:1px solid #E7E5E4;border-radius:12px;background:#FFFFFF}
+.kn-i{padding:12px 14px;display:flex;flex-direction:column;gap:2px;border-right:1px solid #F0EEEC}
+.kn-i:last-child{border-right:0}
+.kn-v{font-size:20px;font-weight:700;letter-spacing:-0.02em;font-family:'Geist Mono',monospace}
+.kn-n{font-size:11.5px;font-weight:600;border-radius:5px;padding:0 6px;align-self:flex-start;line-height:18px}
+.tone-g{color:#15803D;background:#F0FDF4}
+.tone-a{color:#92400E;background:#FFF4E2}
+.tone-r{color:#B91C1C;background:#FEF2F2}
+.tone-n{color:#57534E;background:#F5F5F4}
+
+/* term tooltip */
+.term{position:relative;display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#716A65;font-weight:500;cursor:help;border:0;background:none;padding:0;text-align:left}
+.term svg{color:#A8A29E;flex:none}
+.term .tip{position:absolute;left:0;bottom:calc(100% + 6px);width:240px;background:#1C1917;color:#FAFAF9;font-size:12px;font-weight:400;line-height:1.45;padding:8px 10px;border-radius:8px;opacity:0;visibility:hidden;transition:opacity .12s;z-index:5;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.18)}
+.term:hover .tip,.term:focus-visible .tip{opacity:1;visibility:visible}
+
+/* verdict */
+.vd{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.vd-c{border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;border:1px solid}
+.vd-c h3{margin:0;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:6px}
+.vd-c ul{margin:0;padding-left:18px;font-size:13.5px;color:#292524;display:flex;flex-direction:column;gap:4px}
+.vd-g{background:#F0FDF4;border-color:#BBF7D0}.vd-g h3{color:#15803D}
+.vd-r{background:#FEF2F2;border-color:#FECACA}.vd-r h3{color:#B91C1C}
+.vd-a{background:#FFFBF2;border-color:#FCDDA8}.vd-a h3{color:#92400E}
+
+/* source split */
+.split{display:flex;height:30px;border-radius:8px;overflow:hidden;gap:2px}
+.split span{display:flex;align-items:center;padding:0 10px;font-size:12px;font-weight:600;white-space:nowrap}
+.own{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.own-c{border:1px solid #E7E5E4;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;font-size:13px}
+.own-c b{font-size:14px}
+.own-bar{height:6px;border-radius:99px;background:#F0EEEC;overflow:hidden}
+.own-bar span{display:block;height:100%;background:#1C1917;border-radius:99px}
+
+/* fin chart */
+.seg{display:inline-flex;background:#F5F5F4;border-radius:9px;padding:3px;gap:2px}
+.seg button{min-height:32px;padding:0 12px;border:0;border-radius:7px;background:none;font-size:13px;font-weight:500;color:#57534E;cursor:pointer}
+.seg button:hover{color:#1C1917}
+.seg button[aria-pressed="true"]{background:#FFFFFF;color:#1C1917;font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.chart{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-items:end;height:190px;padding:0 4px;border-bottom:1px solid #E7E5E4}
+.col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;height:100%}
+.col-v{font-family:'Geist Mono',monospace;font-size:13px;font-weight:600}
+.bar{width:100%;max-width:72px;border-radius:6px 6px 0 0;background:#FEA722;min-height:3px}
+.bar-h{background:repeating-linear-gradient(135deg,#FEA722 0 6px,#FDC56B 6px 12px)}
+.xl{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:0 4px;text-align:center;font-size:12.5px;color:#57534E;font-weight:500}
+.xl small{display:block;font-size:11px;color:#A8A29E;font-weight:400}
+.note{margin:0;font-size:13px;color:#57534E;background:#FAFAF9;border-radius:8px;padding:10px 12px}
+
+/* tables */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{font-size:12px;font-weight:600;color:#716A65;text-align:left;padding:10px 14px;background:#FAFAF9;border-bottom:1px solid #E7E5E4;white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid #E7E5E4;font-size:14px;vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+.num{text-align:right;font-family:'Geist Mono',monospace;font-size:13px}
+th.num{font-family:inherit}
+.pct{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.pct-bar{width:64px;height:6px;border-radius:99px;background:#F0EEEC;overflow:hidden;flex:none}
+.pct-bar span{display:block;height:100%;background:#1C1917}
+.tk-link{font-family:'Geist Mono',monospace;font-size:11.5px;font-weight:600;color:#1D4ED8;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:5px;padding:0 5px;text-decoration:none;margin-left:6px}
+
+/* people */
+.ppl{display:flex;flex-direction:column;gap:10px}
+.ppl-i{display:flex;align-items:center;gap:10px}
+.av{width:34px;height:34px;border-radius:999px;background:#F5F5F4;color:#57534E;font-size:12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;flex:none}
+
+/* risks */
+.risk{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+.risk-i{display:flex;gap:10px;border:1px solid #E7E5E4;border-radius:10px;padding:10px 12px}
+.risk-i b{font-size:13.5px;display:block}
+.risk-i span{font-size:13px;color:#57534E}
+.lvl{flex:none;width:8px;border-radius:99px;align-self:stretch}
+.lvl-h{background:#EF4444}.lvl-m{background:#F59E0B}
+
+/* mini chart */
+.mini-v{font-size:17px;font-weight:700;letter-spacing:-0.01em}
+.mini-m{font-size:12px;color:#716A65}
+.mini-chart{width:100%;height:46px;display:block}
+
+/* news */
+.newslist{display:flex;flex-direction:column;gap:2px}
+.news-i{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #F0EEEC}
+.newslist .news-i:last-child{border-bottom:0;padding-bottom:0}
+.news-ic{width:30px;height:30px;border-radius:8px;background:#F5F5F4;color:#716A65;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.news-t{display:flex;flex-direction:column;gap:3px;font-size:13.5px;color:#1C1917}
+.news-m{font-size:12px;color:#716A65;font-weight:500}
+
+/* side */
+.peer{display:flex;align-items:center;gap:10px;text-decoration:none;color:#1C1917;min-height:44px;border-radius:8px;padding:0 6px;margin:0 -6px}
+.peer:hover{background:#F5F5F4;color:#1C1917}
+.peer img{width:30px;height:30px;border-radius:8px;border:1px solid #E7E5E4;flex:none;object-fit:cover}
+.peer-t{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+.peer-t span{font-size:12px;color:#716A65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rep{display:flex;gap:12px;align-items:flex-start}
+.rep-ic{width:40px;height:48px;border-radius:6px;background:#FEF2F2;color:#B91C1C;font-size:10px;font-weight:700;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;flex:none;border:1px solid #FECACA}
+
+
+/* IPO */
+.ipochip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;padding:1px 8px;border-radius:6px;white-space:nowrap}
+.ipochip i{width:6px;height:6px;border-radius:99px;background:currentColor}
+.lgi{width:60px;height:60px;border-radius:14px;background:#1C1917;color:#FEA722;font-family:'Geist Mono',monospace;font-weight:600;font-size:20px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.inote{display:flex;gap:10px;align-items:flex-start;border:1px solid #BFDBFE;background:#F5F9FF;border-radius:12px;padding:12px 14px;font-size:13.5px;color:#1E3A8A;line-height:1.5}
+.inote svg{flex:none;margin-top:2px;color:#1D4ED8}
+.tl{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding:4px 0 2px}
+.tl>div{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-width:0}
+.tl>div::before{content:"";position:absolute;top:10px;left:-50%;right:50%;height:2px;background:#E7E5E4}
+.tl>div:first-child::before{display:none}
+.tl>.done::before,.tl>.cur::before{background:#1C1917}
+.tl i{position:relative;z-index:1;width:22px;height:22px;border-radius:999px;background:#FFFFFF;border:2px solid #D6D3D1;display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-size:11px;color:#FFFFFF}
+.tl>.done i{background:#1C1917;border-color:#1C1917}
+.tl>.cur i{background:#FEA722;border-color:#FEA722;box-shadow:0 0 0 4px #FFE9C2}
+.tl b{font-size:13px;font-weight:600;line-height:1.3}
+.tl small{font-size:12px;color:#716A65}
+.tl>.todo b{color:#716A65}
+.tl>.cur small{color:#92400E;font-weight:600}
+.ud-bar{display:flex;height:30px;border-radius:8px;overflow:hidden;gap:2px}
+.ud-bar span{display:flex;align-items:center;padding:0 10px;font-size:12px;font-weight:600;white-space:nowrap}
+.ud-l{display:flex;flex-direction:column}
+.ud-r{display:grid;grid-template-columns:12px minmax(0,1fr) auto 64px;gap:10px;align-items:center;padding:9px 0;border-top:1px solid #F0EEEC;font-size:14px}
+.ud-r:first-child{border-top:0}
+.ud-r>i{width:10px;height:10px;border-radius:3px}
+.ud-r>.mono{font-size:13px;color:#57534E;text-align:right}
+.ud-r>b{font-family:'Geist Mono',monospace;font-size:13px;text-align:right}
+.cd{display:flex;flex-direction:column;gap:2px;border-radius:12px;padding:16px;background:#1C1917;color:#FFFFFF}
+.cd span{font-size:12.5px;color:#D6D3D1}
+.cd b{font-size:30px;font-weight:700;letter-spacing:-0.02em;line-height:1.15}
+.cd small{font-size:12.5px;color:#A8A29E}
+.uw{display:flex;flex-direction:column;gap:6px;font-size:13.5px}
+.uw span{display:flex;align-items:center;gap:8px}
+.uw span::before{content:"";width:6px;height:6px;border-radius:99px;background:#A8A29E;flex:none}
+.pi{width:30px;height:30px;border-radius:8px;border:1px solid #E7E5E4;background:#F5F5F4;color:#44403C;font-family:'Geist Mono',monospace;font-size:10.5px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.doc-off{opacity:.55}
+
+@media (prefers-reduced-motion:reduce){.term .tip{transition:none}}
+</style>
+</helmet>
+<div style="font-family: 'Geist', system-ui, sans-serif; color: #1C1917; background: #FFFFFF; font-size: 15px; line-height: 1.55; min-height: 100vh; display: flex; flex-wrap: wrap; align-items: stretch">
+
+<aside aria-label="Navigasi aplikasi" style="flex: 0 0 240px; border-right: 1px solid #E7E5E4; background: #FAFAF9; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px">
+<a href="Main.dc.html" aria-label="StockPlan, ke beranda" style="display: flex; align-items: center; gap: 8px; padding: 6px 10px 18px; text-decoration: none; color: #1C1917">
+<svg aria-hidden="true" viewBox="4 213 102 88" width="22" height="19"><g fill="#FEA722"><path d="M13.04,233.96c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.49s0-2.12,5.66-4.97l36.26-15.83c4.18-1.83,6.89-5.96,6.89-10.52v-16.89l-41.92,18.3Z"></path><path d="M96.89,280.81c4.18-1.83,6.89-5.96,6.89-10.52v-16.89h0v-2.49s0,2.12-5.66,4.97l-36.26,15.83c-4.18,1.83-6.89,5.96-6.89,10.52v16.89l41.92-18.3Z"></path><path d="M98.11,226.34l-36.26,15.83s-.07,.04-.1,.05l-48.71,21.26c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.79s0-2.12,5.66-4.97l36.26-15.83c.73-.32,1.4-.73,2.03-1.18l46.78-20.42c4.18-1.83,6.89-5.96,6.89-10.52h0v-16.89h0v-2.5s0,2.12-5.66,4.97Z"></path></g></svg>
+<span style="font-weight: 700; font-size: 15px; letter-spacing: -0.01em">StockPlan</span>
+<span style="margin-left: auto; font-size: 11px; font-weight: 600; color: #92400E; background: #FFF4E2; border: 1px solid #FCDDA8; padding: 0 6px; border-radius: 6px">Beta</span>
+</a>
+<a class="nv" href="Main.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>Beranda</a>
+<span class="sec">Riset</span>
+<a class="nv" href="Tema.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="2.2"></circle><circle cx="19" cy="6" r="2.2"></circle><circle cx="19" cy="18" r="2.2"></circle><path d="M7 11l10-4M7 13l10 4"></path></svg>Tema bisnis</a>
+<a class="nv nv-on" href="Emiten.dc.html" aria-current="page"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"></rect><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1"></path></svg>Emiten</a>
+<span class="sec">Perencanaan</span>
+<a class="nv" href="Tesis.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg>Tesis saya</a>
+<a class="nv" href="Portofolio.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>Portofolio</a>
+<a class="nv" href="Watchlist.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"></path></svg>Watchlist</a>
+<div style="margin-top: auto; padding-top: 24px">
+<a class="nv" href="#pengaturan"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"></path></svg>Pengaturan</a>
+</div>
+</aside>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+<header style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 28px; border-bottom: 1px solid #E7E5E4">
+<nav aria-label="Breadcrumb" style="font-size: 13px; color: #716A65"><a href="Emiten.dc.html" style="color: #716A65">Emiten</a> / <span style="color: #1C1917; font-family: 'Geist Mono', monospace">ABNU</span></nav>
+<button type="button" class="srch" style="margin-left: auto"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg><span>Cari tema atau emiten…</span><span style="margin-left: auto; font-family: 'Geist Mono', monospace; font-size: 11px; border: 1px solid #E7E5E4; background: #FAFAF9; border-radius: 4px; padding: 0 5px; color: #57534E">⌘K</span></button>
+<a href="LayoutNotif.dc.html" aria-label="Notifikasi, 5 belum dibaca" style="position: relative; width: 40px; height: 40px; border-radius: 999px; border: 1px solid #E7E5E4; background: #FFFFFF; color: #44403C; display: inline-flex; align-items: center; justify-content: center; flex: none; text-decoration: none"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg><span aria-hidden="true" style="position: absolute; top: -4px; right: -5px; min-width: 19px; height: 19px; padding: 0 5px; box-sizing: border-box; border-radius: 999px; background: #DC2626; color: #FFFFFF; border: 2px solid #FFFFFF; font-family: 'Geist Mono', monospace; font-size: 10.5px; font-weight: 700; line-height: 15px; text-align: center">5</span></a>
+<button type="button" aria-label="Akun dan langganan" style="width: 40px; height: 40px; border-radius: 999px; border: 1px solid #E7E5E4; background: #1C1917; color: #FEA722; font-weight: 600; font-size: 14px; cursor: pointer">B</button>
+</header>
+
+<main style="padding: 24px 28px 40px; display: flex; flex-direction: column; gap: 18px; width: 100%">
+
+<div class="hero" style="display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap">
+<div aria-hidden="true" class="hero-dec"><svg viewBox="0 0 170 170" width="170" height="170"><g fill="#FEA722"><path d="M15 45 L80 15 L80 45 L15 75 Z" opacity=".14"></path><path d="M40 85 L105 55 L105 85 L40 115 Z" opacity=".24"></path><path d="M65 125 L130 95 L130 125 L65 155 Z" opacity=".4"></path></g></svg></div>
+<div style="position: relative; display: flex; align-items: center; gap: 16px; min-width: 0">
+<span class="lgi" aria-hidden="true">AB</span>
+<div style="display: flex; flex-direction: column; gap: 6px; min-width: 0">
+<div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap">
+<h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em; font-family: 'Geist Mono', monospace">ABNU</h1>
+<span style="color: #57534E; font-size: 15px">Andalan Baterai Nusantara Tbk</span>
+</div>
+<div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center">
+<span class="ipochip"><i aria-hidden="true"></i>Segera IPO · tercatat 12 Nov 2026</span>
+<span class="stchip"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20l6-10 4 6 3-4 5 8z"></path></svg>Nikel &amp; baterai EV · Tahap 2 · Pengolahan bijih</span>
+<span class="pill2">Barang Baku · Nikel &amp; bahan baterai</span>
+<span class="pill2">Papan Utama</span>
+</div>
+</div>
+</div>
+<div style="position: relative; display: flex; gap: 8px; flex-wrap: wrap">
+<button type="button" class="btn btn-o" aria-pressed="{{watch}}" onClick="{{toggleWatch}}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="{{watchFill}}" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"></path></svg>{{watchLabel}}</button>
+<button type="button" class="{{remCls}}" aria-pressed="{{rem}}" onClick="{{toggleRem}}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>{{remLabel}}</button>
+</div>
+</div>
+
+<div class="fresh"><svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg>Data dari <b>prospektus awal (20 Okt 2026)</b> dan pengumuman BEI · belum ada harga pasar sampai <b>12 Nov 2026</b></div>
+
+<div class="inote" role="note"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg><span><b>ABNU belum diperdagangkan di bursa.</b> Angka di bawah memakai harga penawaran, bukan harga pasar. Tren keuangan dan rasio seperti PBV atau ROE muncul setelah laporan keuangan pertama ABNU sebagai emiten tercatat.</span></div>
+
+<section class="kn" aria-label="Angka penawaran">
+<sc-for list="{{keyNums}}" as="k" hint-placeholder-count="5">
+<div class="kn-i">
+<button type="button" class="term">{{k.l}}<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg><span class="tip" role="tooltip">{{k.tip}}</span></button>
+<span class="kn-v">{{k.v}}</span>
+<span style="font-size: 12px; color: #716A65">{{k.sub}}</span>
+</div>
+</sc-for>
+</section>
+
+<nav class="jumpnav" aria-label="Bagian halaman">
+<sc-for list="{{jumps}}" as="j" hint-placeholder-count="6"><a class="jump" href="{{j.href}}" aria-current="{{j.cur}}">{{j.label}}</a></sc-for>
+</nav>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+
+<section id="jadwal" class="box" aria-labelledby="h-jad">
+<div class="bh"><h2 id="h-jad" class="h2">Jadwal IPO</h2><span class="src">Sumber: prospektus &amp; pengumuman BEI</span></div>
+<div class="tl" role="list" aria-label="Tahapan IPO">
+<sc-for list="{{tl}}" as="s" hint-placeholder-count="5"><div class="{{s.cls}}" role="listitem"><i aria-hidden="true">{{s.mark}}</i><b>{{s.label}}</b><small>{{s.d}}</small></div></sc-for>
+</div>
+<p class="note">Sekarang masa <b>penawaran umum</b> sampai 10 Nov. Pemesanan saham dilakukan lewat e-IPO atau perusahaan sekuritas Anda; StockPlan tidak menjual saham dan tidak menerima pesanan.</p>
+</section>
+
+<section id="ringkasan" class="box" aria-labelledby="h-ring">
+<h2 id="h-ring" class="h2">Ringkasan bisnis</h2>
+<p class="lead">ABNU mengolah bijih nikel kadar rendah dari tambangnya di Morowali menjadi <b>MHP (mixed hydroxide precipitate)</b>, bahan baku utama katoda baterai kendaraan listrik. Hampir seluruh pendapatannya datang dari menjual MHP ke produsen prekursor baterai, jadi kinerjanya mengikuti harga nikel dunia dan permintaan baterai EV.</p>
+<div class="vd">
+<div class="vd-c vd-g"><h3><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>Kekuatan</h3><ul><li>Bijih dari tambang sendiri</li><li>Produknya dibutuhkan rantai baterai EV</li><li>Margin bruto naik 18% → 23%</li></ul></div>
+<div class="vd-c vd-r"><h3><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>Kelemahan</h3><ul><li>Satu produk, satu lokasi</li><li>Belum punya rekam jejak sebagai emiten</li><li>Pembeli terkonsentrasi</li></ul></div>
+<div class="vd-c vd-a"><h3><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>Yang dipantau</h3><ul><li>Smelter HPAL tahap 2 selesai tepat waktu</li><li>Harga nikel dunia</li><li>Laporan keuangan pertama setelah IPO</li></ul></div>
+</div>
+</section>
+
+<section id="dana" class="box" aria-labelledby="h-dana">
+<div class="bh"><h2 id="h-dana" class="h2">Dana IPO dipakai untuk apa</h2><span class="src">Rp1,13 T dari harga final Rp450</span></div>
+<div class="ud-bar" role="img" aria-label="Smelter HPAL tahap 2 65 persen, modal kerja 20 persen, pelunasan utang bank 15 persen">
+<span style="flex: 65; background: #1C1917; color: #FFFFFF">65%</span><span style="flex: 20; background: #FEA722; color: #1C1917">20%</span><span style="flex: 15; background: #E7E5E4; color: #1C1917">15%</span>
+</div>
+<div class="ud-l">
+<div class="ud-r"><i style="background: #1C1917"></i><span>Pembangunan smelter HPAL tahap 2</span><span class="mono">Rp731 M</span><b>65%</b></div>
+<div class="ud-r"><i style="background: #FEA722"></i><span>Modal kerja</span><span class="mono">Rp225 M</span><b>20%</b></div>
+<div class="ud-r"><i style="background: #E7E5E4"></i><span>Pelunasan sebagian utang bank</span><span class="mono">Rp169 M</span><b>15%</b></div>
+</div>
+<p class="note">Sebagian besar dana untuk menambah kapasitas, bukan membayar utang. Artinya hasil IPO baru terasa ke penjualan setelah smelter tahap 2 beroperasi.</p>
+</section>
+
+<section id="keuangan" class="box" aria-labelledby="h-keu" style="padding: 0; gap: 0; overflow: hidden">
+<div class="bh" style="padding: 18px 18px 12px"><h2 id="h-keu" class="h2">Keuangan sebelum IPO</h2><span class="src">Laporan keuangan diaudit, dari prospektus</span></div>
+<div class="tw">
+<table style="min-width: 520px">
+<thead><tr><th scope="col">Rp triliun</th><th scope="col" class="num">2024</th><th scope="col" class="num">2025</th><th scope="col" class="num">H1-2026<small style="display: block; font-weight: 400">6 bulan</small></th></tr></thead>
+<tbody>
+<tr><td style="font-weight: 600">Penjualan</td><td class="num">3,1</td><td class="num">4,2</td><td class="num">2,6</td></tr>
+<tr><td style="font-weight: 600">Laba bersih</td><td class="num">0,21</td><td class="num">0,38</td><td class="num">0,27</td></tr>
+<tr><td style="font-weight: 600">Margin bruto</td><td class="num">18%</td><td class="num">21%</td><td class="num">23%</td></tr>
+<tr><td style="font-weight: 600">Utang / aset</td><td class="num">58%</td><td class="num">54%</td><td class="num">52%</td></tr>
+</tbody>
+</table>
+</div>
+<p class="note" style="margin: 12px 18px 18px">Hanya tiga periode yang tersedia di prospektus. Grafik tren seperti di halaman emiten lain muncul setelah ABNU merilis laporan keuangan sebagai emiten tercatat.</p>
+</section>
+
+<section id="risiko" class="box" aria-labelledby="h-risk">
+<h2 id="h-risk" class="h2">Risiko utama</h2>
+<div class="risk">
+<sc-for list="{{risks}}" as="k" hint-placeholder-count="4">
+<div class="risk-i"><span class="{{k.cls}}" aria-hidden="true"></span><div><b>{{k.t}}</b><span>{{k.d}}</span></div></div>
+</sc-for>
+</div>
+</section>
+</div>
+
+<div style="flex: 1 1 280px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<div class="cd" aria-live="polite"><span>Tercatat di BEI dalam</span><b>6 hari</b><small>Kamis, 12 Nov 2026 · Papan Utama</small></div>
+
+<section class="box" aria-labelledby="h-own" style="gap: 10px">
+<div class="bh"><h2 id="h-own" class="h2">Pemegang saham setelah IPO</h2></div>
+<div class="split" role="img" aria-label="PT Andalan Mineral Group 80 persen, publik 20 persen">
+<span style="flex: 80; background: #1C1917; color: #FFFFFF">80%</span>
+<span style="flex: 20; background: #E7E5E4; color: #1C1917">20%</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; font-size: 13.5px">
+<span style="display: flex; align-items: center; gap: 8px"><span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 3px; background: #1C1917"></span>PT Andalan Mineral Group<span class="mono" style="margin-left: auto; font-size: 13px">80%</span></span>
+<span style="display: flex; align-items: center; gap: 8px"><span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 3px; background: #E7E5E4"></span>Publik (saham IPO)<span class="mono" style="margin-left: auto; font-size: 13px">20%</span></span>
+</div>
+<p class="note" style="font-size: 12.5px">Pemegang saham lama tidak boleh menjual sahamnya selama 8 bulan setelah pencatatan (lock-up).</p>
+</section>
+
+<section class="box" aria-labelledby="h-uw" style="gap: 10px">
+<h2 id="h-uw" class="h2">Penjamin pelaksana emisi</h2>
+<div class="uw"><span>PT Sekuritas Nusantara Raya</span><span>PT Arta Kencana Sekuritas</span></div>
+</section>
+
+<section class="box" aria-labelledby="h-sama" style="gap: 4px">
+<div class="bh" style="margin-bottom: 6px"><h2 id="h-sama" class="h2">Satu tahap dengan ABNU</h2><span class="src">Nikel &amp; baterai EV</span></div>
+<sc-for list="{{peers}}" as="p" hint-placeholder-count="3">
+<a class="peer" href="Emiten.dc.html"><span class="pi" aria-hidden="true">{{p.ini}}</span><span class="peer-t"><b class="mono" style="font-size: 13px">{{p.tk}}</b><span>{{p.cap}}</span></span></a>
+</sc-for>
+</section>
+
+<section id="dokumen" class="box" aria-labelledby="h-dok">
+<h2 id="h-dok" class="h2">Dokumen IPO</h2>
+<div class="rep"><span class="rep-ic" aria-hidden="true">PDF</span><div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 14px; font-weight: 600">Prospektus awal</span><span style="font-size: 12.5px; color: #716A65">20 Okt 2026 · 8,4 MB · harga rentang Rp420–480</span></div></div>
+<div class="rep doc-off"><span class="rep-ic" aria-hidden="true">PDF</span><div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 14px; font-weight: 600">Prospektus final</span><span style="font-size: 12.5px; color: #716A65">Menyusul setelah diunggah emiten</span></div></div>
+<button type="button" class="btn btn-in">Unduh prospektus awal</button>
+</section>
+
+<p style="margin: 0; font-size: 12px; color: #716A65">Sumber: prospektus awal ABNU dan pengumuman BEI. Contoh dengan angka ilustratif. Bukan rekomendasi untuk ikut atau tidak ikut IPO.</p>
+</div>
+</div>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2320}}'>
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { watch: false, rem: false };
+}
+renderVals() {
+var self = this, w = this.state.watch, r = this.state.rem;
+var keyNums = [
+{ l: 'Harga IPO', v: 'Rp450', sub: 'rentang Rp420–480', tip: 'Harga per lembar saham yang dibayar pemesan saat IPO. Ditetapkan setelah masa penawaran awal (bookbuilding).' },
+{ l: 'Saham ditawarkan', v: '2,5 miliar', sub: 'lembar saham baru', tip: 'Jumlah saham baru yang dijual ke publik lewat IPO ini.' },
+{ l: 'Dana dihimpun', v: 'Rp1,13 T', sub: 'harga × saham', tip: 'Uang yang diterima perusahaan dari IPO, sebelum biaya emisi.' },
+{ l: 'Nilai di harga IPO', v: 'Rp5,63 T', sub: '12,5 miliar lembar total', tip: 'Harga IPO × seluruh saham setelah IPO. Gambaran berapa “harga” seluruh perusahaan di harga penawaran, bukan harga pasar.' },
+{ l: 'Porsi publik', v: '20%', sub: 'dari modal setelah IPO', tip: 'Bagian saham yang dimiliki investor publik setelah IPO. Sisanya tetap dipegang pemilik lama.' }
+];
+var jumps = [['jadwal', 'Jadwal IPO'], ['ringkasan', 'Ringkasan'], ['dana', 'Penggunaan dana'], ['keuangan', 'Keuangan'], ['risiko', 'Risiko'], ['dokumen', 'Dokumen']].map(function (j, i) {
+return { href: '#' + j[0], label: j[1], cur: i === 0 ? 'true' : 'false' };
+});
+var tl = [['Bookbuilding', '20–27 Okt', 'done'], ['Efektif OJK', '30 Okt', 'done'], ['Penawaran umum', '4–10 Nov · sekarang', 'cur'], ['Penjatahan', '10 Nov', 'todo'], ['Pencatatan', '12 Nov', 'todo']].map(function (s) {
+return { label: s[0], d: s[1], cls: s[2], mark: s[2] === 'done' ? '✓' : '' };
+});
+var risks = [
+{ t: 'Harga nikel', d: 'Pendapatan hampir seluruhnya dari MHP, yang harganya mengikuti nikel dunia.', lv: 'h' },
+{ t: 'Proyek smelter tahap 2', d: '65% dana IPO ke proyek ini. Kalau terlambat atau biayanya membengkak, tambahan kapasitas ikut mundur.', lv: 'h' },
+{ t: 'Pembeli terkonsentrasi', d: 'Sebagian besar penjualan ke segelintir produsen prekursor baterai.', lv: 'm' },
+{ t: 'Saham baru tercatat', d: 'Belum ada riwayat harga dan likuiditas; pergerakan harga awal sering lebar.', lv: 'm' }
+].map(function (k) { return { t: k.t, d: k.d, cls: 'lvl lvl-' + k.lv }; });
+var peers = [
+{ tk: 'INCO', ini: 'IN', cap: 'Vale Indonesia · nikel matte' },
+{ tk: 'NCKL', ini: 'NC', cap: 'Harita Nickel · HPAL di Pulau Obi' },
+{ tk: 'MBMA', ini: 'MB', cap: 'Merdeka Battery Materials' }
+];
+return {
+watch: w, watchFill: w ? 'currentColor' : 'none', watchLabel: w ? 'Di watchlist' : 'Tambah ke watchlist',
+toggleWatch: function () { self.setState({ watch: !w }); },
+rem: r, remCls: r ? 'btn btn-in' : 'btn btn-p', remLabel: r ? 'Diingatkan 12 Nov' : 'Ingatkan saat tercatat',
+toggleRem: function () { self.setState({ rem: !r }); },
+keyNums: keyNums, jumps: jumps, tl: tl, risks: risks, peers: peers
+};
+}
+}
+</script>
+</body>
+</html>

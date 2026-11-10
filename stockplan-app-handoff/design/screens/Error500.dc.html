@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>StockPlan — Ada masalah di server</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FAFAF9}
+*{box-sizing:border-box}
+a{color:#1C1917}
+button{font-family:inherit}
+:focus-visible{outline:2px solid #1C1917;outline-offset:2px}
+.wrap{font-family:'Geist',system-ui,sans-serif;color:#1C1917;font-size:15px;line-height:1.55;min-height:100vh;display:flex;flex-direction:column;background:#FAFAF9}
+.top{display:flex;align-items:center;justify-content:space-between;padding:22px 40px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:16px;text-decoration:none;color:#1C1917}
+.top>span{font-size:14px;color:#716A65}
+.top>span a{font-weight:600}
+.mid{flex:1;display:flex;align-items:center;justify-content:center;padding:24px 16px 56px}
+.card{width:100%;max-width:520px;display:flex;flex-direction:column;gap:18px}
+.ic{width:56px;height:56px;border-radius:16px;display:inline-flex;align-items:center;justify-content:center}
+.code{font-family:'Geist Mono',monospace;font-size:13px;font-weight:600;color:#716A65;letter-spacing:.04em}
+h1{margin:0;font-size:30px;font-weight:700;letter-spacing:-0.025em;line-height:1.2}
+p{margin:0;color:#57534E;line-height:1.6}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:9px;font-size:15px;font-weight:600;cursor:pointer;border:1px solid transparent;text-decoration:none;white-space:nowrap}
+.btn-p{background:#FEA722;color:#1C1917}.btn-p:hover{background:#F59E0B;color:#1C1917}
+.btn-o{background:#FFFFFF;color:#1C1917;border-color:#E7E5E4}.btn-o:hover{background:#F5F5F4}
+.btn-d{background:#F5F5F4;color:#A8A29E;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.safe{display:flex;gap:10px;align-items:flex-start;border:1px solid #BBF7D0;background:#F0FDF4;color:#14532D;border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.5}
+.safe>svg{flex:none;margin-top:2px}
+.ref{display:flex;align-items:center;gap:10px;border:1px solid #E7E5E4;background:#FFFFFF;border-radius:10px;padding:8px 8px 8px 12px;font-size:13.5px;color:#57534E}
+.ref code{font-family:'Geist Mono',monospace;font-weight:600;color:#1C1917}
+.ref button{margin-left:auto;display:inline-flex;align-items:center;gap:6px;border:1px solid #E7E5E4;background:#FAFAF9;border-radius:7px;font-size:12.5px;font-weight:600;padding:0 10px;line-height:28px;cursor:pointer;color:#1C1917}
+.spin{width:15px;height:15px;border-radius:999px;border:2px solid rgba(28,25,23,.2);border-top-color:#1C1917;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.st{display:flex;flex-direction:column;border:1px solid #E7E5E4;border-radius:12px;background:#FFFFFF;overflow:hidden}
+.st>div{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid #F0EEEC;font-size:14px}
+.st>div:first-child{border-top:0}
+.st i{width:8px;height:8px;border-radius:999px;display:block;flex:none}
+.st span:last-child{margin-left:auto;font-size:13px;color:#716A65}
+.pb{height:6px;border-radius:999px;background:#E7E5E4;overflow:hidden}
+.pb>i{display:block;height:100%;background:#FEA722;border-radius:999px}
+.nt{display:flex;gap:8px}
+.nt input{flex:1;height:44px;border:1px solid #D6D3D1;border-radius:9px;padding:0 12px;font-size:15px;font-family:inherit}
+.nt input:focus{outline:none;border-color:#1C1917;box-shadow:0 0 0 3px rgba(28,25,23,.1)}
+.foot{padding:18px 40px;font-size:12.5px;color:#A8A29E;display:flex;gap:16px}
+.foot a{color:#716A65;text-decoration:none}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1C1917;color:#FFFFFF;padding:9px 16px;border-radius:999px;font-size:13.5px}
+</style>
+</helmet>
+<div class="wrap">
+<div class="top"><a class="brand" href="Login.dc.html"><svg aria-hidden="true" viewBox="4 213 102 88" width="24" height="21"><g fill="#FEA722"><path d="M13.04,233.96c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.49s0-2.12,5.66-4.97l36.26-15.83c4.18-1.83,6.89-5.96,6.89-10.52v-16.89l-41.92,18.3Z"></path><path d="M96.89,280.81c4.18-1.83,6.89-5.96,6.89-10.52v-16.89h0v-2.49s0,2.12-5.66,4.97l-36.26,15.83c-4.18,1.83-6.89,5.96-6.89,10.52v16.89l41.92-18.3Z"></path><path d="M98.11,226.34l-36.26,15.83s-.07,.04-.1,.05l-48.71,21.26c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.79s0-2.12,5.66-4.97l36.26-15.83c.73-.32,1.4-.73,2.03-1.18l46.78-20.42c4.18-1.83,6.89-5.96,6.89-10.52h0v-16.89h0v-2.5s0,2.12-5.66,4.97Z"></path></g></svg>StockPlan</a><span>Status layanan: <b style="color: #B45309">gangguan sebagian</b></span></div>
+<main class="mid"><div class="card">
+<span class="ic" style="background: #FEF2F2; color: #B91C1C" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20z"></path><path d="M12 10v4M12 17h.01"></path></svg></span>
+<span class="code">ERROR 500</span>
+<h1>Ada masalah di server kami</h1>
+<p>Ini bukan karena Anda. Halaman gagal dimuat karena gangguan di sisi StockPlan, dan tim kami sudah otomatis diberi tahu.</p>
+<div class="safe"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"></path><path d="m9 12 2 2 4-4"></path></svg><span>Tesis, portofolio, dan watchlist Anda aman. Tidak ada data yang hilang atau berubah.</span></div>
+<div class="row"><button type="button" class="{{rCls}}" aria-disabled="{{rDis}}" onClick="{{retry}}"><sc-if value="{{busy}}" hint-placeholder-val="{{false}}"><span class="spin" aria-hidden="true"></span></sc-if>{{rLbl}}</button><a class="btn btn-o" href="Main.dc.html">Ke Beranda</a></div>
+<span style="font-size: 13.5px; color: #716A65">{{auto}}</span>
+<div class="ref"><span>Kode kejadian <code>SP-500-7F3A2C</code></span><button type="button" onClick="{{copy}}"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h8"></path></svg>{{cpLbl}}</button></div>
+<p style="font-size: 13.5px">Kalau masih terjadi, kirim kode di atas lewat <a href="BantuanPublik.dc.html" style="font-weight: 600">halaman Bantuan</a> supaya tim bisa melacaknya.</p>
+</div></main>
+<div class="foot"><span>© 2026 StockPlan</span><a href="BantuanPublik.dc.html">Bantuan</a><a href="KebijakanPrivasi.dc.html">Kebijakan privasi</a></div>
+</div>
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}"><div class="toast" role="status">{{toast}}</div></sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+constructor(p){ super(p); this.state = { cd: 30, busy: false, tries: 0, copied: false, toast: '' }; this.tick(); }
+tick(){ if (this._t) return; this._t = setInterval(() => { const c = this.state.cd; if (this.state.busy) return; if (c <= 1) { this.doRetry(); } else this.setState({ cd: c - 1 }); }, 1000); }
+doRetry(){ this.setState({ busy: true }); setTimeout(() => this.setState({ busy: false, cd: 30, tries: this.state.tries + 1, toast: 'Server masih bermasalah. Kami coba lagi otomatis.' }), 1400); setTimeout(() => this.setState({ toast: '' }), 4000); }
+renderVals(){
+const self = this, st = this.state;
+return {
+busy: st.busy, rLbl: st.busy ? 'Mencoba lagi…' : 'Coba lagi sekarang', rCls: 'btn ' + (st.busy ? 'btn-d' : 'btn-p'), rDis: st.busy ? 'true' : 'false',
+retry: () => { if (!self.state.busy) self.doRetry(); },
+auto: st.busy ? 'Menghubungi server…' : 'Dicoba lagi otomatis dalam ' + st.cd + ' detik' + (st.tries ? ' · sudah ' + st.tries + ' kali dicoba' : ''),
+cpLbl: st.copied ? 'Tersalin' : 'Salin', copy: () => { try { navigator.clipboard.writeText('SP-500-7F3A2C'); } catch (e) {} self.setState({ copied: true }); },
+hasToast: !!st.toast, toast: st.toast
+};
+}
+}
+</script>
+</body>
+</html>

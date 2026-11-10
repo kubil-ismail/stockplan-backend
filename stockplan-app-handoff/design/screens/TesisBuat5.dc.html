@@ -1,0 +1,923 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>StockPlan — Tulis tesis baru</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+*{box-sizing:border-box}
+a{color:#1C1917}a:hover{color:#57534E}
+button,input,textarea,select{font-family:inherit}
+:focus-visible{outline:2px solid #1C1917;outline-offset:2px}
+.nv{display:flex;align-items:center;gap:10px;min-height:40px;padding:0 10px;border-radius:8px;font-size:14px;color:#57534E;text-decoration:none;border:1px solid transparent}
+.nv:hover{background:#F5F5F4;color:#1C1917}
+.nv-on,.nv-on:hover{background:#FFFFFF;color:#1C1917;font-weight:600;border-color:#E7E5E4;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.sec{font-size:11px;font-weight:600;color:#716A65;padding:16px 10px 6px;text-transform:uppercase;letter-spacing:.06em}
+.srch{display:flex;align-items:center;gap:8px;height:40px;min-width:260px;border:1px solid #E7E5E4;border-radius:8px;padding:0 10px;background:#FFFFFF;color:#716A65;font-size:14px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 14px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer;border:1px solid transparent;white-space:nowrap}
+.btn-p{background:#FEA722;color:#1C1917}.btn-p:hover{background:#F59E0B;color:#1C1917}
+.btn-o{background:#FFFFFF;color:#1C1917;border-color:#E7E5E4}.btn-o:hover{background:#F5F5F4;color:#1C1917}
+.btn-g{background:transparent;color:#57534E}.btn-g:hover{background:#F5F5F4;color:#1C1917}
+.btn-s{min-height:34px;padding:0 12px;font-size:13px}
+.mono{font-family:'Geist Mono',monospace}
+
+/* stepper */
+.stp{margin:0;padding:0;list-style:none;display:flex;gap:6px;flex-wrap:wrap}
+.stp li{flex:1 1 120px;min-width:0}
+.stp-b{display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border-radius:10px;border:1px solid #E7E5E4;background:#FFFFFF;color:#716A65;font-size:13px;font-weight:500;cursor:pointer;text-align:left}
+.stp-b:hover{background:#FAFAF9}
+.stp-n{width:22px;height:22px;border-radius:999px;border:1.5px solid #D6D3D1;font-size:11.5px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none;color:#716A65;background:#FFFFFF}
+.stp-l{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stp-cur .stp-b{border-color:#1C1917;color:#1C1917;font-weight:600;box-shadow:0 0 0 3px rgba(28,25,23,.06)}
+.stp-cur .stp-n{background:#1C1917;border-color:#1C1917;color:#FFFFFF}
+.stp-done .stp-b{color:#1C1917}
+.stp-done .stp-n{background:#22C55E;border-color:#22C55E;color:#FFFFFF}
+.stp-lock .stp-b{cursor:default;background:#FAFAF9;color:#A8A29E}
+.stp-lock .stp-b:hover{background:#FAFAF9}
+
+/* form */
+.card{border:1px solid #E7E5E4;border-radius:14px;padding:24px;display:flex;flex-direction:column;gap:18px;background:#FFFFFF;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.q-kick{font-size:12px;font-weight:700;color:#92400E;letter-spacing:.06em;text-transform:uppercase}
+.q-t{margin:0;font-size:22px;font-weight:700;letter-spacing:-0.015em;line-height:1.3}
+.q-d{margin:0;font-size:14px;color:#716A65;line-height:1.55;max-width:600px}
+.lbl{font-size:14px;font-weight:600}
+.hint{font-size:13px;color:#716A65}
+.inp{width:100%;height:44px;border:1px solid #D6D3D1;border-radius:8px;padding:0 12px;font-size:15px;color:#1C1917;background:#FFFFFF}
+.inp-big{height:auto;min-height:84px;padding:12px 14px;font-size:18px;font-weight:600;line-height:1.45;resize:vertical;letter-spacing:-0.01em}
+.inp::placeholder{color:#A8A29E;font-weight:400}
+.inp:focus{outline:none;border-color:#1C1917;box-shadow:0 0 0 3px rgba(28,25,23,.12)}
+.fld{display:flex;flex-direction:column;gap:8px}
+.fld-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.chip{min-height:36px;padding:0 14px;border-radius:999px;border:1px solid #E7E5E4;background:#FFFFFF;color:#1C1917;font-size:13.5px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.chip:hover{background:#F5F5F4}
+.chip-on,.chip-on:hover{background:#1C1917;border-color:#1C1917;color:#FFFFFF}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.ex{display:flex;flex-direction:column;gap:6px}
+.ex-b{display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;padding:10px 12px;border:1px dashed #D6D3D1;border-radius:10px;background:#FAFAF9;color:#44403C;font-size:14px;line-height:1.45;cursor:pointer}
+.ex-b:hover{background:#FFF8EC;border-color:#FCDDA8;color:#1C1917}
+.ex-b svg{flex:none;margin-top:3px;color:#A8A29E}
+.row-in{display:flex;align-items:flex-start;gap:8px}
+.row-n{width:26px;height:26px;border-radius:999px;background:#F5F5F4;color:#57534E;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none;margin-top:9px}
+.row-kn{width:26px;height:26px;border-radius:999px;background:#FEF2F2;color:#B91C1C;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none;margin-top:9px}
+.ta-row{width:100%;border:1px solid #D6D3D1;border-radius:8px;padding:10px 12px;font-size:14.5px;line-height:1.5;color:#1C1917;background:#FFFFFF;resize:none;field-sizing:content;max-height:160px;overflow-y:auto;font-family:inherit;min-height:44px}
+.ta-row::placeholder{color:#A8A29E}
+.ta-row:focus{outline:none;border-color:#1C1917;box-shadow:0 0 0 3px rgba(28,25,23,.12)}
+.rm{width:36px;height:36px;border-radius:8px;border:1px solid transparent;background:transparent;color:#A8A29E;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:none;margin-top:4px}
+.rm:hover{background:#F5F5F4;color:#B91C1C}
+.add{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 10px;border-radius:8px;border:1px dashed #D6D3D1;background:#FFFFFF;color:#57534E;font-size:13px;font-weight:600;cursor:pointer}
+.add:hover{background:#F5F5F4;color:#1C1917}
+.sug{display:flex;gap:6px;flex-wrap:wrap}
+.sug-b{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 10px;border-radius:999px;border:1px solid #FECACA;background:#FFFFFF;color:#B91C1C;font-size:12.5px;font-weight:500;cursor:pointer;text-align:left}
+.sug-b:hover{background:#FEF2F2}
+.err{display:flex;align-items:center;gap:8px;font-size:13px;color:#B91C1C;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:8px 10px}
+.tipbox{display:flex;gap:10px;align-items:flex-start;background:#FFF8EC;border:1px solid #F3E2C2;border-radius:10px;padding:12px;font-size:13px;color:#78350F;line-height:1.5}
+.tipbox svg{flex:none;margin-top:2px;color:#92400E}
+.chip-ic{width:18px;height:18px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.tic-amber{background:#FFF4E2;color:#92400E}.tic-blue{background:#EFF6FF;color:#1D4ED8}.tic-green{background:#F0FDF4;color:#15803D}.tic-purple{background:#F5F3FF;color:#6D28D9}.tic-rose{background:#FDF2F8;color:#BE185D}.tic-stone{background:#F5F5F4;color:#57534E}
+.chip-on .chip-ic{background:rgba(255,255,255,.18) !important;color:#FFFFFF !important}
+.pill2-ph{color:#A8A29E;border-style:dashed}
+.ov{position:fixed;inset:0;background:rgba(28,25,23,.45);z-index:40}
+.modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:92vw;max-width:560px;max-height:78vh;overflow-y:auto;background:#FFFFFF;border-radius:16px;border:1px solid #E7E5E4;box-shadow:0 24px 48px -12px rgba(28,25,23,.35);z-index:41;padding:20px;display:flex;flex-direction:column;gap:14px}
+.modal-h{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.modal-h h3{margin:0;font-size:17px;font-weight:700}
+.xbtn{width:32px;height:32px;border-radius:8px;border:1px solid transparent;background:transparent;color:#716A65;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.xbtn:hover{background:#F5F5F4;color:#1C1917}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.tgc{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #E7E5E4;border-radius:12px;background:#FFFFFF;cursor:pointer;text-align:left;color:#1C1917}
+.tgc:hover{background:#FAFAF9;border-color:#D6D3D1}
+.tgc-on,.tgc-on:hover{background:#FFF7E8;border-color:#FEA722;box-shadow:0 0 0 3px rgba(254,167,34,.15)}
+.tic-lg{width:34px;height:34px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.tgc-l{font-size:13.5px;font-weight:600}
+
+/* emiten picker */
+.emg{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.emc{position:relative;display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid #E7E5E4;border-radius:12px;background:#FFFFFF;cursor:pointer;text-align:left;color:#1C1917;min-height:56px}
+.emc:hover{background:#FAFAF9;border-color:#D6D3D1}
+.emc-on,.emc-on:hover{background:#FFF7E8;border-color:#FEA722;box-shadow:0 0 0 3px rgba(254,167,34,.15)}
+.emc img,.emc .ini{width:36px;height:36px;border-radius:9px;border:1px solid #E7E5E4;flex:none;background:#FFFFFF;margin-top:1px}
+.ini{display:inline-flex;align-items:center;justify-content:center;color:#FFFFFF;font-family:'Geist Mono',monospace;font-size:12px;font-weight:600;border:0 !important}
+.emc-t{display:flex;flex-direction:column;gap:3px;line-height:1.3;min-width:0;flex:1}
+.emc-t b{font-family:'Geist Mono',monospace;font-size:13px}
+.emc-t span{font-size:12px;color:#716A65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.emc-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:1px}
+.emc-ck{width:22px;height:22px;border-radius:999px;border:1.5px solid #D6D3D1;flex:none;display:inline-flex;align-items:center;justify-content:center;color:transparent;background:#FFFFFF;margin-top:1px}
+.emc-on .emc-ck{background:#FEA722;border-color:#FEA722;color:#1C1917}
+.wtbl{display:flex;flex-direction:column;border:1px solid #F0EEEC;border-radius:10px;overflow:hidden}
+.wrow{display:flex;align-items:center;gap:10px;padding:8px 12px;border-top:1px solid #F0EEEC;font-size:13.5px}
+.wrow:first-child{border-top:0}
+.wrow img,.wrow .ini{width:24px;height:24px;border-radius:6px;border:1px solid #E7E5E4;flex:none;font-size:9px}
+.wbar{flex:1;height:6px;border-radius:999px;background:#F0EEEC;overflow:hidden;max-width:220px}
+.wbar span{display:block;height:100%;background:#FEA722;border-radius:999px}
+.emtag{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:0 6px;border-radius:6px;line-height:18px;white-space:nowrap;flex:none}
+.emtag-w{background:#FFF4E2;color:#92400E;border:1px solid #FCDDA8}
+.emtag-s{background:#F5F5F4;color:#57534E;border:1px solid #E7E5E4}
+.sbox{position:relative;display:flex;align-items:center}
+.sbox>svg{position:absolute;left:12px;color:#A8A29E;pointer-events:none}
+.sbox .inp{padding-left:38px;padding-right:38px}
+.sclr{position:absolute;right:6px;width:30px;height:30px;border-radius:6px;border:0;background:transparent;color:#716A65;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.sclr:hover{background:#F5F5F4;color:#1C1917}
+.srbox{display:flex;flex-direction:column;border:1px solid #E7E5E4;border-radius:10px;overflow:hidden;background:#FFFFFF;box-shadow:0 8px 20px -12px rgba(28,25,23,.25)}
+.sr{display:flex;align-items:center;gap:10px;width:100%;padding:8px 12px;border:0;border-top:1px solid #F0EEEC;background:#FFFFFF;cursor:pointer;text-align:left;color:#1C1917;font-size:13.5px}
+.sr:first-child{border-top:0}
+.sr:hover{background:#FFF8EC}
+.sr img,.sr .ini{width:28px;height:28px;border-radius:7px;border:1px solid #E7E5E4;flex:none;font-size:10px;background:#FFFFFF}
+.sr-t{display:flex;flex-direction:column;line-height:1.3;min-width:0;flex:1}
+.sr-t b{font-family:'Geist Mono',monospace;font-size:13px}
+.sr-t>span{font-size:12px;color:#716A65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sr-in{cursor:default;background:#FAFAF9}
+.sr-in:hover{background:#FAFAF9}
+.sr-add{width:24px;height:24px;border-radius:999px;border:1px solid #E7E5E4;color:#57534E;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.warn-ic{width:40px;height:40px;border-radius:999px;background:#FFF4E2;color:#92400E;border:1px solid #FCDDA8;display:inline-flex;align-items:center;justify-content:center}
+
+/* review */
+.rv{display:flex;flex-direction:column;border:1px solid #E7E5E4;border-radius:12px;overflow:hidden}
+.rv-r{display:grid;grid-template-columns:150px 1fr auto;gap:12px;align-items:start;padding:12px 14px;border-top:1px solid #F0EEEC;font-size:14px}
+.rv-r:first-child{border-top:0}
+.rv-k{font-size:12.5px;font-weight:600;color:#716A65;padding-top:1px}
+.rv-e{font-size:12.5px;font-weight:600;color:#57534E;background:transparent;border:0;cursor:pointer;text-decoration:underline;text-underline-offset:2px;padding:0}
+.rv-e:hover{color:#1C1917}
+
+/* preview */
+.pv{position:sticky;top:20px;display:flex;flex-direction:column;gap:12px}
+.pvc{border:1px solid #E7E5E4;border-radius:14px;background:#FFFFFF;overflow:hidden;box-shadow:0 8px 24px -12px rgba(28,25,23,.18)}
+.pvc-h{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;background:#FAFAF9;border-bottom:1px solid #E7E5E4;font-size:12px;font-weight:600;color:#716A65}
+.pvc-b{padding:16px;display:flex;flex-direction:column;gap:14px}
+.pv-st{margin:0;font-size:17px;font-weight:700;line-height:1.35;letter-spacing:-0.01em}
+.pv-ph{color:#A8A29E;font-weight:500;font-style:italic}
+.pv-meta{display:flex;gap:6px;flex-wrap:wrap}
+.pill2{font-size:12px;font-weight:500;border:1px solid #E7E5E4;padding:1px 8px;border-radius:7px;background:#FFFFFF;color:#44403C;white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
+.stchip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;background:#FFF4E2;color:#92400E;border:1px solid #FCDDA8;padding:1px 8px;border-radius:7px;white-space:nowrap}
+.pv-sec{display:flex;flex-direction:column;gap:6px}
+.pv-k{font-size:11.5px;font-weight:700;color:#716A65;text-transform:uppercase;letter-spacing:.05em}
+.pv-li{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px}
+.pv-li li{display:flex;gap:8px;font-size:13px;color:#292524;line-height:1.45}
+.pv-li li::before{content:"";width:5px;height:5px;border-radius:999px;background:#A8A29E;flex:none;margin-top:8px}
+.pv-kl li::before{background:#DC2626}
+.pv-none{font-size:12.5px;color:#A8A29E;font-style:italic}
+.pv-avs{display:flex;align-items:center}
+.pv-avs img,.pv-avs .ini{width:26px;height:26px;border-radius:999px;border:2px solid #FFFFFF;box-shadow:0 0 0 1px #E7E5E4;margin-left:-8px;background:#FFFFFF;font-size:9px}
+.pv-avs img:first-child,.pv-avs .ini:first-child{margin-left:0}
+.prog{height:6px;border-radius:99px;background:#F0EEEC;overflow:hidden}
+.prog span{display:block;height:100%;background:#22C55E;border-radius:99px}
+.toast{display:flex;align-items:center;gap:8px;font-size:13px;color:#15803D;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:6px 10px;align-self:flex-start}
+
+/* done */
+.done{max-width:620px;margin:24px auto 0;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px}
+.done-ic{width:60px;height:60px;border-radius:999px;background:#F0FDF4;color:#15803D;display:inline-flex;align-items:center;justify-content:center;border:1px solid #BBF7D0}
+.done-card{width:100%;text-align:left;border:1px solid #E7E5E4;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;background:#FFFFFF;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.ev{display:flex;align-items:center;gap:12px;border:1px solid #FCDDA8;background:linear-gradient(120deg,#FFF8EC 0%,#FFFFFF 80%);border-radius:12px;padding:12px 14px;text-align:left;width:100%}
+.ev-ic{width:44px;height:44px;border-radius:10px;background:#FEA722;color:#1C1917;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none;line-height:1}
+.ev-ic b{font-size:17px;font-family:'Geist Mono',monospace}
+.ev-ic small{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+@media (max-width:760px){.rv-r{grid-template-columns:1fr}}
+</style>
+</helmet>
+<div style="font-family: 'Geist', system-ui, sans-serif; color: #1C1917; background: #FFFFFF; font-size: 15px; line-height: 1.55; min-height: 100vh; display: flex; flex-wrap: wrap; align-items: stretch">
+
+<aside aria-label="Navigasi aplikasi" style="flex: 0 0 240px; border-right: 1px solid #E7E5E4; background: #FAFAF9; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px">
+<a href="Main.dc.html" aria-label="StockPlan, ke beranda" style="display: flex; align-items: center; gap: 8px; padding: 6px 10px 18px; text-decoration: none; color: #1C1917">
+<svg aria-hidden="true" viewBox="4 213 102 88" width="22" height="19"><g fill="#FEA722"><path d="M13.04,233.96c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.49s0-2.12,5.66-4.97l36.26-15.83c4.18-1.83,6.89-5.96,6.89-10.52v-16.89l-41.92,18.3Z"></path><path d="M96.89,280.81c4.18-1.83,6.89-5.96,6.89-10.52v-16.89h0v-2.49s0,2.12-5.66,4.97l-36.26,15.83c-4.18,1.83-6.89,5.96-6.89,10.52v16.89l41.92-18.3Z"></path><path d="M98.11,226.34l-36.26,15.83s-.07,.04-.1,.05l-48.71,21.26c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.79s0-2.12,5.66-4.97l36.26-15.83c.73-.32,1.4-.73,2.03-1.18l46.78-20.42c4.18-1.83,6.89-5.96,6.89-10.52h0v-16.89h0v-2.5s0,2.12-5.66,4.97Z"></path></g></svg>
+<span style="font-weight: 700; font-size: 15px; letter-spacing: -0.01em">StockPlan</span>
+<span style="margin-left: auto; font-size: 11px; font-weight: 600; color: #92400E; background: #FFF4E2; border: 1px solid #FCDDA8; padding: 0 6px; border-radius: 6px">Beta</span>
+</a>
+<a class="nv" href="Main.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>Beranda</a>
+<span class="sec">Riset</span>
+<a class="nv" href="Tema.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="2.2"></circle><circle cx="19" cy="6" r="2.2"></circle><circle cx="19" cy="18" r="2.2"></circle><path d="M7 11l10-4M7 13l10 4"></path></svg>Tema bisnis</a>
+<a class="nv" href="Emiten.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"></rect><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1"></path></svg>Emiten</a>
+<span class="sec">Perencanaan</span>
+<a class="nv nv-on" href="Tesis.dc.html" aria-current="page"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg>Tesis saya</a>
+<a class="nv" href="Portofolio.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>Portofolio</a>
+<a class="nv" href="Watchlist.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"></path></svg>Watchlist</a>
+<div style="margin-top: auto; padding-top: 24px">
+<a class="nv" href="#pengaturan"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"></path></svg>Pengaturan</a>
+</div>
+</aside>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+<header style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 28px; border-bottom: 1px solid #E7E5E4">
+<nav aria-label="Breadcrumb" style="font-size: 13px; color: #716A65">Perencanaan / <a href="Tesis.dc.html" style="color: #716A65">Tesis saya</a> / <span style="color: #1C1917">Tesis baru</span></nav>
+<div style="margin-left: auto; display: flex; gap: 8px; align-items: center">
+<sc-if value="{{draftSaved}}" hint-placeholder-val="{{false}}"><span class="toast" role="status"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>Draf tersimpan</span></sc-if>
+<sc-if value="{{notDone}}" hint-placeholder-val="{{true}}">
+<button type="button" class="btn btn-g btn-s" onClick="{{saveDraft}}">Simpan sebagai draf</button>
+<a class="btn btn-o btn-s" href="Tesis.dc.html">Batal</a>
+</sc-if>
+</div>
+<a href="LayoutNotif.dc.html" aria-label="Notifikasi, 5 belum dibaca" style="position: relative; width: 40px; height: 40px; border-radius: 999px; border: 1px solid #E7E5E4; background: #FFFFFF; color: #44403C; display: inline-flex; align-items: center; justify-content: center; flex: none; text-decoration: none"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg><span aria-hidden="true" style="position: absolute; top: -4px; right: -5px; min-width: 19px; height: 19px; padding: 0 5px; box-sizing: border-box; border-radius: 999px; background: #DC2626; color: #FFFFFF; border: 2px solid #FFFFFF; font-family: 'Geist Mono', monospace; font-size: 10.5px; font-weight: 700; line-height: 15px; text-align: center">5</span></a>
+<button type="button" aria-label="Akun dan langganan" style="width: 40px; height: 40px; border-radius: 999px; border: 1px solid #E7E5E4; background: #1C1917; color: #FEA722; font-weight: 600; font-size: 14px; cursor: pointer">B</button>
+</header>
+
+<main style="padding: 24px 28px 40px; display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 1180px">
+
+<sc-if value="{{notDone}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.02em">Tulis tesis baru</h1>
+<p style="margin: 0; color: #716A65; font-size: 14px">Tesis = alasan Anda berinvestasi. Lima langkah singkat, sekitar 5 menit. Semua bisa diubah nanti.</p>
+</div>
+
+<nav aria-label="Langkah menulis tesis">
+<ol class="stp">
+<sc-for list="{{steps}}" as="s" hint-placeholder-count="5">
+<li class="{{s.cls}}">
+<button type="button" class="stp-b" onClick="{{s.go}}" aria-current="{{s.cur}}" aria-disabled="{{s.lock}}">
+<span class="stp-n" aria-hidden="true">
+<sc-if value="{{s.done}}" hint-placeholder-val="{{false}}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>
+<sc-if value="{{s.notDone}}" hint-placeholder-val="{{true}}">{{s.n}}</sc-if>
+</span>
+<span class="stp-l">{{s.label}}</span>
+</button>
+</li>
+</sc-for>
+</ol>
+</nav>
+
+<div style="display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start">
+
+<div style="flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<section class="card" aria-labelledby="q-title">
+
+<sc-if value="{{is1}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span class="q-kick">Langkah 1 dari 5</span>
+<h2 id="q-title" class="q-t">Apa yang Anda yakini?</h2>
+<p class="q-d">Tulis satu kalimat tentang bisnis atau sektor yang menurut Anda akan tumbuh. Bukan soal harga saham besok — tapi cerita bisnis beberapa tahun ke depan.</p>
+</div>
+<div class="fld">
+<div class="fld-h"><label class="lbl" for="pernyataan">Pernyataan tesis</label><span class="hint mono">{{stLen}}/140</span></div>
+<textarea id="pernyataan" class="inp inp-big" maxlength="140" placeholder="Contoh: Kebutuhan listrik Indonesia terus naik dalam 5 tahun ke depan." onInput="{{onStatement}}">{{statement}}</textarea>
+</div>
+<div class="ex">
+<span class="hint" style="font-weight: 600">Belum ada ide? Mulai dari contoh ini:</span>
+<sc-for list="{{examples}}" as="x" hint-placeholder-count="3">
+<button type="button" class="ex-b" onClick="{{x.use}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"></path></svg><span>{{x.t}}</span></button>
+</sc-for>
+</div>
+<fieldset style="border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px">
+<legend class="lbl" style="padding: 0; margin-bottom: 8px">Tema bisnis terkait</legend>
+<div class="chips">
+<sc-for list="{{temas}}" as="t" hint-placeholder-count="4"><button type="button" class="{{t.cls}}" aria-pressed="{{t.on}}" onClick="{{t.pick}}"><span class="chip-ic {{t.icCls}}" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="{{t.icon}}"></path></svg></span>{{t.label}}</button></sc-for>
+<button type="button" class="chip" onClick="{{openTemaModal}}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Pilih tema lain</button>
+</div>
+<span class="hint">Tema dipakai untuk menyarankan emiten di langkah 4. Belum yakin? <a href="Tema.dc.html">Jelajahi tema bisnis</a>.</span>
+</fieldset>
+<sc-if value="{{temaModalOpen}}" hint-placeholder-val="{{false}}">
+<div class="ov" onClick="{{closeTemaModal}}" aria-hidden="true"></div>
+<div class="modal" role="dialog" aria-label="Pilih tema bisnis">
+<div class="modal-h"><h3>Pilih tema bisnis</h3><button type="button" class="xbtn" aria-label="Tutup" onClick="{{closeTemaModal}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></div>
+<div class="tgrid">
+<sc-for list="{{allTemas}}" as="t" hint-placeholder-count="10"><button type="button" class="{{t.cls}}" aria-pressed="{{t.on}}" onClick="{{t.pick}}"><span class="tic-lg {{t.icCls}}" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{t.icon}}"></path></svg></span><span class="tgc-l">{{t.label}}</span></button></sc-for>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{is2}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span class="q-kick">Langkah 2 dari 5</span>
+<h2 class="q-t">Kenapa Anda yakin?</h2>
+<p class="q-d">Tulis alasan dengan bahasa Anda sendiri — satu alasan per baris. Alasan inilah yang nanti Anda cek ulang saat evaluasi.</p>
+</div>
+<div class="fld">
+<sc-for list="{{reasonRows}}" as="r" hint-placeholder-count="2">
+<div class="row-in">
+<span class="row-n" aria-hidden="true">{{r.n}}</span>
+<textarea class="inp ta-row" rows="1" maxlength="160" aria-label="{{r.aria}}" placeholder="{{r.ph}}" onInput="{{r.onInput}}">{{r.val}}</textarea>
+<sc-if value="{{r.canRemove}}" hint-placeholder-val="{{false}}"><button type="button" class="rm" aria-label="{{r.rmAria}}" onClick="{{r.remove}}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-9 0 1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"></path></svg></button></sc-if>
+</div>
+</sc-for>
+<button type="button" class="add" onClick="{{addReason}}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Tambah alasan</button>
+</div>
+<sc-if value="{{hasReasonSug}}" hint-placeholder-val="{{true}}">
+<div class="fld">
+<span class="hint" style="font-weight: 600">Contoh alasan umum — klik untuk memakai:</span>
+<div class="sug">
+<sc-for list="{{reasonSug}}" as="k" hint-placeholder-count="3"><button type="button" class="sug-b" onClick="{{k.use}}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>{{k.t}}</button></sc-for>
+</div>
+</div>
+</sc-if>
+<div class="tipbox"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 22h4M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"></path></svg><span>Alasan yang baik bisa dicek: "pusat data baru menambah kebutuhan listrik" lebih mudah dievaluasi daripada "sektor ini bagus".</span></div>
+</div>
+</sc-if>
+
+<sc-if value="{{is3}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span class="q-kick">Langkah 3 dari 5</span>
+<h2 class="q-t">Kapan tesis ini dianggap gugur?</h2>
+<p class="q-d">Tentukan batasnya sekarang, saat kepala masih dingin. Kalau salah satu terjadi, itu tanda untuk meninjau ulang — bukan saat panik karena harga turun.</p>
+</div>
+<div class="fld">
+<sc-for list="{{killRows}}" as="r" hint-placeholder-count="1">
+<div class="row-in">
+<span class="row-kn" aria-hidden="true">{{r.n}}</span>
+<textarea class="inp ta-row" rows="1" maxlength="160" aria-label="{{r.aria}}" placeholder="{{r.ph}}" onInput="{{r.onInput}}">{{r.val}}</textarea>
+<sc-if value="{{r.canRemove}}" hint-placeholder-val="{{false}}"><button type="button" class="rm" aria-label="{{r.rmAria}}" onClick="{{r.remove}}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-9 0 1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"></path></svg></button></sc-if>
+</div>
+</sc-for>
+<button type="button" class="add" onClick="{{addKill}}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Tambah kondisi</button>
+</div>
+<sc-if value="{{hasKillSug}}" hint-placeholder-val="{{true}}">
+<div class="fld">
+<span class="hint" style="font-weight: 600">Contoh kondisi gugur (berlaku untuk tema apa pun) — klik untuk memakai:</span>
+<div class="sug">
+<sc-for list="{{killSug}}" as="k" hint-placeholder-count="3"><button type="button" class="sug-b" onClick="{{k.use}}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>{{k.t}}</button></sc-for>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{is4}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span class="q-kick">Langkah 4 dari 5 · opsional</span>
+<h2 class="q-t">Emiten mana yang mendukung tesis ini?</h2>
+<p class="q-d">Pilih perusahaan yang bisnisnya paling terhubung dengan keyakinan Anda. Boleh dilewati dulu dan ditambah nanti dari halaman tema.</p>
+</div>
+<sc-if value="{{noEmOptionsNoTema}}" hint-placeholder-val="{{false}}">
+<div class="tipbox"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg><span>Anda belum memilih tema, jadi belum ada saran emiten. Cari emiten secara manual di bawah, atau kembali ke langkah 1 untuk memilih tema.</span></div>
+</sc-if>
+<sc-if value="{{noEmOptionsNoData}}" hint-placeholder-val="{{false}}">
+<div class="tipbox"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg><span>Belum ada saran emiten terkurasi untuk tema {{temaLabel}}. Cari emiten secara manual di bawah.</span></div>
+</sc-if>
+<sc-if value="{{hasEmOptions}}" hint-placeholder-val="{{true}}">
+<div class="fld">
+<div class="fld-h"><span class="lbl">{{gridLabel}}</span><span class="hint">Klik untuk memilih</span></div>
+<div class="emg">
+<sc-for list="{{emOptions}}" as="e" hint-placeholder-count="6">
+<button type="button" class="{{e.cls}}" aria-pressed="{{e.on}}" onClick="{{e.toggle}}">
+<sc-if value="{{e.hasLogo}}" hint-placeholder-val="{{true}}"><img src="{{e.logo}}" alt=""></sc-if>
+<sc-if value="{{e.noLogo}}" hint-placeholder-val="{{false}}"><span class="ini" style="background: {{e.c}}" aria-hidden="true">{{e.ini}}</span></sc-if>
+<span class="emc-t"><b>{{e.tk}}</b><span>{{e.role}}</span><sc-if value="{{e.hasTags}}" hint-placeholder-val="{{false}}"><span class="emc-tags"><sc-if value="{{e.diffSek}}" hint-placeholder-val="{{false}}"><span class="emtag emtag-w">Sektor lain</span></sc-if><sc-if value="{{e.sameExtra}}" hint-placeholder-val="{{false}}"><span class="emtag emtag-s">Dari pencarian</span></sc-if></span></sc-if></span>
+<span class="emc-ck" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+</button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<div class="fld">
+<label class="lbl" for="em-cari">Atau cari emiten lain</label>
+<div class="sbox">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+<input id="em-cari" type="text" class="inp" autocomplete="off" placeholder="Ketik kode atau nama, misalnya TLKM atau Telkom" value="{{emSearch}}" onInput="{{onEmSearch}}">
+<sc-if value="{{hasQuery}}" hint-placeholder-val="{{false}}"><button type="button" class="sclr" aria-label="Hapus pencarian" onClick="{{clearSearch}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></sc-if>
+</div>
+<sc-if value="{{hasResults}}" hint-placeholder-val="{{false}}">
+<div class="srbox" role="listbox" aria-label="Hasil pencarian emiten">
+<sc-for list="{{srResults}}" as="r" hint-placeholder-count="3">
+<button type="button" class="{{r.cls}}" role="option" onClick="{{r.pick}}">
+<sc-if value="{{r.hasLogo}}" hint-placeholder-val="{{false}}"><img src="{{r.logo}}" alt=""></sc-if>
+<sc-if value="{{r.noLogo}}" hint-placeholder-val="{{true}}"><span class="ini" style="background: {{r.c}}" aria-hidden="true">{{r.ini}}</span></sc-if>
+<span class="sr-t"><b>{{r.tk}}</b><span>{{r.meta}}</span></span>
+<sc-if value="{{r.inList}}" hint-placeholder-val="{{false}}"><span class="emtag emtag-s">Sudah di daftar</span></sc-if>
+<sc-if value="{{r.showDiff}}" hint-placeholder-val="{{false}}"><span class="emtag emtag-w">Sektor lain</span></sc-if>
+<sc-if value="{{r.notInList}}" hint-placeholder-val="{{true}}"><span class="sr-add" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg></span></sc-if>
+</button>
+</sc-for>
+</div>
+<span class="hint">Emiten yang diklik masuk ke daftar di atas dulu — pilih di sana kalau mau dimasukkan ke tesis.</span>
+</sc-if>
+<sc-if value="{{noResults}}" hint-placeholder-val="{{false}}"><span class="hint">Tidak ada emiten yang cocok dengan "{{emSearch}}".</span></sc-if>
+</div>
+<sc-if value="{{pendOpen}}" hint-placeholder-val="{{false}}">
+<div class="ov" onClick="{{cancelPend}}" aria-hidden="true"></div>
+<div class="modal" role="alertdialog" aria-labelledby="pend-t" style="max-width: 440px">
+<span class="warn-ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 21h20L12 3z"></path><path d="M12 10v5M12 18h.01"></path></svg></span>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h3 id="pend-t" style="margin: 0; font-size: 17px; font-weight: 700">{{pendTk}} bukan dari sektor yang sama</h3>
+<p style="margin: 0; font-size: 14px; color: #57534E; line-height: 1.55">{{pendName}} ada di sektor <b style="color: #1C1917">{{pendSek}}</b>, sedangkan tema {{temaLabel}} ada di sektor <b style="color: #1C1917">{{temaSek}}</b>. Emiten di luar tema bisa membuat tesis Anda kurang fokus.</p>
+<p style="margin: 0; font-size: 14px; font-weight: 600">Masih mau ditambahkan ke daftar?</p>
+</div>
+<div style="display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap">
+<button type="button" class="btn btn-o" onClick="{{cancelPend}}">Batal</button>
+<button type="button" class="btn btn-p" onClick="{{confirmPend}}">Tetap tambahkan</button>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{hasPicked}}" hint-placeholder-val="{{false}}">
+<div class="fld">
+<div class="fld-h"><span class="lbl">Bobot awal</span><button type="button" class="btn btn-g btn-s" onClick="{{resetWeights}}">Bagi rata</button></div>
+<div class="wtbl">
+<sc-for list="{{pickedRows}}" as="p" hint-placeholder-count="2">
+<div class="wrow">
+<sc-if value="{{p.hasLogo}}" hint-placeholder-val="{{true}}"><img src="{{p.logo}}" alt=""></sc-if>
+<sc-if value="{{p.noLogo}}" hint-placeholder-val="{{false}}"><span class="ini" style="background: {{p.c}}" aria-hidden="true">{{p.ini}}</span></sc-if>
+<b class="mono" style="font-size: 13px; width: 48px">{{p.tk}}</b>
+<span class="wbar" aria-hidden="true"><span style="width: {{p.w}}"></span></span>
+<span style="position:relative;display:inline-flex;align-items:center;margin-left:auto;flex:none">
+<input type="number" min="0" max="100" class="mono" aria-label="Bobot {{p.tk}}" style="width: 58px; height: 28px; border: 1px solid #D6D3D1; border-radius: 6px; text-align: right; padding: 0 18px 0 4px; font-size: 13px; -moz-appearance:textfield" value="{{p.wVal}}" onInput="{{p.onWeight}}">
+<span class="mono" style="position:absolute;right:6px;font-size:12px;color:#A8A29E;pointer-events:none">%</span>
+</span>
+<button type="button" class="rm" style="width: 30px; height: 30px; margin-top: 0" aria-label="Hapus {{p.tk}} dari tesis" onClick="{{p.remove}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-9 0 1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"></path></svg></button>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{totalOk}}" hint-placeholder-val="{{true}}"><span class="hint">Total bobot: <b style="color: #15803D">{{totalWeight}}%</b></span></sc-if>
+<sc-if value="{{totalOff}}" hint-placeholder-val="{{false}}"><span class="hint">Total bobot: <b style="color: #B91C1C">{{totalWeight}}%</b> — idealnya 100%</span></sc-if>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{is5}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span class="q-kick">Langkah 5 dari 5</span>
+<h2 class="q-t">Jangka waktu &amp; jadwal evaluasi</h2>
+<p class="q-d">Seberapa lama Anda memberi waktu tesis ini untuk terbukti, dan seberapa sering Anda ingin mengeceknya.</p>
+</div>
+<fieldset style="border: 0; padding: 0; margin: 0">
+<legend class="lbl" style="padding: 0; margin-bottom: 8px">Jangka waktu</legend>
+<div class="chips"><sc-for list="{{horizons}}" as="h" hint-placeholder-count="3"><button type="button" class="{{h.cls}}" aria-pressed="{{h.on}}" onClick="{{h.pick}}">{{h.label}}</button></sc-for></div>
+</fieldset>
+<fieldset style="border: 0; padding: 0; margin: 0">
+<legend class="lbl" style="padding: 0; margin-bottom: 8px">Evaluasi rutin</legend>
+<div class="chips"><sc-for list="{{evals}}" as="v" hint-placeholder-count="3"><button type="button" class="{{v.cls}}" aria-pressed="{{v.on}}" onClick="{{v.pick}}">{{v.label}}</button></sc-for></div>
+<sc-if value="{{hasEval}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px">
+<span class="hint">Evaluasi pertama <b style="color: #1C1917">({{nextEval}})</b> — bisa diubah:</span>
+<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+<input type="date" class="inp" style="width: 170px; height: 38px" value="{{evalDateStr}}" onInput="{{onEvalDate}}">
+<sc-if value="{{evalDateCustom}}" hint-placeholder-val="{{false}}"><button type="button" class="btn btn-g btn-s" onClick="{{resetEvalDate}}">Pakai default ({{autoEvalLabel}})</button></sc-if>
+</div>
+<span class="hint">Kami ingatkan lewat beranda saat tanggalnya tiba.</span>
+</div>
+</sc-if>
+<sc-if value="{{noEval}}" hint-placeholder-val="{{true}}"><span class="hint" style="display: block; margin-top: 8px">Pilih jadwal evaluasi di atas dulu.</span></sc-if>
+</fieldset>
+<div class="fld">
+<span class="lbl">Periksa sekali lagi</span>
+<div class="rv">
+<div class="rv-r"><span class="rv-k">Pernyataan</span><span style="font-weight: 600">{{statementOrDash}}</span><button type="button" class="rv-e" onClick="{{go1}}">Ubah</button></div>
+<div class="rv-r"><span class="rv-k">Alasan</span><span>{{reasonCountLabel}}</span><button type="button" class="rv-e" onClick="{{go2}}">Ubah</button></div>
+<div class="rv-r"><span class="rv-k">Batas gugur</span><span>{{killCountLabel}}</span><button type="button" class="rv-e" onClick="{{go3}}">Ubah</button></div>
+<div class="rv-r"><span class="rv-k">Emiten</span><span>{{pickedLabel}}</span><button type="button" class="rv-e" onClick="{{go4}}">Ubah</button></div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{showErr}}" hint-placeholder-val="{{false}}">
+<div class="err" role="alert"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16h.01"></path></svg>{{errText}}</div>
+</sc-if>
+
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; border-top: 1px solid #F0EEEC; padding-top: 16px">
+<sc-if value="{{hasBack}}" hint-placeholder-val="{{false}}"><button type="button" class="btn btn-o" onClick="{{back}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>Kembali</button></sc-if>
+<sc-if value="{{noBack}}" hint-placeholder-val="{{true}}"><span></span></sc-if>
+<button type="button" class="btn btn-p" onClick="{{next}}">{{nextLabel}}<sc-if value="{{showArrow}}" hint-placeholder-val="{{true}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"></path></svg></sc-if></button>
+</div>
+</section>
+</div>
+
+<aside class="pv" aria-label="Pratinjau tesis" style="flex: 1 1 320px; max-width: 380px; min-width: 280px">
+<div class="pvc">
+<div class="pvc-h"><span>Pratinjau tesis</span><span class="mono">{{filled}}/5 terisi</span></div>
+<div class="pvc-b">
+<div class="prog" aria-hidden="true"><span style="width: {{filledPct}}"></span></div>
+<sc-if value="{{hasStatement}}" hint-placeholder-val="{{false}}"><p class="pv-st">{{statement}}</p></sc-if>
+<sc-if value="{{noStatement}}" hint-placeholder-val="{{true}}"><p class="pv-st pv-ph">Pernyataan tesis Anda akan muncul di sini.</p></sc-if>
+<div class="pv-meta">
+<sc-if value="{{hasTema}}" hint-placeholder-val="{{true}}"><span class="stchip">Tema {{temaLabel}}</span></sc-if>
+<sc-if value="{{hasHorizon}}" hint-placeholder-val="{{false}}"><span class="pill2">Jangka {{horizon}}</span></sc-if>
+<sc-if value="{{noHorizon}}" hint-placeholder-val="{{true}}"><span class="pill2 pill2-ph">Jangka belum dipilih</span></sc-if>
+<sc-if value="{{hasEval}}" hint-placeholder-val="{{false}}"><span class="pill2">Evaluasi {{evalLower}}</span></sc-if>
+<sc-if value="{{noEval}}" hint-placeholder-val="{{true}}"><span class="pill2 pill2-ph">Evaluasi belum dipilih</span></sc-if>
+</div>
+<div class="pv-sec">
+<span class="pv-k">Kenapa saya yakin</span>
+<sc-if value="{{hasReasons}}" hint-placeholder-val="{{false}}"><ul class="pv-li"><sc-for list="{{pvReasons}}" as="r" hint-placeholder-count="2"><li>{{r.t}}</li></sc-for></ul></sc-if>
+<sc-if value="{{noReasons}}" hint-placeholder-val="{{true}}"><span class="pv-none">Belum ada alasan</span></sc-if>
+</div>
+<div class="pv-sec">
+<span class="pv-k">Gugur kalau…</span>
+<sc-if value="{{hasKills}}" hint-placeholder-val="{{false}}"><ul class="pv-li pv-kl"><sc-for list="{{pvKills}}" as="k" hint-placeholder-count="1"><li>{{k.t}}</li></sc-for></ul></sc-if>
+<sc-if value="{{noKills}}" hint-placeholder-val="{{true}}"><span class="pv-none">Belum ada batas gugur</span></sc-if>
+</div>
+<div class="pv-sec">
+<span class="pv-k">Emiten</span>
+<sc-if value="{{hasPicked}}" hint-placeholder-val="{{false}}">
+<span class="pv-avs" aria-hidden="true">
+<sc-for list="{{pickedAvatars}}" as="p" hint-placeholder-count="2">
+<sc-if value="{{p.hasLogo}}" hint-placeholder-val="{{true}}"><img src="{{p.logo}}" alt=""></sc-if>
+<sc-if value="{{p.noLogo}}" hint-placeholder-val="{{false}}"><span class="ini" style="background: {{p.c}}">{{p.ini}}</span></sc-if>
+</sc-for>
+<sc-if value="{{pickedOverflow}}" hint-placeholder-val="{{false}}"><span class="ini" style="background:#57534E">+{{pickedOverflow}}</span></sc-if>
+</span>
+</sc-if>
+<sc-if value="{{noPicked}}" hint-placeholder-val="{{true}}"><span class="pv-none">Belum ada emiten — boleh ditambah nanti</span></sc-if>
+</div>
+</div>
+</div>
+<p style="margin: 0; font-size: 12px; color: #716A65; line-height: 1.5">Tesis adalah catatan pribadi Anda. StockPlan tidak memproses transaksi dan isi halaman ini bukan rekomendasi saham.</p>
+</aside>
+
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isDone}}" hint-placeholder-val="{{false}}">
+<div class="done" role="status">
+<span class="done-ic" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+<h1 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.02em">Tesis tersimpan</h1>
+<p style="margin: 0; color: #716A65; font-size: 14px; max-width: 480px">Mulai sekarang, setiap keputusan untuk emiten di tesis ini bisa Anda cocokkan dengan alasan yang baru saja Anda tulis.</p>
+<div class="done-card">
+<span style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #716A65"><span style="font-size: 12px; font-weight: 600; padding: 0 7px; border-radius: 6px; border: 1px solid #BBF7D0; color: #15803D; background: #F0FDF4; line-height: 20px">Aktif</span>Dibuat 4 Nov 2026</span>
+<p class="pv-st" style="font-size: 19px">{{statementOrDash}}</p>
+<div class="pv-meta">
+<sc-if value="{{hasTema}}" hint-placeholder-val="{{true}}"><span class="stchip">Tema {{temaLabel}}</span></sc-if>
+<span class="pill2">Jangka {{horizon}}</span>
+<span class="pill2">{{reasonCountLabel}}</span>
+<span class="pill2">{{killCountLabel}}</span>
+<span class="pill2">{{pickedLabel}}</span>
+</div>
+</div>
+<div class="ev">
+<span class="ev-ic" aria-hidden="true"><b>{{nextDay}}</b><small>{{nextMon}}</small></span>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 14.5px; font-weight: 600">Evaluasi pertama {{nextEval}}</span>
+<span style="font-size: 13px; color: #57534E">Kami ingatkan lewat beranda saat waktunya tiba.</span>
+</div>
+</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center">
+<a class="btn btn-p" href="Tesis.dc.html">Lihat tesis</a>
+<sc-if value="{{noPicked}}" hint-placeholder-val="{{false}}"><a class="btn btn-o" href="TemaDetail.dc.html">Tambah emiten dari tema</a></sc-if>
+<button type="button" class="btn btn-g" onClick="{{restart}}">Tulis tesis lain</button>
+</div>
+</div>
+</sc-if>
+
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1180}}'>
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = Object.assign(this.fresh(), { step: 5, maxStep: 5, statement: 'Kebutuhan listrik Indonesia terus naik dalam 5 tahun ke depan.', tema: 'Batubara', reasons: ['Smelter nikel, kawasan industri, dan pusat data baru terus menambah kebutuhan listrik.', 'Batu bara masih jadi sumber terbesar pembangkit PLN untuk beberapa tahun ke depan.', 'Kewajiban pasok dalam negeri (DMO) menjaga sebagian produksi tetap terserap di Indonesia.'], kills: ['Konsumsi listrik nasional turun dua tahun berturut-turut.', 'Pemerintah mempercepat pensiun PLTU batu bara.'], picked: ['PTBA','AADI','UNTR'], horizon: '3–5 tahun', evalEvery: 'Tiap 3 bulan' });
+}
+fresh() {
+return { step: 1, maxStep: 1, statement: '', tema: 'Batubara', reasons: ['', ''], kills: [''], picked: [], weights: {}, horizon: '', evalEvery: '', evalDateOverride: '', err: '', done: false, draftSaved: false, temaModalOpen: false, emSearch: '', extraEm: [], pendingEm: '' };
+}
+renderVals() {
+var self = this;
+var st = this.state;
+var TODAY = new Date(2026, 10, 4);
+var MONTHS_ID = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+var AVC = ['#1C1917', '#92400E', '#1D4ED8', '#15803D', '#6D28D9', '#BE185D'];
+
+var TEMA = {
+'Batubara': {
+em: [
+['PTBA', 'Bukit Asam Tbk', 'Pemilik tambang · pembangkit', '/_blob/a7814f85d9b69b78f4edb98dc5be88d5'],
+['AADI', 'Adaro Andalan Indonesia Tbk', 'Pemilik tambang · logistik', '/_blob/fee486793ba6867b5b69aaf44de9f6e7'],
+['ITMG', 'Indo Tambangraya Megah Tbk', 'Pemilik tambang kalori tinggi', '/_blob/cd0894862a9546ef41964447ba7224e5'],
+['BUMI', 'Bumi Resources Tbk', 'Produsen terbesar RI', '/_blob/d05174a2155f04e81025859fef041f66'],
+['UNTR', 'United Tractors Tbk', 'Kontraktor tambang', '/_blob/f5a059270c2b05fcd6c975eb7bbd11d3'],
+['INDY', 'Indika Energy Tbk', 'Tambang · diversifikasi energi', '/_blob/8feb111705443327d88bc0d6249f7c1e']
+],
+kills: ['Konsumsi listrik nasional turun dua tahun berturut-turut.', 'Pemerintah mempercepat pensiun PLTU batu bara.', 'Mayoritas emiten di tesis ini rugi dua tahun berturut-turut.']
+},
+'Perbankan': {
+em: [
+['BBRI', 'Bank Rakyat Indonesia Tbk', 'Bank fokus UMKM', ''],
+['BMRI', 'Bank Mandiri Tbk', 'Bank BUMN korporasi', ''],
+['BBCA', 'Bank Central Asia Tbk', 'Bank swasta transaksi', ''],
+['BBNI', 'Bank Negara Indonesia Tbk', 'Bank BUMN', '']
+],
+kills: ['Kredit macet (NPL) bank naik di atas 5% dua kuartal berturut-turut.', 'Pertumbuhan kredit nasional di bawah 3% setahun penuh.', 'Suku bunga acuan naik tajam dan menekan permintaan kredit.']
+},
+'Barang konsumsi': {
+em: [
+['ICBP', 'Indofood CBP Sukses Makmur Tbk', 'Mi instan & makanan', ''],
+['SIDO', 'Industri Jamu Sido Muncul Tbk', 'Jamu & herbal', ''],
+['MYOR', 'Mayora Indah Tbk', 'Makanan ringan', ''],
+['UNVR', 'Unilever Indonesia Tbk', 'Produk rumah tangga', '']
+],
+kills: ['Penjualan ritel nasional turun dua kuartal berturut-turut.', 'Daya beli melemah dan volume penjualan emiten turun.', 'Margin laba emiten tergerus kenaikan bahan baku setahun penuh.']
+}
+};
+var TEMA_KEYS = ['Batubara', 'Perbankan', 'Barang konsumsi', 'Belum pilih'];
+var TEMA_ICONS = {
+'Batubara': { icon: 'M13 2 3 14h8l-1 8 10-12h-8l1-8Z', cls: 'tic-amber' },
+'Perbankan': { icon: 'M3 10h18L12 4z M5 10v8M10 10v8M14 10v8M19 10v8M3 20h18', cls: 'tic-blue' },
+'Barang konsumsi': { icon: 'M4 9h16l-2 11H6z M9 9l3-5 3 5', cls: 'tic-green' },
+'Properti': { icon: 'M4 21V5l8-2v18 M12 9h8v12 M4 21h16', cls: 'tic-purple' },
+'Teknologi': { icon: 'M7 7h10v10H7z M10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4', cls: 'tic-stone' },
+'Kesehatan': { icon: 'M12 5v14M5 12h14', cls: 'tic-rose' },
+'Infrastruktur': { icon: 'M12 3v18 M5 21l7-18 7 18 M8 14h8', cls: 'tic-blue' },
+'Transportasi & logistik': { icon: 'M3 7h11v9H3z M14 10h4l3 3v3h-7', cls: 'tic-green' },
+'Energi terbarukan': { icon: 'M13 2 3 14h8l-1 8 10-12h-8l1-8Z', cls: 'tic-amber' }
+};
+var TEMA_ORDER = ['Batubara', 'Perbankan', 'Barang konsumsi', 'Properti', 'Teknologi', 'Kesehatan', 'Infrastruktur', 'Transportasi & logistik', 'Energi terbarukan'];
+function temaIcon(k) {
+var d = TEMA_ICONS[k];
+return d || { icon: 'M5 12h14', cls: 'tic-stone' };
+}
+var TEMA_SECTOR = {
+'Batubara': 'Energi', 'Perbankan': 'Keuangan', 'Barang konsumsi': 'Barang Konsumen Primer', 'Properti': 'Properti & Real Estat',
+'Teknologi': 'Teknologi', 'Kesehatan': 'Kesehatan', 'Infrastruktur': 'Infrastruktur', 'Transportasi & logistik': 'Transportasi & Logistik', 'Energi terbarukan': 'Energi'
+};
+var EXTRA_EM = [
+['PGEO', 'Pertamina Geothermal Energy Tbk', 'Pembangkit panas bumi', '', 'Energi'],
+['PGAS', 'Perusahaan Gas Negara Tbk', 'Distribusi gas bumi', '', 'Energi'],
+['MEDC', 'Medco Energi Internasional Tbk', 'Minyak & gas', '', 'Energi'],
+['CUAN', 'Petrindo Jaya Kreasi Tbk', 'Tambang batu bara & mineral', '', 'Energi'],
+['DEWA', 'Darma Henwa Tbk', 'Kontraktor tambang', '', 'Energi'],
+['INCO', 'Vale Indonesia Tbk', 'Tambang nikel', '', 'Barang Baku'],
+['ANTM', 'Aneka Tambang Tbk', 'Nikel & emas', '', 'Barang Baku'],
+['TLKM', 'Telkom Indonesia Tbk', 'Telekomunikasi', '', 'Infrastruktur'],
+['TOWR', 'Sarana Menara Nusantara Tbk', 'Menara telekomunikasi', '', 'Infrastruktur'],
+['JSMR', 'Jasa Marga Tbk', 'Jalan tol', '', 'Infrastruktur'],
+['CDIA', 'Chandra Daya Investasi Tbk', 'Infrastruktur energi & air', '', 'Infrastruktur'],
+['GOTO', 'GoTo Gojek Tokopedia Tbk', 'Platform digital', '', 'Teknologi'],
+['INET', 'Sinergi Inti Andalan Prima Tbk', 'Jaringan internet', '', 'Teknologi'],
+['KLBF', 'Kalbe Farma Tbk', 'Farmasi', '', 'Kesehatan'],
+['MIKA', 'Mitra Keluarga Karyasehat Tbk', 'Rumah sakit', '', 'Kesehatan'],
+['BSDE', 'Bumi Serpong Damai Tbk', 'Pengembang properti', '', 'Properti & Real Estat'],
+['CTRA', 'Ciputra Development Tbk', 'Pengembang properti', '', 'Properti & Real Estat'],
+['TAPG', 'Triputra Agro Persada Tbk', 'Perkebunan sawit', '', 'Barang Konsumen Primer'],
+['GTSI', 'GTS Internasional Tbk', 'Kapal pengangkut LNG', '', 'Transportasi & Logistik'],
+['PADI', 'Minna Padi Investama Sekuritas Tbk', 'Sekuritas', '', 'Keuangan'],
+['ASII', 'Astra International Tbk', 'Otomotif & konglomerasi', '', 'Perindustrian']
+];
+
+var EXAMPLES = [
+['Kebutuhan listrik Indonesia terus naik dalam 5 tahun ke depan.', 'Batubara'],
+['Kredit UMKM tumbuh seiring pulihnya daya beli masyarakat.', 'Perbankan'],
+['Belanja rumah tangga pulih, emiten barang konsumsi ikut tumbuh.', 'Barang konsumsi']
+];
+
+var temaData = TEMA[st.tema] || null;
+var reasonsF = st.reasons.filter(function (r) { return r.trim() !== ''; });
+var killsF = st.kills.filter(function (r) { return r.trim() !== ''; });
+var stmt = st.statement.trim();
+
+var CATALOG = [];
+Object.keys(TEMA).forEach(function (k) { TEMA[k].em.forEach(function (e) { CATALOG.push([e[0], e[1], e[2], e[3], TEMA_SECTOR[k]]); }); });
+CATALOG = CATALOG.concat(EXTRA_EM);
+function emById(tk) {
+for (var i = 0; i < CATALOG.length; i++) { if (CATALOG[i][0] === tk) return CATALOG[i]; }
+return null;
+}
+function avatar(e, i) {
+var has = !!e[3];
+return { hasLogo: has, noLogo: !has, logo: e[3], ini: e[0].slice(0, 2), c: AVC[i % AVC.length] };
+}
+
+function validate(step) {
+if (step === 1 && stmt.length < 10) return 'Tulis pernyataan tesis dulu — cukup satu kalimat pendek.';
+if (step === 2 && reasonsF.length === 0) return 'Isi minimal satu alasan kenapa Anda yakin.';
+if (step === 3 && killsF.length === 0) return 'Isi minimal satu kondisi gugur — ini yang menjaga Anda tetap objektif.';
+if (step === 5 && (!st.horizon || !st.evalEvery)) return 'Pilih jangka waktu dan jadwal evaluasi dulu.';
+return '';
+}
+function goTo(n) {
+if (n > st.maxStep) return;
+self.setState({ step: n, err: '' });
+}
+
+var LABELS = ['Pernyataan', 'Alasan', 'Batas gugur', 'Emiten', 'Jangka & evaluasi'];
+var steps = LABELS.map(function (l, i) {
+var n = i + 1;
+var cur = n === st.step;
+var done = !cur && n < st.maxStep;
+var lock = n > st.maxStep;
+return {
+n: n, label: l, done: done, notDone: !done,
+cur: cur ? 'step' : 'false', lock: lock ? 'true' : 'false',
+cls: cur ? 'stp-cur' : (done ? 'stp-done' : (lock ? 'stp-lock' : '')),
+go: function () { goTo(n); }
+};
+});
+
+function setArr(key, i, v) { var a = st[key].slice(); a[i] = v; var o = { err: '' }; o[key] = a; self.setState(o); }
+function rmArr(key, i) { var a = st[key].slice(); a.splice(i, 1); var o = {}; o[key] = a; self.setState(o); }
+
+var RPH = ['Contoh: pembangunan smelter dan pusat data menambah kebutuhan listrik.', 'Alasan kedua (opsional)', 'Alasan lain (opsional)'];
+var reasonRows = st.reasons.map(function (v, i) {
+return { n: i + 1, val: v, ph: RPH[Math.min(i, 2)], aria: 'Alasan ' + (i + 1), rmAria: 'Hapus alasan ' + (i + 1),
+canRemove: st.reasons.length > 1,
+onInput: function (e) { setArr('reasons', i, e.target.value); },
+remove: function () { rmArr('reasons', i); } };
+});
+var killRows = st.kills.map(function (v, i) {
+return { n: i + 1, val: v, ph: i === 0 ? 'Contoh: konsumsi listrik nasional turun dua tahun berturut-turut.' : 'Kondisi lain (opsional)',
+aria: 'Kondisi gugur ' + (i + 1), rmAria: 'Hapus kondisi ' + (i + 1),
+canRemove: st.kills.length > 1,
+onInput: function (e) { setArr('kills', i, e.target.value); },
+remove: function () { rmArr('kills', i); } };
+});
+var GENERIC_REASON_SUG = [
+'Permintaan di sektor ini tumbuh lebih cepat dari pertumbuhan ekonomi secara umum.',
+'Perusahaan punya posisi pasar yang kuat dan sulit ditiru pesaing baru.',
+'Pemerintah mendukung sektor ini lewat kebijakan atau insentif jangka panjang.',
+'Tren jangka panjang (populasi, teknologi, daya beli) mendukung bisnis ini terus tumbuh.',
+'Perusahaan punya rekam jejak pertumbuhan laba yang konsisten.'
+];
+var reasonSug = GENERIC_REASON_SUG.filter(function (r) { return st.reasons.indexOf(r) < 0; }).map(function (r) {
+return { t: r, use: function () {
+var a = st.reasons.slice(); var idx = a.indexOf('');
+if (idx >= 0) a[idx] = r; else a.push(r);
+self.setState({ reasons: a, err: '' });
+} };
+});
+var GENERIC_KILL_SUG = [
+'Pertumbuhan pendapatan perusahaan berhenti atau turun dua tahun berturut-turut.',
+'Alasan utama saya di atas terbukti tidak lagi berlaku.',
+'Perusahaan kehilangan posisi pasar signifikan ke pesaing.',
+'Ada perubahan regulasi besar yang merugikan bisnis ini.',
+'Manajemen melakukan hal yang mengkhawatirkan (utang berlebihan, tata kelola buruk, dll).'
+];
+var killSug = GENERIC_KILL_SUG.filter(function (k) { return st.kills.indexOf(k) < 0; }).map(function (k) {
+return { t: k, use: function () {
+var a = st.kills.slice(); var idx = a.indexOf('');
+if (idx >= 0) a[idx] = k; else a.push(k);
+self.setState({ kills: a, err: '' });
+} };
+});
+
+var temaSek = TEMA_SECTOR[st.tema] || '';
+var curated = temaData ? temaData.em.map(function (e) { return e[0]; }) : [];
+var extraList = (st.extraEm || []).filter(function (tk) { return curated.indexOf(tk) < 0; });
+var candidates = curated.concat(extraList);
+var emOptions = candidates.map(function (tk, i) {
+var e = emById(tk) || [tk, tk, '', '', ''];
+var on = st.picked.indexOf(tk) >= 0;
+var av = avatar(e, i);
+var isExtra = extraList.indexOf(tk) >= 0;
+var diff = isExtra && !!temaSek && e[4] !== temaSek;
+var sameExtra = isExtra && !diff;
+return { tk: tk, role: e[2], on: on, cls: on ? 'emc emc-on' : 'emc',
+hasLogo: av.hasLogo, noLogo: av.noLogo, logo: av.logo, ini: av.ini, c: av.c,
+diffSek: diff, sameExtra: sameExtra, hasTags: diff || sameExtra,
+toggle: function () { self.setState({ picked: on ? st.picked.filter(function (x) { return x !== tk; }) : st.picked.concat([tk]) }); } };
+});
+function addExtra(tk) { self.setState({ extraEm: (st.extraEm || []).concat([tk]), emSearch: '', pendingEm: '' }); }
+var q = (st.emSearch || '').trim().toLowerCase();
+var srResults = !q ? [] : CATALOG.filter(function (e) {
+return e[0].toLowerCase().indexOf(q) === 0 || e[1].toLowerCase().indexOf(q) >= 0;
+}).slice(0, 6).map(function (e, i) {
+var inList = candidates.indexOf(e[0]) >= 0;
+var diff = !!temaSek && e[4] !== temaSek;
+var av = avatar(e, i);
+return { tk: e[0], meta: e[1] + ' · ' + e[4], inList: inList, notInList: !inList, showDiff: diff && !inList,
+cls: inList ? 'sr sr-in' : 'sr',
+hasLogo: av.hasLogo, noLogo: av.noLogo, logo: av.logo, ini: av.ini, c: av.c,
+pick: function () {
+if (inList) return;
+if (diff) { self.setState({ pendingEm: e[0] }); return; }
+addExtra(e[0]);
+} };
+});
+var pend = st.pendingEm ? (emById(st.pendingEm) || [st.pendingEm, st.pendingEm, '', '', '-']) : null;
+var np = st.picked.length;
+function evenWeights(list) {
+var n = list.length; var o = {};
+list.forEach(function (tk, i) { o[tk] = n ? Math.floor(100 / n) + (i < 100 % n ? 1 : 0) : 0; });
+return o;
+}
+var EVEN_W = evenWeights(st.picked);
+function effW(tk) { return (st.weights && st.weights[tk] !== undefined) ? st.weights[tk] : EVEN_W[tk]; }
+var pickedRows = st.picked.map(function (tk, i) {
+var e = emById(tk) || [tk, tk, '', '', ''];
+var av = avatar(e, i);
+var wv = effW(tk);
+return { tk: tk, w: wv + '%', wVal: wv, hasLogo: av.hasLogo, noLogo: av.noLogo, logo: av.logo, ini: av.ini, c: av.c,
+onWeight: function (ev) {
+var n = parseInt(ev.target.value, 10);
+if (isNaN(n)) n = 0;
+n = Math.max(0, Math.min(100, n));
+var w = Object.assign({}, st.weights || {});
+w[tk] = n;
+self.setState({ weights: w });
+},
+remove: function () {
+var w = Object.assign({}, st.weights || {});
+delete w[tk];
+self.setState({ picked: st.picked.filter(function (x) { return x !== tk; }), weights: w });
+} };
+});
+var totalWeight = pickedRows.reduce(function (s, p) { return s + p.wVal; }, 0);
+
+var MONTHS_EVERY = { 'Tiap 3 bulan': 3, 'Tiap 6 bulan': 6, 'Tiap tahun': 12 };
+var hasEvalChosen = !!st.evalEvery;
+function pad2(n) { return ('0' + n).slice(-2); }
+function fmtID(d) { return d.getDate() + ' ' + MONTHS_ID[d.getMonth()] + ' ' + d.getFullYear(); }
+var autoNd = hasEvalChosen ? new Date(TODAY.getFullYear(), TODAY.getMonth() + MONTHS_EVERY[st.evalEvery], TODAY.getDate()) : null;
+var autoDateStr = autoNd ? (autoNd.getFullYear() + '-' + pad2(autoNd.getMonth() + 1) + '-' + pad2(autoNd.getDate())) : '';
+var evalDateStr = st.evalDateOverride || autoDateStr;
+function parseDateStr(s) { var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+var nd = evalDateStr ? parseDateStr(evalDateStr) : null;
+var evalDateCustom = hasEvalChosen && !!st.evalDateOverride && st.evalDateOverride !== autoDateStr;
+
+var filled = (stmt.length >= 10 ? 1 : 0) + (reasonsF.length ? 1 : 0) + (killsF.length ? 1 : 0) + (np ? 1 : 0) + (st.maxStep >= 5 ? 1 : 0);
+
+var isLast = st.step === 5;
+var nextLabel = isLast ? 'Simpan tesis' : (st.step === 4 && np === 0 ? 'Lewati dulu' : 'Lanjut');
+
+return {
+notDone: !st.done, isDone: st.done,
+draftSaved: st.draftSaved,
+saveDraft: function () { self.setState({ draftSaved: true }); },
+steps: steps,
+is1: st.step === 1, is2: st.step === 2, is3: st.step === 3, is4: st.step === 4, is5: st.step === 5,
+statement: st.statement, stLen: st.statement.length,
+onStatement: function (e) { self.setState({ statement: e.target.value, err: '' }); },
+examples: EXAMPLES.map(function (x) { return { t: x[0], use: function () { self.setState({ statement: x[0], tema: x[1], picked: st.tema === x[1] ? st.picked : [], extraEm: st.tema === x[1] ? st.extraEm : [], err: '' }); } }; }),
+temas: TEMA_KEYS.map(function (k) {
+var on = st.tema === k;
+var ic = temaIcon(k);
+return { label: k === 'Belum pilih' ? 'Belum tahu' : k, on: on, cls: on ? 'chip chip-on' : 'chip', icon: ic.icon, icCls: ic.cls,
+pick: function () { self.setState({ tema: k, picked: st.tema === k ? st.picked : [], extraEm: st.tema === k ? st.extraEm : [] }); } };
+}),
+allTemas: TEMA_ORDER.concat(['Belum pilih']).map(function (k) {
+var on = st.tema === k;
+var ic = temaIcon(k);
+return { label: k === 'Belum pilih' ? 'Belum tahu' : k, on: on, cls: on ? 'tgc tgc-on' : 'tgc', icon: ic.icon, icCls: ic.cls,
+pick: function () { self.setState({ tema: k, picked: st.tema === k ? st.picked : [], extraEm: st.tema === k ? st.extraEm : [], temaModalOpen: false }); } };
+}),
+temaModalOpen: !!st.temaModalOpen,
+openTemaModal: function () { self.setState({ temaModalOpen: true }); },
+closeTemaModal: function () { self.setState({ temaModalOpen: false }); },
+temaLabel: st.tema,
+hasTema: st.tema !== 'Belum pilih',
+reasonRows: reasonRows,
+addReason: function () { self.setState({ reasons: st.reasons.concat(['']) }); },
+reasonSug: reasonSug, hasReasonSug: reasonSug.length > 0,
+killRows: killRows,
+addKill: function () { self.setState({ kills: st.kills.concat(['']) }); },
+killSug: killSug, hasKillSug: killSug.length > 0,
+emOptions: emOptions, hasEmOptions: emOptions.length > 0,
+gridLabel: curated.length ? 'Saran dari tema ' + st.tema : 'Emiten dari pencarian',
+noEmOptionsNoTema: curated.length === 0 && st.tema === 'Belum pilih',
+noEmOptionsNoData: curated.length === 0 && st.tema !== 'Belum pilih',
+emSearch: st.emSearch || '', hasQuery: q !== '',
+onEmSearch: function (e) { self.setState({ emSearch: e.target.value }); },
+clearSearch: function () { self.setState({ emSearch: '' }); },
+srResults: srResults, hasResults: srResults.length > 0, noResults: q !== '' && srResults.length === 0,
+pendOpen: !!pend, pendTk: pend ? pend[0] : '', pendName: pend ? pend[1] : '', pendSek: pend ? pend[4] : '',
+temaSek: temaSek,
+confirmPend: function () { addExtra(st.pendingEm); },
+cancelPend: function () { self.setState({ pendingEm: '' }); },
+pickedRows: pickedRows, hasPicked: np > 0, noPicked: np === 0,
+pickedLabel: np ? (np + ' emiten · ' + st.picked.join(', ')) : 'Belum ada emiten',
+pickedAvatars: pickedRows.slice(0, 10),
+pickedOverflow: np > 10 ? np - 10 : 0,
+resetWeights: function () { self.setState({ weights: {} }); },
+totalWeight: totalWeight, totalOk: totalWeight === 100, totalOff: totalWeight !== 100,
+horizons: ['1–3 tahun', '3–5 tahun', 'Lebih dari 5 tahun'].map(function (l) {
+var on = st.horizon === l;
+return { label: l, on: on, cls: on ? 'chip chip-on' : 'chip', pick: function () { self.setState({ horizon: l }); } };
+}),
+evals: ['Tiap 3 bulan', 'Tiap 6 bulan', 'Tiap tahun'].map(function (l) {
+var on = st.evalEvery === l;
+return { label: l, on: on, cls: on ? 'chip chip-on' : 'chip', pick: function () { self.setState({ evalEvery: l }); } };
+}),
+horizon: st.horizon, hasHorizon: !!st.horizon, noHorizon: !st.horizon,
+evalLower: st.evalEvery.toLowerCase(), hasEval: hasEvalChosen, noEval: !hasEvalChosen,
+nextEval: nd ? fmtID(nd) : '',
+nextDay: nd ? pad2(nd.getDate()) : '--',
+nextMon: nd ? MONTHS_ID[nd.getMonth()] : '',
+evalDateStr: evalDateStr,
+onEvalDate: function (e) { self.setState({ evalDateOverride: e.target.value }); },
+resetEvalDate: function () { self.setState({ evalDateOverride: '' }); },
+evalDateCustom: evalDateCustom,
+autoEvalLabel: autoNd ? fmtID(autoNd) : '',
+statementOrDash: stmt || '—',
+reasonCountLabel: reasonsF.length + ' alasan',
+killCountLabel: killsF.length + ' kondisi gugur',
+go1: function () { goTo(1); }, go2: function () { goTo(2); }, go3: function () { goTo(3); }, go4: function () { goTo(4); },
+showErr: st.err !== '', errText: st.err,
+hasBack: st.step > 1, noBack: st.step === 1,
+back: function () { self.setState({ step: st.step - 1, err: '' }); },
+nextLabel: nextLabel, showArrow: !isLast,
+next: function () {
+var e = validate(st.step);
+if (e) { self.setState({ err: e }); return; }
+if (isLast) { self.setState({ done: true, err: '' }); return; }
+var n = st.step + 1;
+self.setState({ step: n, maxStep: Math.max(st.maxStep, n), err: '' });
+},
+restart: function () { self.setState(self.fresh()); },
+filled: filled, filledPct: (filled * 20) + '%',
+hasStatement: stmt !== '', noStatement: stmt === '',
+pvReasons: reasonsF.map(function (t) { return { t: t }; }), hasReasons: reasonsF.length > 0, noReasons: reasonsF.length === 0,
+pvKills: killsF.map(function (t) { return { t: t }; }), hasKills: killsF.length > 0, noKills: killsF.length === 0
+};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>StockPlan — Tema Batubara</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+*{box-sizing:border-box}
+a{color:#1C1917}a:hover{color:#57534E}
+button,input,textarea,select{font-family:inherit}
+:focus-visible{outline:2px solid #1C1917;outline-offset:2px}
+.nv{display:flex;align-items:center;gap:10px;min-height:40px;padding:0 10px;border-radius:8px;font-size:14px;color:#57534E;text-decoration:none;border:1px solid transparent}
+.nv:hover{background:#F5F5F4;color:#1C1917}
+.nv-on,.nv-on:hover{background:#FFFFFF;color:#1C1917;font-weight:600;border-color:#E7E5E4;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.sec{font-size:11px;font-weight:600;color:#716A65;padding:16px 10px 6px;text-transform:uppercase;letter-spacing:.06em}
+.srch{display:flex;align-items:center;gap:8px;height:40px;min-width:260px;border:1px solid #E7E5E4;border-radius:8px;padding:0 10px;background:#FFFFFF;color:#716A65;font-size:14px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 14px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer;border:1px solid transparent}
+.btn-p{background:#FEA722;color:#1C1917}.btn-p:hover{background:#F59E0B;color:#1C1917}
+.btn-o{background:#FFFFFF;color:#1C1917;border-color:#E7E5E4}.btn-o:hover{background:#F5F5F4;color:#1C1917}
+.tab{min-height:34px;font-size:13px;font-weight:500;color:#57534E;padding:0 14px;border-radius:6px;border:0;background:transparent;cursor:pointer}
+.tab-on{font-weight:600;color:#1C1917;background:#FFFFFF;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.tk{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border-radius:8px;border:1px solid transparent;background:transparent;cursor:pointer;text-align:left;color:#1C1917;min-height:44px}
+.tk:hover{background:#F5F5F4}
+.tk-on,.tk-on:hover{background:#FFF7E8;border-color:#FEA722;box-shadow:0 0 0 3px rgba(254,167,34,.18)}
+.sk{display:block;height:8px;border-radius:4px;background:#F5F5F4}
+.ta{width:100%;min-height:180px;border:1px solid #D6D3D1;border-radius:10px;padding:12px 14px;font-size:15px;line-height:1.55;color:#1C1917;resize:vertical}
+.ta:focus{outline:none;border-color:#1C1917;box-shadow:0 0 0 3px rgba(28,25,23,.12)}
+th{font-size:12px;font-weight:600;color:#716A65;text-align:left;padding:10px 16px;background:#FAFAF9;border-bottom:1px solid #E7E5E4}
+td{padding:10px 16px;border-bottom:1px solid #E7E5E4;font-size:14px;vertical-align:middle}
+.hero{position:relative;overflow:hidden;border-radius:16px;background:linear-gradient(120deg,#FFF8EC 0%,#FFFFFF 70%);border:1px solid #F3E7D1;padding:20px 24px}
+.hero-dec{position:absolute;top:-34px;right:-24px;width:170px;height:170px;pointer-events:none}
+.gico{width:46px;height:46px;border-radius:12px;background:#FFF4E2;color:#92400E;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.pill2{font-size:12px;font-weight:600;border:1px solid #E7E5E4;padding:1px 8px;border-radius:6px;background:#FFFFFF}
+.glabel{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 10px;border-radius:999px;white-space:nowrap}
+.glabel-hulu{color:#92400E;background:#FFF4E2;border:1px solid #FCDDA8}
+.glabel-tengah{color:#1D4ED8;background:#EFF6FF;border:1px solid #BFDBFE}
+.glabel-hilir{color:#15803D;background:#F0FDF4;border:1px solid #BBF7D0}
+.flow-arr{display:flex;align-items:center;justify-content:center;margin:-6px 0}
+.flow-arr span{width:30px;height:30px;border-radius:999px;background:#FFFFFF;border:1px solid #E7E5E4;color:#A8A29E;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.grp{border:1px solid #E7E5E4;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden}
+.grp::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px}
+.grp-hulu{background:linear-gradient(180deg,#FFFAF1 0%,#FFFFFF 55%);border-color:#F3E2C2}.grp-hulu::before{background:#FEA722}
+.grp-tengah{background:linear-gradient(180deg,#F5F9FF 0%,#FFFFFF 55%);border-color:#D6E4FB}.grp-tengah::before{background:#3B82F6}
+.grp-hilir{background:linear-gradient(180deg,#F3FCF6 0%,#FFFFFF 55%);border-color:#CFEFD9}.grp-hilir::before{background:#22C55E}
+.ghead{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:2px 4px 2px 6px}
+.gic{width:44px;height:44px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.grp-hulu .gic{background:#FFF4E2;color:#92400E}.grp-tengah .gic{background:#EFF6FF;color:#1D4ED8}.grp-hilir .gic{background:#F0FDF4;color:#15803D}
+.gover{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.grp-hulu .gover{color:#B45309}.grp-tengah .gover{color:#1D4ED8}.grp-hilir .gover{color:#15803D}
+.gtitle{margin:0;font-size:18px;font-weight:700;letter-spacing:-0.01em;line-height:1.25}
+.gmeta{display:flex;gap:8px;margin-left:auto}
+.gstat{display:inline-flex;align-items:baseline;gap:4px;font-size:12px;color:#716A65;background:#FFFFFF;border:1px solid #E7E5E4;border-radius:8px;padding:4px 10px}
+.gstat b{font-size:15px;color:#1C1917;font-weight:700}
+.stn{width:24px;height:24px;border-radius:999px;background:#FFF4E2;color:#92400E;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.rbar{display:flex;height:12px;border-radius:999px;overflow:hidden;gap:2px}
+.rleg{display:flex;align-items:center;gap:6px;font-size:12px;color:#57534E}
+.rdot{width:9px;height:9px;border-radius:3px;flex:none}
+.posb{font-size:11px;font-weight:600;padding:1px 8px;border-radius:6px;border:1px solid;white-space:nowrap}
+.posb-hulu{color:#92400E;background:#FFF4E2;border-color:#FCDDA8}
+.posb-tengah{color:#1D4ED8;background:#EFF6FF;border-color:#BFDBFE}
+.posb-hilir{color:#15803D;background:#F0FDF4;border-color:#BBF7D0}
+.sub{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:#716A65}
+.gdesc{font-size:12.5px;color:#716A65;margin:0;line-height:1.5}
+.sdesc{font-size:11.5px;color:#A8A29E;line-height:1.35;margin:0}
+.tkcap{font-size:11.5px;color:#92400E;line-height:1.35;white-space:normal;font-weight:500}
+@keyframes mdpop{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes fdin{from{opacity:0}to{opacity:1}}
+.drawer-bd{position:fixed;inset:0;background:rgba(28,25,23,.44);z-index:40;animation:fdin .18s ease-out;display:flex;align-items:center;justify-content:center;padding:24px;overflow-y:auto}
+.drawer{position:relative;width:min(480px,100%);max-height:calc(100vh - 48px);margin:auto;background:#FFFFFF;border:1px solid #E7E5E4;border-radius:16px;box-shadow:0 24px 64px rgba(28,25,23,.28);z-index:41;display:flex;flex-direction:column;overflow-y:auto;animation:mdpop .2s cubic-bezier(.2,.8,.2,1)}
+.xbtn{margin-left:auto;width:36px;height:36px;border-radius:8px;border:1px solid #E7E5E4;background:#FFFFFF;color:#57534E;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:none}
+.xbtn:hover{background:#F5F5F4;color:#1C1917}
+.stile{border:1px solid #E7E5E4;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:3px;background:#FAFAF9;min-width:0}
+.stile b{font-size:18px;font-weight:700;color:#1C1917;letter-spacing:-0.01em}
+.stile span{font-size:11.5px;color:#716A65;line-height:1.3}
+.insight{display:flex;gap:10px;align-items:flex-start;background:#FFF8EC;border:1px solid #F3E2C2;border-radius:10px;padding:12px}
+.insight svg{flex:none;margin-top:1px;color:#92400E}
+.vtog{display:inline-flex;align-self:flex-start;background:#F5F5F4;border-radius:10px;padding:3px;gap:2px}
+.vtog a{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 14px;border-radius:8px;font-size:13px;font-weight:500;color:#57534E;text-decoration:none}
+.vtog a:hover{color:#1C1917}
+.vtog a[aria-current="page"]{font-weight:600;color:#1C1917;background:#FFFFFF;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.vc{border:1px solid #E7E5E4;border-radius:16px;overflow:hidden;background:#FFFFFF;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.vc-top{display:flex;gap:8px 20px;justify-content:space-between;align-items:center;flex-wrap:wrap;padding:10px 16px;background:#FAFAF9;border-bottom:1px solid #E7E5E4;font-size:12.5px;color:#716A65}
+.vc-top span{display:inline-flex;align-items:center;gap:6px}
+.vc-gh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 16px;border-bottom:1px solid #E7E5E4}
+.vc-gh-hulu{background:#FFFAF1;box-shadow:inset 3px 0 0 #FEA722}.vc-gh-tengah{background:#F5F9FF;box-shadow:inset 3px 0 0 #3B82F6}.vc-gh-hilir{background:#F3FCF6;box-shadow:inset 3px 0 0 #22C55E}
+.vc-gi{width:26px;height:26px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.vc-gh-hulu .vc-gi{background:#FFF4E2;color:#92400E}.vc-gh-tengah .vc-gi{background:#EFF6FF;color:#1D4ED8}.vc-gh-hilir .vc-gi{background:#F0FDF4;color:#15803D}
+.vc-gn{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.vc-gh-hulu .vc-gn{color:#92400E}.vc-gh-tengah .vc-gn{color:#1D4ED8}.vc-gh-hilir .vc-gn{color:#15803D}
+.vc-gd{font-size:12.5px;color:#716A65}
+.vc-gc{margin-left:auto;font-size:12px;color:#716A65;font-weight:500}
+.vc-row{display:grid;grid-template-columns:270px minmax(0,1fr);border-bottom:1px solid #F0EEEC}
+.vc-row:last-child{border-bottom:0}
+.vc-st{padding:14px 16px;border-right:1px solid #F0EEEC;display:flex;flex-direction:column;gap:2px}
+.vc-stn{font-size:14.5px;font-weight:700;line-height:1.3}
+.vc-stm{font-size:11.5px;color:#A8A29E;font-weight:500}
+.vc-std{font-size:12.5px;color:#716A65;margin-top:4px;line-height:1.45}
+.vc-tiles{display:flex;flex-wrap:wrap;gap:4px;padding:10px 12px;align-content:center}
+.vt{display:flex;flex-direction:column;align-items:center;gap:5px;width:74px;padding:8px 4px 6px;border-radius:10px;border:1px solid transparent;background:transparent;cursor:pointer;color:#1C1917}
+.vt:hover{background:#F5F5F4}
+.vt-on,.vt-on:hover{background:#FFF7E8;border-color:#FEA722;box-shadow:0 0 0 3px rgba(254,167,34,.18)}
+.vt-logo{position:relative;width:44px;height:44px;flex:none}
+.vt-logo img{width:44px;height:44px;border-radius:999px;border:1px solid #E7E5E4;display:block;object-fit:cover;background:#FFFFFF}
+.vt-ini{width:44px;height:44px;border-radius:999px;color:#FFFFFF;font-family:'Geist Mono',monospace;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.vt-multi .vt-logo img,.vt-multi .vt-ini{box-shadow:0 0 0 2px #FFFFFF,0 0 0 4px #93C5FD}
+.vc-badge{position:absolute;top:-5px;right:-7px;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:#2563EB;color:#FFFFFF;font-size:10.5px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;border:2px solid #FFFFFF;line-height:1}
+.vc-badge-static{position:static;border:0;min-width:18px;height:18px}
+.vt-tk{font-family:'Geist Mono',monospace;font-size:11.5px;font-weight:600}
+.xs{border:1px solid #E7E5E4;border-radius:16px;background:#FFFFFF;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.xs-title{margin:0;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+.xs-desc{margin:2px 0 0;font-size:13px;color:#716A65}
+.xs-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+.xs-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #E7E5E4;border-radius:12px;background:#FFFFFF;cursor:pointer;text-align:left;color:#1C1917;min-height:56px}
+.xs-item:hover{background:#FAFAF9;border-color:#D6D3D1}
+.xs-on,.xs-on:hover{background:#FFF7E8;border-color:#FEA722}
+.xs-logo{width:34px;height:34px;flex:none}
+.xs-logo img,.xs-logo .vt-ini{width:34px;height:34px;font-size:11px}
+.xs-logo img{border-radius:999px;border:1px solid #E7E5E4;display:block;object-fit:cover}
+.xs-body{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}
+.xs-tk{font-family:'Geist Mono',monospace;font-size:13px;font-weight:600}
+.xs-path{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.xs-arr{font-size:11px;color:#A8A29E}
+.mlogo{width:44px;height:44px;flex:none}
+.mlogo img{width:44px;height:44px;border-radius:10px;border:1px solid #E7E5E4;display:block;background:#FFFFFF}
+.mlogo .vt-ini{border-radius:10px;font-size:14px}
+.tlogo{width:32px;height:32px;flex:none}
+.tlogo img{width:32px;height:32px;border-radius:8px;border:1px solid #E7E5E4;display:block}
+.tlogo .vt-ini{width:32px;height:32px;border-radius:8px;font-size:11px}
+.mnote{margin:0;font-size:12px;color:#716A65;background:#FAFAF9;border:1px dashed #E7E5E4;border-radius:8px;padding:8px 10px;line-height:1.45}
+.trkbar{display:flex;gap:3px;width:100%;max-width:220px}
+.trk{flex:1;height:6px;border-radius:999px;background:#F0EEEC}
+.trk-hulu{background:#FEA722}.trk-tengah{background:#3B82F6}.trk-hilir{background:#22C55E}
+.xs-nst{font-size:11px;font-weight:600;color:#1D4ED8;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:999px;padding:0 7px;line-height:18px}
+.xs-wide{grid-column:span 2;background:linear-gradient(120deg,#F5F9FF 0%,#FFFFFF 60%);border-color:#BFDBFE}
+.xs-wide .xs-nst{background:#2563EB;color:#FFFFFF;border-color:#2563EB}
+.xs-tkrow{display:flex;align-items:center;gap:8px}
+@media (max-width:760px){.xs-wide{grid-column:auto}}
+.xs-headrow{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.xm{display:flex;flex-direction:column;border:1px solid #F0EEEC;border-radius:12px;overflow:visible}
+.xm-row{display:grid;grid-template-columns:150px minmax(0,1fr) 84px;align-items:center;gap:12px;padding:6px 12px;border-bottom:1px solid #F0EEEC;min-height:52px}
+.xm-row:last-child{border-bottom:0}
+.xm-head{min-height:0;padding:8px 12px;background:#FAFAF9;border-radius:12px 12px 0 0;font-size:11.5px;color:#716A65;font-weight:600}
+.xm-on{background:#FFF7E8}
+.xm-emi{display:flex;align-items:center;gap:10px;border:0;background:transparent;padding:4px;margin:-4px;border-radius:8px;cursor:pointer;text-align:left;color:#1C1917;min-height:40px}
+.xm-emi:hover{background:#F5F5F4}
+.xm-tk{font-family:'Geist Mono',monospace;font-size:13px;font-weight:600}
+.xm-track{position:relative;display:grid;grid-template-columns:repeat(5,1fr);align-items:center;min-height:36px}
+.xm-head .xm-track{min-height:0}
+.xm-h{display:flex;flex-direction:column;align-items:center;text-align:center;line-height:1.25;gap:1px}
+.xm-hg{font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.xm-hn{font-size:11.5px;color:#57534E;font-weight:600;white-space:nowrap}
+.xm-h-hulu .xm-hg{color:#B45309}.xm-h-tengah .xm-hg{color:#1D4ED8}.xm-h-hilir .xm-hg{color:#15803D}
+.xm-cell{position:relative;display:flex;justify-content:center;align-items:center;z-index:1}
+.xm-dot{position:relative;display:inline-flex;align-items:center;justify-content:center;border-radius:7px;border:0;padding:0}
+.xm-off{width:22px;height:22px;background:#FFFFFF;border:1.5px dashed #D6D3D1;cursor:default;color:transparent}
+.xm-onb{width:22px;height:22px;cursor:pointer;color:#FFFFFF;transition:transform .12s ease}
+.xm-onb:hover,.xm-onb:focus-visible{transform:scale(1.15)}
+.xm-hulu{background:#F59E0B}.xm-tengah{background:#2563EB}.xm-hilir{background:#16A34A}
+.xm-tip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1C1917;color:#FFFFFF;font-size:11.5px;font-weight:500;padding:5px 8px;border-radius:6px;white-space:nowrap;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .12s ease;z-index:5}
+.xm-tip::after{content:"";position:absolute;top:100%;left:50%;margin-left:-4px;border:4px solid transparent;border-top-color:#1C1917}
+.xm-dot:hover .xm-tip,.xm-dot:focus-visible .xm-tip{opacity:1;visibility:visible}
+.xm-c2{display:flex;justify-content:flex-end}
+.xm-n{font-size:11.5px;font-weight:600;color:#1D4ED8;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:999px;padding:0 8px;line-height:20px;white-space:nowrap}
+.xm-n3{background:#2563EB;color:#FFFFFF;border-color:#2563EB}
+.fresh{display:flex;align-items:center;gap:7px;font-size:12.5px;color:#716A65;background:#FAFAF9;border:1px solid #E7E5E4;border-radius:999px;padding:5px 12px 5px 10px;align-self:flex-start}
+.fresh b{color:#1C1917;font-weight:600}
+.fresh svg{flex:none;color:#A8A29E}
+@media (prefers-reduced-motion:reduce){.xm-onb{transition:none}}
+@media (max-width:760px){.vc-row{grid-template-columns:1fr}.vc-st{border-right:0;border-bottom:1px solid #F0EEEC}}
+@media (prefers-reduced-motion:reduce){.drawer,.drawer-bd{animation:none}}
+</style>
+</helmet>
+<div style="font-family: 'Geist', system-ui, sans-serif; color: #1C1917; background: #FFFFFF; font-size: 15px; line-height: 1.55; min-height: 100vh; display: flex; flex-wrap: wrap; align-items: stretch">
+
+<aside aria-label="Navigasi aplikasi" style="flex: 0 0 240px; border-right: 1px solid #E7E5E4; background: #FAFAF9; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px">
+<a href="Main.dc.html" aria-label="StockPlan, ke beranda" style="display: flex; align-items: center; gap: 8px; padding: 6px 10px 18px; text-decoration: none; color: #1C1917">
+<svg aria-hidden="true" viewBox="4 213 102 88" width="22" height="19"><g fill="#FEA722"><path d="M13.04,233.96c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.49s0-2.12,5.66-4.97l36.26-15.83c4.18-1.83,6.89-5.96,6.89-10.52v-16.89l-41.92,18.3Z"></path><path d="M96.89,280.81c4.18-1.83,6.89-5.96,6.89-10.52v-16.89h0v-2.49s0,2.12-5.66,4.97l-36.26,15.83c-4.18,1.83-6.89,5.96-6.89,10.52v16.89l41.92-18.3Z"></path><path d="M98.11,226.34l-36.26,15.83s-.07,.04-.1,.05l-48.71,21.26c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.79s0-2.12,5.66-4.97l36.26-15.83c.73-.32,1.4-.73,2.03-1.18l46.78-20.42c4.18-1.83,6.89-5.96,6.89-10.52h0v-16.89h0v-2.5s0,2.12-5.66,4.97Z"></path></g></svg>
+<span style="font-weight: 700; font-size: 15px; letter-spacing: -0.01em">StockPlan</span>
+<span style="margin-left: auto; font-size: 11px; font-weight: 600; color: #92400E; background: #FFF4E2; border: 1px solid #FCDDA8; padding: 0 6px; border-radius: 6px">Beta</span>
+</a>
+<a class="nv" href="Main.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>Beranda</a>
+<span class="sec">Riset</span>
+<a class="nv nv-on" href="Tema.dc.html" aria-current="page"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="2.2"></circle><circle cx="19" cy="6" r="2.2"></circle><circle cx="19" cy="18" r="2.2"></circle><path d="M7 11l10-4M7 13l10 4"></path></svg>Tema bisnis</a>
+<a class="nv" href="Emiten.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"></rect><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1"></path></svg>Emiten</a>
+<span class="sec">Perencanaan</span>
+<a class="nv" href="Tesis.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg>Tesis saya</a>
+<a class="nv" href="Portofolio.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>Portofolio</a>
+<a class="nv" href="Watchlist.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"></path></svg>Watchlist</a>
+<div style="margin-top: auto; padding-top: 24px">
+<a class="nv" href="#pengaturan"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"></path></svg>Pengaturan</a>
+</div>
+</aside>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+<header style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 28px; border-bottom: 1px solid #E7E5E4">
+<nav aria-label="Breadcrumb" style="font-size: 13px; color: #716A65"><a href="Tema.dc.html" style="color: #716A65">Tema bisnis</a> / <span style="color: #1C1917">Batubara</span></nav>
+<button type="button" class="srch" style="margin-left: auto"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg><span>Cari tema atau emiten…</span><span style="margin-left: auto; font-family: 'Geist Mono', monospace; font-size: 11px; border: 1px solid #E7E5E4; background: #FAFAF9; border-radius: 4px; padding: 0 5px; color: #57534E">⌘K</span></button>
+<a href="LayoutNotif.dc.html" aria-label="Notifikasi, 5 belum dibaca" style="position: relative; width: 40px; height: 40px; border-radius: 999px; border: 1px solid #E7E5E4; background: #FFFFFF; color: #44403C; display: inline-flex; align-items: center; justify-content: center; flex: none; text-decoration: none"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg><span aria-hidden="true" style="position: absolute; top: -4px; right: -5px; min-width: 19px; height: 19px; padding: 0 5px; box-sizing: border-box; border-radius: 999px; background: #DC2626; color: #FFFFFF; border: 2px solid #FFFFFF; font-family: 'Geist Mono', monospace; font-size: 10.5px; font-weight: 700; line-height: 15px; text-align: center">5</span></a>
+<button type="button" aria-label="Akun dan langganan" style="width: 40px; height: 40px; border-radius: 999px; border: 1px solid #E7E5E4; background: #1C1917; color: #FEA722; font-weight: 600; font-size: 14px; cursor: pointer">B</button>
+</header>
+
+<main style="padding: 24px 28px; display: flex; flex-direction: column; gap: 18px; width: 100%">
+<div class="hero" style="display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap">
+<div aria-hidden="true" class="hero-dec"><svg viewBox="0 0 170 170" width="170" height="170"><g fill="#FEA722"><path d="M15 45 L80 15 L80 45 L15 75 Z" opacity=".14"></path><path d="M40 85 L105 55 L105 85 L40 115 Z" opacity=".24"></path><path d="M65 125 L130 95 L130 125 L65 155 Z" opacity=".4"></path></g></svg></div>
+<div style="position: relative; display: flex; align-items: center; gap: 14px">
+<span class="gico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c-1 4-5 5-5 10a5 5 0 0010 0c0-5-4-6-5-10z"></path></svg></span>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
+<h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em">Batubara</h1>
+<span class="pill2">{{nStagesAll}} tahap</span>
+<span class="pill2">{{nTkAll}} emiten</span>
+</div>
+<p style="margin: 0; color: #716A65; max-width: 580px">Dari menggali batu bara sampai mengubahnya jadi listrik. Peta siapa mengerjakan apa — dari tambang sampai jadi listrik.</p>
+</div>
+</div>
+<a class="btn btn-p" href="TesisBuat.dc.html" style="position: relative"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>Buat tesis dari tema ini</a>
+</div>
+
+<nav class="vtog" aria-label="Tampilan tema">
+<a href="TemaDetail.dc.html" aria-current="page"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="5" rx="1.5"></rect><rect x="14" y="10" width="7" height="5" rx="1.5"></rect><rect x="3" y="16" width="7" height="5" rx="1.5"></rect><path d="M10 5.5h2a2 2 0 012 2v5M10 18.5h2a2 2 0 002-2v-1"></path></svg>Rantai nilai</a>
+<a href="TemaDetailTabel.dc.html"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M3 10h18M3 15h18M9 10v10"></path></svg>Tabel</a>
+</nav>
+<div class="fresh"><svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg>Kapitalisasi pasar per <b>{{mcapAsOf}}</b> · nama &amp; tahap rantai nilai berdasarkan riset umum, bukan data resmi BEI real-time</div>
+
+<sc-if value="{{isChain}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+<div style="display: flex; flex-direction: column; gap: 16px; flex: 1 1 100%; min-width: 0">
+<div class="vc">
+<div class="vc-top">
+<span><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg>Klik logo emiten untuk melihat detailnya.</span>
+<span><span class="vc-badge vc-badge-static" aria-hidden="true">2</span>Angka biru = emiten ini juga ada di tahap lain</span>
+</div>
+<sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+<div class="{{g.ghcls}}">
+<span class="vc-gi" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="{{g.icon}}"></path></svg></span>
+<span class="vc-gn">{{g.label}}</span>
+<span class="vc-gd">{{g.desc}}</span>
+<span class="vc-gc">{{g.meta}}</span>
+</div>
+<sc-for list="{{g.stages}}" as="st" hint-placeholder-count="2">
+<div class="vc-row">
+<div class="vc-st">
+<span class="vc-stn">{{st.name}}</span>
+<span class="vc-stm">Tahap {{st.n}} dari {{nStagesAll}} · {{st.count}} emiten</span>
+<span class="vc-std">{{st.desc}}</span>
+</div>
+<div class="vc-tiles">
+<sc-for list="{{st.rows}}" as="r" hint-placeholder-count="5">
+<button type="button" class="{{r.cls}}" onClick="{{r.pick}}" aria-pressed="{{r.on}}" title="{{r.title}}" aria-label="{{r.title}}">
+<span class="vt-logo">
+<sc-if value="{{r.hasLogo}}" hint-placeholder-val="{{true}}"><img src="{{r.logo}}" alt=""></sc-if>
+<sc-if value="{{r.noLogo}}" hint-placeholder-val="{{false}}"><span class="vt-ini" style="background: {{r.c}}" aria-hidden="true">{{r.ini}}</span></sc-if>
+<sc-if value="{{r.multi}}" hint-placeholder-val="{{false}}"><span class="vc-badge" aria-hidden="true">{{r.nst}}</span></sc-if>
+</span>
+<span class="vt-tk">{{r.tk}}</span>
+</button>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</sc-for>
+</div>
+
+<section class="xs" aria-labelledby="xs-title">
+<div class="xs-headrow">
+<div>
+<h2 id="xs-title" class="xs-title"><span class="vc-badge vc-badge-static" aria-hidden="true">{{multiCount}}</span>Emiten lintas tahap</h2>
+<p class="xs-desc">Perusahaan yang berperan di lebih dari satu tahap. Arahkan kursor ke titik untuk lihat tahapnya, klik untuk buka detail.</p>
+</div>
+</div>
+<div class="xm" role="table" aria-label="Posisi emiten lintas tahap di rantai nilai">
+<div class="xm-row xm-head" role="row">
+<span class="xm-c0" role="columnheader">Emiten</span>
+<div class="xm-track" role="presentation">
+<sc-for list="{{stageHeads}}" as="h" hint-placeholder-count="5">
+<span class="{{h.cls}}" role="columnheader"><span class="xm-hg">{{h.g}}</span><span class="xm-hn">{{h.n}}. {{h.short}}</span></span>
+</sc-for>
+</div>
+<span class="xm-c2" role="columnheader">Peran</span>
+</div>
+<sc-for list="{{multiList}}" as="m" hint-placeholder-count="6">
+<div class="{{m.rcls}}" role="row">
+<button type="button" class="xm-emi" onClick="{{m.pick}}" aria-label="{{m.title}}">
+<span class="xs-logo">
+<sc-if value="{{m.hasLogo}}" hint-placeholder-val="{{true}}"><img src="{{m.logo}}" alt=""></sc-if>
+<sc-if value="{{m.noLogo}}" hint-placeholder-val="{{false}}"><span class="vt-ini" style="background: {{m.c}}" aria-hidden="true">{{m.ini}}</span></sc-if>
+</span>
+<span class="xm-tk">{{m.tk}}</span>
+</button>
+<div class="xm-track">
+<sc-for list="{{m.dots}}" as="d" hint-placeholder-count="5">
+<span class="xm-cell">
+<sc-if value="{{d.on}}" hint-placeholder-val="{{false}}"><button type="button" class="{{d.cls}}" onClick="{{d.pick}}" aria-label="{{d.tip}}"><svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg><span class="xm-tip" role="tooltip">{{d.tip}}</span></button></sc-if>
+<sc-if value="{{d.off}}" hint-placeholder-val="{{true}}"><span class="xm-dot xm-off" tabindex="-1" aria-hidden="true"><span class="xm-tip">{{d.tip}}</span></span></sc-if>
+</span>
+</sc-for>
+</div>
+<span class="xm-c2"><span class="{{m.ncls}}">{{m.nstLabel}}</span></span>
+</div>
+</sc-for>
+</div>
+</section>
+</div>
+
+<sc-if value="{{open}}" hint-placeholder-val="{{false}}">
+<div class="drawer-bd" onClick="{{close}}" aria-hidden="true"></div>
+<div class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+<div style="padding: 20px; display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid #E7E5E4; background: linear-gradient(180deg,#FFF8EC 0%,#FFFFFF 100%); border-radius: 16px 16px 0 0; flex: none">
+<div style="display: flex; align-items: center; gap: 10px">
+<span class="mlogo">
+<sc-if value="{{selHasLogo}}" hint-placeholder-val="{{true}}"><img src="{{selLogo}}" alt=""></sc-if>
+<sc-if value="{{selNoLogo}}" hint-placeholder-val="{{false}}"><span class="vt-ini" style="background: {{selC}}" aria-hidden="true">{{selIni}}</span></sc-if>
+</span>
+<div style="display: flex; flex-direction: column; line-height: 1.3; min-width: 0">
+<span id="drawer-title" style="font-family: 'Geist Mono', monospace; font-weight: 600; font-size: 17px">{{sel}}</span>
+<span style="font-size: 13px; color: #716A65">{{selName}}</span>
+</div>
+<button type="button" class="xbtn" onClick="{{close}}" aria-label="Tutup detail emiten"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+</div>
+<div style="display: flex; gap: 6px; flex-wrap: wrap">
+<sc-for list="{{selStages}}" as="b" hint-placeholder-count="1">
+<span class="{{b.cls}}" style="font-size: 12px">{{b.label}}</span>
+</sc-for>
+</div>
+<sc-if value="{{selMulti}}" hint-placeholder-val="{{true}}">
+<p style="margin: 0; font-size: 12px; color: #1D4ED8; background: #EFF6FF; border-radius: 8px; padding: 8px 10px; line-height: 1.45">Punya peran di {{selNst}} tahap rantai nilai sekaligus — lihat semuanya di bagian "Emiten lintas tahap".</p>
+</sc-if>
+</div>
+<div style="padding: 16px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span class="sub">Ringkasan bisnis</span>
+<p style="margin: 0; font-size: 13.5px; color: #44403C; line-height: 1.6">{{selSummary}}</p>
+</div>
+<sc-if value="{{thin}}" hint-placeholder-val="{{false}}">
+<p class="mnote">Angka kunci dan rincian pendapatan emiten ini belum dirangkum. Cek laporan keuangan terbarunya di halaman bisnis.</p>
+</sc-if>
+<sc-if value="{{hasStats}}" hint-placeholder-val="{{true}}">
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+<sc-for list="{{selStats}}" as="st2" hint-placeholder-count="2">
+<div class="stile"><b>{{st2.v}}</b><span>{{st2.l}}</span></div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{hasInsight}}" hint-placeholder-val="{{true}}">
+<div class="insight">
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"></path></svg>
+<p style="margin: 0; font-size: 12.5px; color: #78350F; line-height: 1.5">{{selInsight}}</p>
+</div>
+</sc-if>
+<sc-if value="{{hasRev}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span class="sub">Sumber pendapatan terbesar</span>
+<div class="rbar" aria-hidden="true">
+<sc-for list="{{selRev}}" as="rv" hint-placeholder-count="2">
+<span style="width: {{rv.pct}}; background: {{rv.c}}"></span>
+</sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<sc-for list="{{selRev}}" as="rv" hint-placeholder-count="2">
+<span class="rleg"><span class="rdot" style="background: {{rv.c}}"></span>{{rv.label}}<span style="margin-left: auto; font-weight: 600; color: #1C1917">{{rv.pctLabel}}</span></span>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{hasSubs}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span class="sub">Anak usaha</span>
+<sc-for list="{{selSubs}}" as="su" hint-placeholder-count="2">
+<div style="display: flex; align-items: center; gap: 8px">
+<span aria-hidden="true" style="width: 22px; height: 22px; border-radius: 6px; background: #F5F5F4; color: #A8A29E; flex: none; display: inline-flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V10l6 4V10l6 4V6l6 3v12z"></path></svg></span>
+<span style="font-size: 13px">{{su.name}}</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<a class="btn btn-o" href="Emiten.dc.html" style="flex: 1 1 auto">Buka halaman bisnis</a>
+<button type="button" class="btn btn-o" aria-label="Tambah ke watchlist"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"></path></svg></button>
+</div>
+<span class="src" style="border-top: 1px dashed #E7E5E4; padding-top: 12px; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #716A65"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><ellipse cx="12" cy="6" rx="8" ry="3"></ellipse><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"></path></svg>Profil perusahaan &amp; laporan keuangan · BEI</span>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-if></main></div>
+
+
+
+
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1420}}'>
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { sel: 'BUMI', tab: 'chain', open: false };
+}
+renderVals() {
+var self = this;
+var L = {
+UNTR: '/_blob/f5a059270c2b05fcd6c975eb7bbd11d3',
+BUMI: '/_blob/d05174a2155f04e81025859fef041f66',
+ITMG: '/_blob/cd0894862a9546ef41964447ba7224e5',
+PTBA: '/_blob/a7814f85d9b69b78f4edb98dc5be88d5',
+AADI: '/_blob/fee486793ba6867b5b69aaf44de9f6e7',
+INDY: '/_blob/8feb111705443327d88bc0d6249f7c1e'
+};
+var N = {
+UNTR: 'United Tractors Tbk', DOID: 'Delta Dunia Makmur Tbk', PTRO: 'Petrosea Tbk', DEWA: 'Darma Henwa Tbk', ABMM: 'ABM Investama Tbk',
+BUMI: 'Bumi Resources Tbk', AADI: 'Adaro Andalan Indonesia Tbk', BYAN: 'Bayan Resources Tbk', ITMG: 'Indo Tambangraya Megah Tbk',
+PTBA: 'Bukit Asam Tbk', GEMS: 'Golden Energy Mines Tbk', INDY: 'Indika Energy Tbk', HRUM: 'Harum Energy Tbk',
+BSSR: 'Baramulti Suksessarana Tbk', DSSA: 'Dian Swastatika Sentosa Tbk', TOBA: 'TBS Energi Utama Tbk',
+MBAP: 'Mitrabara Adiperdana Tbk', KKGI: 'Resource Alam Indonesia Tbk', ADMR: 'Alamtri Minerals Indonesia Tbk (d/h Adaro Minerals)',
+TCPI: 'Transcoal Pacific Tbk', PSSI: 'IMC Pelita Logistik Tbk'
+};
+var stages = [
+{ n: 1, name: 'Kontraktor tambang', short: 'Kontraktor', g: 'Hulu', desc: 'Dibayar jasa menggali, bukan menjual batu bara sendiri.', tks: ['UNTR', 'DOID', 'PTRO', 'DEWA', 'ABMM'] },
+{ n: 2, name: 'Pemilik tambang termal', short: 'Pemilik tambang', g: 'Hulu', desc: 'Punya konsesi dan menjual batu bara untuk pembangkit listrik.', tks: ['BUMI', 'AADI', 'BYAN', 'ITMG', 'PTBA', 'GEMS', 'INDY', 'HRUM', 'BSSR', 'DSSA', 'TOBA', 'MBAP', 'KKGI', 'ABMM'] },
+{ n: 3, name: 'Tambang batu bara metalurgi', short: 'Metalurgi', g: 'Hulu', desc: 'Batu bara kokas untuk bahan baku industri baja.', tks: ['ADMR'] },
+{ n: 4, name: 'Logistik & pengapalan', short: 'Logistik', g: 'Tengah', desc: 'Mengangkut batu bara lewat tongkang dan kapal ke pembeli.', tks: ['AADI', 'TCPI', 'PSSI', 'ABMM'] },
+{ n: 5, name: 'Pembangkit listrik (PLTU)', short: 'Pembangkit', g: 'Hilir', desc: 'Membakar batu bara menjadi listrik.', tks: ['PTBA', 'INDY', 'TOBA', 'DSSA'] }
+];
+var SUMMARY = {
+UNTR: 'Kontraktor alat berat yang mengerjakan jasa penambangan untuk banyak pemilik tambang batu bara lewat anak usaha Pamapersada Nusantara (PAMA).',
+DOID: 'Induk Bukit Makmur Mandiri Utama (BUMA), salah satu kontraktor tambang batu bara terbesar di Indonesia.',
+PTRO: 'Kontraktor pertambangan sekaligus penyedia jasa rekayasa (engineering) untuk tambang batu bara dan mineral.',
+DEWA: 'Kontraktor jasa penambangan batu bara yang terafiliasi dengan Grup Bakrie.',
+ABMM: 'Grup energi terintegrasi: kontraktor tambang (Cipta Kridatama), tambang batu bara sendiri, dan jasa logistik.',
+BUMI: 'Pemilik tambang batu bara lewat Kaltim Prima Coal & Arutmin — produsen batu bara termal terbesar di Indonesia.',
+AADI: 'Hasil spin-off dari Adaro Energy (ADRO) akhir 2024, menaungi bisnis tambang dan logistik batu bara termal Grup Adaro.',
+BYAN: 'Produsen batu bara termal besar dengan tambang utama di Kalimantan Timur dan biaya produksi yang rendah.',
+ITMG: 'Pemilik tambang batu bara berkalori lebih tinggi dari BUMI; sekitar 75% volume penjualannya diekspor.',
+PTBA: 'BUMN di bawah holding MIND ID, pemilik tambang batu bara di Sumatra Selatan dengan kewajiban pasok domestik (DMO) ke PLN, plus PLTU mulut tambang.',
+GEMS: 'Pemilik tambang batu bara di Kalimantan, bagian dari Grup Sinar Mas lewat DSSA.',
+INDY: 'Perusahaan energi yang tengah menjauh dari batu bara — menargetkan separuh pendapatan dari bisnis non-batubara, termasuk kendaraan listrik.',
+HRUM: 'Pemilik tambang batu bara di Kalimantan Timur yang belakangan ekspansi ke bisnis nikel.',
+BSSR: 'Pemilik tambang batu bara di Kalimantan Selatan dengan fokus pasar ekspor.',
+DSSA: 'Holding energi Grup Sinar Mas: punya tambang batu bara (lewat GEMS) dan bisnis pembangkit listrik.',
+TOBA: 'Punya tambang batu bara dan PLTU, sambil beralih ke energi terbarukan dan pengelolaan limbah.',
+MBAP: 'Pemilik tambang batu bara di Kalimantan Utara.',
+KKGI: 'Pemilik tambang batu bara skala menengah di Kalimantan Timur.',
+ADMR: 'Fokus pada batu bara metalurgi (coking coal) plus proyek smelter aluminium untuk hilirisasi mineral.',
+TCPI: 'Penyedia jasa angkutan laut batu bara: tongkang, kapal tunda, dan bongkar muat.',
+PSSI: 'Penyedia jasa logistik laut untuk batu bara, dari tongkang sampai transshipment.'
+};
+var REV = {
+UNTR: [['Jasa pertambangan (PAMA)', 62], ['Alat berat & suku cadang', 38]],
+BUMI: [['Penjualan batu bara ekspor', 52], ['Penjualan domestik', 48]],
+ITMG: [['Ekspor batu bara', 75], ['Penjualan domestik', 25]],
+PTBA: [['Penjualan ke PLN (DMO)', 55], ['Komersial & ekspor', 45]],
+AADI: [['Penjualan batu bara termal', 72], ['Jasa logistik & pelabuhan', 28]],
+ADMR: [['Batu bara metalurgi', 70], ['Proyek hilirisasi aluminium', 30]],
+INDY: [['Pembangkit listrik & tambang', 50], ['Bisnis non-batubara (EV, energi baru)', 50]]
+};
+var SUBS = {
+UNTR: ['Pamapersada Nusantara'],
+DOID: ['Bukit Makmur Mandiri Utama (BUMA)'],
+BUMI: ['Kaltim Prima Coal', 'Arutmin Indonesia'],
+ITMG: ['Indominco Mandiri', 'Trubaindo Coal Mining'],
+PTBA: ['Bukit Asam Prima'],
+AADI: ['Adaro Logistics'],
+DSSA: ['Golden Energy Mines (GEMS)'],
+INDY: ['Indika Indonesia Resources']
+};
+var TKDESC = {
+UNTR: 'Kontraktor lewat PAMA', DOID: 'Induk BUMA', PTRO: 'Kontraktor + engineering', DEWA: 'Kontraktor Grup Bakrie', ABMM: 'Terintegrasi 3 tahap',
+BUMI: 'Produsen terbesar RI', AADI: 'Spin-off ADRO (2024)', BYAN: 'Biaya produksi rendah', ITMG: 'Kalori tinggi · ~75% ekspor',
+PTBA: 'BUMN · >50% ke PLN', GEMS: 'Grup Sinar Mas', INDY: 'Diversifikasi ke EV', HRUM: 'Ekspansi ke nikel', BSSR: 'Fokus ekspor',
+DSSA: 'Tambang + pembangkit', TOBA: 'Transisi ke EBT', MBAP: 'Tambang di Kaltara', KKGI: 'Skala menengah',
+ADMR: 'Batu bara metalurgi', TCPI: 'Kapal & tongkang', PSSI: 'Logistik laut'
+};
+var STATS = {
+UNTR: [['18,8 juta ton', 'Target jual batu bara 2026'], ['Jasa', 'Dibayar kontrak, bukan jual batu bara sendiri']],
+BUMI: [['80 juta ton', 'Target produksi 2025'], ['#1', 'Produsen batu bara termal terbesar RI']],
+ITMG: [['~75%', 'Volume penjualan diekspor'], ['±34%', 'Porsi ekspor ke China, pembeli terbesar']],
+PTBA: [['>50%', 'Porsi penjualan DMO ke PLN'], ['BUMN', 'Di bawah holding MIND ID']],
+AADI: [['2024', 'Tahun spin-off dari Adaro Energy'], ['Termal', 'Fokus tambang & logistik batu bara']],
+ADMR: [['Metalurgi', 'Jenis batu bara: coking coal'], ['Smelter', 'Lagi bangun proyek hilirisasi aluminium']],
+INDY: [['50%', 'Target pendapatan dari non-batubara'], ['EV', 'Masuk ke bisnis kendaraan listrik']]
+};
+var INSIGHT = {
+UNTR: 'Pendapatan UNTR dari batu bara mengikuti volume kerja kontraktornya, bukan harga batu bara secara langsung — beda sensitivitas dibanding pemilik tambang.',
+BUMI: 'Sebagai produsen volume terbesar, kinerja BUMI relatif lebih sensitif ke harga batu bara acuan dibanding emiten kalori tinggi seperti ITMG.',
+ITMG: 'Fokus ekspor bikin ITMG lebih terekspos ke permintaan pasar global (terutama China) dan harga batu bara kalori tinggi, bukan kebijakan DMO domestik.',
+PTBA: 'Kewajiban DMO ke PLN bikin sebagian pendapatan PTBA relatif stabil, tapi harga jual domestiknya biasanya di bawah harga ekspor.',
+AADI: 'Sebagai entitas baru hasil spin-off, rekam jejak keuangan independennya masih pendek — perlu dicek laporan triwulanannya sendiri.',
+ADMR: 'Harga coking coal bergerak beda dari batu bara termal biasa, jadi ADMR nggak selalu searah dengan BUMI/ITMG/PTBA.',
+INDY: 'INDY makin bergantung pada bisnis non-batubara, jadi performanya nggak lagi murni cerminan harga batu bara.',
+DSSA: 'Karena punya tambang dan pembangkit sekaligus, sebagian risiko harga batu bara di DSSA saling mengimbangi antar lini bisnis.',
+TOBA: 'Pendapatan TOBA masih dari batu bara, tapi arah investasinya sudah ke energi terbarukan — cek porsi tiap lini di laporan terbaru.',
+ABMM: 'ABMM dapat pendapatan dari tiga sisi — jasa kontraktor, penjualan batu bara sendiri, dan logistik — jadi sensitivitasnya ke harga batu bara campuran.'
+};
+var REVC = ['#FEA722', '#E7E5E4'];
+var GCLS = { Hulu: 'glabel glabel-hulu', Tengah: 'glabel glabel-tengah', Hilir: 'glabel glabel-hilir' };
+var GDESC = {
+Hulu: 'Menggali batu bara dari dalam tanah.',
+Tengah: 'Mengangkut hasil tambang ke pembeli.',
+Hilir: 'Mengubah batu bara jadi listrik.'
+};
+var POSCLS = { Hulu: 'posb posb-hulu', Tengah: 'posb posb-tengah', Hilir: 'posb posb-hilir' };
+var AVC = ['#1C1917', '#92400E', '#1D4ED8', '#15803D', '#6D28D9', '#BE185D', '#0F766E', '#B45309'];
+var order = ['UNTR', 'DOID', 'PTRO', 'DEWA', 'ABMM', 'BUMI', 'AADI', 'BYAN', 'ITMG', 'PTBA', 'GEMS', 'INDY', 'HRUM', 'BSSR', 'DSSA', 'TOBA', 'MBAP', 'KKGI', 'ADMR', 'TCPI', 'PSSI'];
+var avc = function (tk) { return AVC[order.indexOf(tk) % AVC.length]; };
+var sel = this.state.sel;
+var open = this.state.open;
+var stagesOf = function (tk) { return stages.filter(function (s) { return s.tks.indexOf(tk) >= 0; }); };
+var gnames = ['Hulu', 'Tengah', 'Hilir'];
+var GICON = {
+Hulu: 'M3 20l6-10 4 6 3-4 5 8z M14 7a2 2 0 100-4 2 2 0 000 4z',
+Tengah: 'M2 7h12v9H2z M14 10h4l3 3v3h-7 M6 19a2 2 0 100-4 2 2 0 000 4z M17 19a2 2 0 100-4 2 2 0 000 4z',
+Hilir: 'M13 2 3 14h8l-1 8 10-12h-8l1-8z'
+};
+var MCAP = {
+UNTR: 79.03, BUMI: 67.58, ITMG: 25.36, PTBA: 32.24, AADI: 95.19, ADMR: 68.89, INDY: 14.52
+};
+var MCAP_ASOF = '16 Okt 2026';
+var fmtCap = function (tk) {
+var v = MCAP[tk];
+if (!v) return { has: false, na: true, label: 'Belum tersedia' };
+return { has: true, na: false, label: 'Rp ' + v.toFixed(1).replace('.', ',') + ' T' };
+};
+var byStages = function (tks) {
+return tks.slice().sort(function (a, b) { return stagesOf(b).length - stagesOf(a).length; });
+};
+var tile = function (tk) {
+var nst = stagesOf(tk).length;
+var on = open && tk === sel;
+return {
+tk: tk, name: N[tk], cap: TKDESC[tk] || '', logo: L[tk] || '', hasLogo: !!L[tk], noLogo: !L[tk], ini: tk.slice(0, 2), c: avc(tk),
+multi: nst > 1, nst: nst, on: on,
+title: tk + ' · ' + N[tk] + (nst > 1 ? ' — ada di ' + nst + ' tahap' : ''),
+cls: 'vt' + (nst > 1 ? ' vt-multi' : '') + (on ? ' vt-on' : ''),
+mcap: fmtCap(tk),
+pick: function () { self.setState({ sel: tk, open: true }); }
+};
+};
+var mk = function (s) {
+return { n: s.n, name: s.name, desc: s.desc, count: s.tks.length, rows: byStages(s.tks).map(tile) };
+};
+var groups = gnames.map(function (g, gi) {
+var gs = stages.filter(function (s) { return s.g === g; });
+var tks = [];
+gs.forEach(function (s) { s.tks.forEach(function (t) { if (tks.indexOf(t) < 0) tks.push(t); }); });
+return {
+label: g, desc: GDESC[g], icon: GICON[g], ghcls: 'vc-gh vc-gh-' + g.toLowerCase(),
+meta: gs.length + ' tahap · ' + tks.length + ' emiten',
+stages: gs.map(mk)
+};
+});
+var multiList = order.filter(function (tk) { return stagesOf(tk).length > 1; })
+.sort(function (a, b) { return stagesOf(b).length - stagesOf(a).length; })
+.map(function (tk) {
+var t = tile(tk);
+var mine = stagesOf(tk);
+var pick = t.pick;
+t.dots = stages.map(function (s) {
+var on = s.tks.indexOf(tk) >= 0;
+return {
+on: on, off: !on, n: s.n,
+cls: 'xm-dot xm-onb xm-' + s.g.toLowerCase(),
+tip: on ? (tk + ' · Tahap ' + s.n + ': ' + s.name) : ('Tahap ' + s.n + ': ' + s.short + ' — tidak berperan'),
+pick: pick
+};
+});
+t.nstLabel = mine.length + ' tahap';
+t.ncls = 'xm-n' + (mine.length >= 3 ? ' xm-n3' : '');
+t.rcls = 'xm-row' + (t.on ? ' xm-on' : '');
+return t;
+});
+var stageHeads = stages.map(function (s) { return { n: s.n, short: s.short, g: s.g, cls: 'xm-h xm-h-' + s.g.toLowerCase() }; });
+var ss = stagesOf(sel);
+var tab = this.state.tab;
+var tabDefs = [['chain', 'Rantai nilai'], ['list', 'Daftar emiten'], ['note', 'Catatan']];
+return {
+tabs: tabDefs.map(function (t) {
+return { label: t[1], on: tab === t[0], cls: tab === t[0] ? 'tab tab-on' : 'tab', pick: function () { self.setState({ tab: t[0] }); } };
+}),
+isChain: true,
+mcapAsOf: MCAP_ASOF,
+open: open,
+close: function () { self.setState({ open: false }); },
+groups: groups,
+sel: sel, selName: N[sel], selLogo: L[sel] || '', selHasLogo: !!L[sel], selNoLogo: !L[sel], selIni: sel.slice(0, 2), selC: avc(sel),
+selMulti: ss.length > 1, selNst: ss.length,
+selStages: ss.map(function (s) { return { label: 'Tahap ' + s.n + ' · ' + s.name, cls: POSCLS[s.g] }; }),
+nStagesAll: stages.length, nTkAll: order.length, multiList: multiList, multiCount: multiList.length, stageHeads: stageHeads,
+hasStats: !!STATS[sel], hasInsight: !!INSIGHT[sel], hasRev: !!REV[sel], hasSubs: !!SUBS[sel],
+thin: !STATS[sel] && !REV[sel],
+selSummary: SUMMARY[sel],
+selStats: (STATS[sel] || []).map(function (s) { return { v: s[0], l: s[1] }; }),
+selInsight: INSIGHT[sel],
+selRev: (REV[sel] || []).map(function (r, i) { return { label: r[0], pct: r[1] + '%', pctLabel: r[1] + '%', c: REVC[i % REVC.length] }; }),
+selSubs: (SUBS[sel] || []).map(function (nm) { return { name: nm }; }),
+rows: order.map(function (tk) {
+var st = stagesOf(tk);
+var posGroups = st.map(function (s) { return s.g; }).filter(function (v, i, a) { return a.indexOf(v) === i; });
+return {
+tk: tk, name: N[tk], logo: L[tk],
+stageText: st.map(function (s) { return s.name; }).join(' · '),
+posBadges: posGroups.map(function (g) { return { label: g, cls: POSCLS[g] }; })
+};
+})
+};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>StockPlan — Emiten (hasil pencarian)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+
+body{margin:0;background:#FFFFFF}
+*{box-sizing:border-box}
+a{color:#1C1917}a:hover{color:#57534E}
+button,input,textarea,select{font-family:inherit}
+:focus-visible{outline:2px solid #1C1917;outline-offset:2px}
+.nv{display:flex;align-items:center;gap:10px;min-height:40px;padding:0 10px;border-radius:8px;font-size:14px;color:#57534E;text-decoration:none;border:1px solid transparent}
+.nv:hover{background:#F5F5F4;color:#1C1917}
+.nv-on,.nv-on:hover{background:#FFFFFF;color:#1C1917;font-weight:600;border-color:#E7E5E4;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.sec{font-size:11px;font-weight:600;color:#716A65;padding:16px 10px 6px;text-transform:uppercase;letter-spacing:.06em}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 14px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer;border:1px solid transparent}
+.btn-p{background:#FEA722;color:#1C1917}.btn-p:hover{background:#F59E0B;color:#1C1917}
+.btn-o{background:#FFFFFF;color:#1C1917;border-color:#E7E5E4}.btn-o:hover{background:#F5F5F4;color:#1C1917}
+.btn-s{min-height:34px;padding:0 12px;font-size:13px}
+.wrap{flex:1;display:flex;justify-content:center;padding:40px 28px 56px}
+.colm{max-width:720px;width:100%;display:flex;flex-direction:column;gap:20px}
+.sbox{position:relative;display:flex;align-items:center}
+.sbox>svg{position:absolute;left:16px;color:#A8A29E;pointer-events:none}
+.sinp{width:100%;height:50px;border:1px solid #E7E5E4;border-radius:10px;padding:0 48px 0 44px;font-size:15px;color:#1C1917;background:#FFFFFF;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.sinp::placeholder{color:#716A65}
+.sinp:focus{outline:none;border-color:#1C1917;box-shadow:0 0 0 3px rgba(28,25,23,.1)}
+.sclr{position:absolute;right:8px;width:34px;height:34px;border-radius:8px;border:0;background:transparent;color:#716A65;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.sclr:hover{background:#F5F5F4;color:#1C1917}
+.hd{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hd h1{margin:0;font-size:20px;font-weight:700;letter-spacing:-0.01em;line-height:1.3}
+.hd span{font-size:13.5px;color:#716A65}
+.lbl{font-size:12px;font-weight:600;color:#716A65;text-transform:uppercase;letter-spacing:.04em}
+.grp{display:flex;flex-direction:column;gap:8px}
+.chiprow{display:flex;gap:8px;flex-wrap:wrap}
+.echip{display:inline-flex;align-items:center;gap:8px;min-height:36px;border:1px solid #E7E5E4;border-radius:999px;padding:0 12px;text-decoration:none;color:#1C1917;font-size:13.5px;font-weight:500;background:#FFFFFF;cursor:pointer}
+.echip:hover{background:#F5F5F4;color:#1C1917}
+.echip svg{color:#716A65;flex:none}
+.echip small{font-size:12.5px;font-weight:400;color:#716A65}
+.echip-on,.echip-on:hover{background:#1C1917;border-color:#1C1917;color:#FFFFFF}
+.echip-on small{color:#D6D3D1}
+.lst{border:1px solid #E7E5E4;border-radius:12px;background:#FFFFFF;box-shadow:0 1px 2px rgba(0,0,0,.04);overflow:hidden}
+.rw{display:flex;align-items:flex-start;gap:14px;padding:16px 12px 16px 20px;border-top:1px solid #F0EEEC}
+.rw:first-child{border-top:0}
+.rw:hover{background:#FAFAF9}
+.rw-av img,.rw-av .ini{width:40px;height:40px;border-radius:999px;border:1px solid #E7E5E4;background:#FFFFFF;flex:none;object-fit:cover;display:block}
+.ini{display:inline-flex !important;align-items:center;justify-content:center;color:#FFFFFF;font-family:'Geist Mono',monospace;font-size:12.5px;font-weight:600;border:0 !important}
+.rw-id{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1;text-decoration:none;color:#1C1917}
+.rw-id:hover{color:#1C1917}
+.rw-id:hover .rw-tk{text-decoration:underline;text-underline-offset:3px;text-decoration-color:#D6D3D1}
+.rw-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;line-height:1.3}
+.rw-tk{font-family:'Geist Mono',monospace;font-size:15px;font-weight:600}
+.rw-nm{font-size:14px;color:#44403C}
+.rw-role{font-size:13.5px;color:#716A65;line-height:1.5}
+.rw-meta{font-size:12.5px;color:#716A65}
+.tg{display:inline-flex;align-items:center;font-size:12px;font-weight:600;height:20px;padding:0 7px;border-radius:6px;border:1px solid #E7E5E4;background:#F5F5F4;color:#57534E;white-space:nowrap}
+.tg-a{background:#FFF4E2;color:#92400E;border-color:#FCDDA8}
+.bm{width:44px;height:44px;border-radius:8px;border:1px solid transparent;background:transparent;color:#716A65;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.bm:hover{background:#F5F5F4;color:#1C1917}
+.bm-on,.bm-on:hover{color:#92400E;background:#FFF4E2;border-color:#FCDDA8}
+mark{background:#FFF4E2;color:inherit;border-radius:3px;padding:0}
+.or-row{display:flex;align-items:center;gap:10px;width:100%;color:#716A65;font-size:12px}
+.or-row::before,.or-row::after{content:"";flex:1;height:1px;background:#E7E5E4}
+.ctr{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:24px 0 4px}
+.eicon{width:52px;height:52px;border-radius:14px;background:#FFF4E2;color:#92400E;display:inline-flex;align-items:center;justify-content:center}
+.etitle{font-size:20px;font-weight:700;letter-spacing:-0.01em}
+.etext{font-size:14px;color:#716A65;line-height:1.6;max-width:520px}
+.tic{display:inline-flex;align-items:center;justify-content:center;flex:none;background:#F5F5F4;color:#57534E}
+.secgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.secc{display:flex;flex-direction:column;gap:10px;padding:14px;border:1px solid #E7E5E4;border-radius:12px;background:#FFFFFF;cursor:pointer;text-align:left;color:#1C1917;font:inherit}
+.secc:hover{background:#FAFAF9;border-color:#D6D3D1}
+.secc-h{display:flex;align-items:center;gap:10px}
+.secc-ic{width:36px;height:36px;border-radius:10px}
+.secc-t{display:flex;flex-direction:column;line-height:1.3}
+.secc-t b{font-size:14px}
+.secc-t span{font-size:12.5px;color:#716A65}
+.secc-tk{display:flex;gap:4px;flex-wrap:wrap}
+.secc-tk span{font-family:'Geist Mono',monospace;font-size:11px;font-weight:600;color:#57534E;background:#F5F5F4;border-radius:5px;padding:0 6px;line-height:18px}
+@media (max-width:600px){.wrap{padding:24px 16px 40px}.rw{padding-left:14px;gap:10px}}
+</style>
+</helmet>
+<div style="font-family: 'Geist', system-ui, sans-serif; color: #1C1917; background: #FFFFFF; font-size: 15px; line-height: 1.55; min-height: 100vh; display: flex; flex-wrap: wrap; align-items: stretch">
+
+<aside aria-label="Navigasi aplikasi" style="flex: 0 0 240px; border-right: 1px solid #E7E5E4; background: #FAFAF9; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px">
+<a href="Main.dc.html" aria-label="StockPlan, ke beranda" style="display: flex; align-items: center; gap: 8px; padding: 6px 10px 18px; text-decoration: none; color: #1C1917">
+<svg aria-hidden="true" viewBox="4 213 102 88" width="22" height="19"><g fill="#FEA722"><path d="M13.04,233.96c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.49s0-2.12,5.66-4.97l36.26-15.83c4.18-1.83,6.89-5.96,6.89-10.52v-16.89l-41.92,18.3Z"></path><path d="M96.89,280.81c4.18-1.83,6.89-5.96,6.89-10.52v-16.89h0v-2.49s0,2.12-5.66,4.97l-36.26,15.83c-4.18,1.83-6.89,5.96-6.89,10.52v16.89l41.92-18.3Z"></path><path d="M98.11,226.34l-36.26,15.83s-.07,.04-.1,.05l-48.71,21.26c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.79s0-2.12,5.66-4.97l36.26-15.83c.73-.32,1.4-.73,2.03-1.18l46.78-20.42c4.18-1.83,6.89-5.96,6.89-10.52h0v-16.89h0v-2.5s0,2.12-5.66,4.97Z"></path></g></svg>
+<span style="font-weight: 700; font-size: 15px; letter-spacing: -0.01em">StockPlan</span>
+<span style="margin-left: auto; font-size: 11px; font-weight: 600; color: #92400E; background: #FFF4E2; border: 1px solid #FCDDA8; padding: 0 6px; border-radius: 6px">Beta</span>
+</a>
+<a class="nv" href="Main.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>Beranda</a>
+<span class="sec">Riset</span>
+<a class="nv" href="Tema.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="2.2"></circle><circle cx="19" cy="6" r="2.2"></circle><circle cx="19" cy="18" r="2.2"></circle><path d="M7 11l10-4M7 13l10 4"></path></svg>Tema bisnis</a>
+<a class="nv nv-on" href="Emiten.dc.html" aria-current="page"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"></rect><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1"></path></svg>Emiten</a>
+<span class="sec">Perencanaan</span>
+<a class="nv" href="Tesis.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg>Tesis saya</a>
+<a class="nv" href="Portofolio.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>Portofolio</a>
+<a class="nv" href="Watchlist.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"></path></svg>Watchlist</a>
+<div style="margin-top: auto; padding-top: 24px">
+<a class="nv" href="#pengaturan"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"></path></svg>Pengaturan</a>
+</div>
+</aside>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+<header style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 28px; border-bottom: 1px solid #E7E5E4">
+<nav aria-label="Breadcrumb" style="font-size: 13px; color: #716A65">Emiten / <span style="color: #1C1917">Cari</span></nav>
+<a href="LayoutNotif.dc.html" aria-label="Notifikasi, 5 belum dibaca" style="margin-left: auto; position: relative; width: 40px; height: 40px; border-radius: 999px; border: 1px solid #E7E5E4; background: #FFFFFF; color: #44403C; display: inline-flex; align-items: center; justify-content: center; flex: none; text-decoration: none"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg><span aria-hidden="true" style="position: absolute; top: -4px; right: -5px; min-width: 19px; height: 19px; padding: 0 5px; box-sizing: border-box; border-radius: 999px; background: #DC2626; color: #FFFFFF; border: 2px solid #FFFFFF; font-family: 'Geist Mono', monospace; font-size: 10.5px; font-weight: 700; line-height: 15px; text-align: center">5</span></a>
+<button type="button" aria-label="Akun dan langganan" style="width: 40px; height: 40px; border-radius: 999px; border: 1px solid #E7E5E4; background: #1C1917; color: #FEA722; font-weight: 600; font-size: 14px; cursor: pointer">B</button>
+</header>
+
+<main class="wrap">
+<div class="colm">
+
+<div class="sbox">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+<input id="em-search" type="text" class="sinp" autocomplete="off" aria-label="Cari emiten" placeholder="Ketik ticker atau nama emiten, misalnya &quot;BUMI&quot; atau &quot;Bukit Asam&quot;…" value="{{q}}" onInput="{{onSearch}}">
+<sc-if value="{{hasQuery}}" hint-placeholder-val="{{true}}"><button type="button" class="sclr" aria-label="Hapus pencarian" onClick="{{clearQuery}}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></sc-if>
+</div>
+
+<sc-if value="{{showResults}}" hint-placeholder-val="{{true}}">
+<div class="hd">
+<sc-if value="{{hasQuery}}" hint-placeholder-val="{{true}}"><h1>Hasil untuk “{{qShow}}”</h1></sc-if>
+<sc-if value="{{noQuery}}" hint-placeholder-val="{{false}}"><h1>{{othersTitle}}</h1></sc-if>
+<span>{{sumLabel}}</span>
+</div>
+
+<div class="chiprow" role="group" aria-label="Filter sektor">
+<sc-for list="{{filters}}" as="f" hint-placeholder-count="3"><button type="button" class="{{f.chipCls}}" aria-pressed="{{f.on}}" onClick="{{f.pick}}">{{f.label}}<small>{{f.count}}</small></button></sc-for>
+</div>
+
+<div class="lst">
+<sc-for list="{{list}}" as="r" hint-placeholder-count="3">
+<article class="rw">
+<span class="rw-av" aria-hidden="true">
+<sc-if value="{{r.hasLogo}}" hint-placeholder-val="{{true}}"><img src="{{r.logo}}" alt=""></sc-if>
+<sc-if value="{{r.noLogo}}" hint-placeholder-val="{{false}}"><span class="ini" style="background: {{r.c}}">{{r.ini}}</span></sc-if>
+</span>
+<a class="rw-id" href="Emiten.dc.html">
+<span class="rw-top"><span class="rw-tk">{{r.tkA}}<mark>{{r.tkB}}</mark>{{r.tkC}}</span><span class="rw-nm">{{r.nmA}}<mark>{{r.nmB}}</mark>{{r.nmC}}</span><sc-if value="{{r.isTop}}" hint-placeholder-val="{{false}}"><span class="tg tg-a">Paling cocok</span></sc-if><sc-if value="{{r.inTesis}}" hint-placeholder-val="{{false}}"><span class="tg">Di tesis Anda</span></sc-if></span>
+<span class="rw-role">{{r.role}}</span>
+<span class="rw-meta">{{r.sector}} · {{r.tema}} · Skala {{r.sizeLower}}<sc-if value="{{r.hasReport}}" hint-placeholder-val="{{false}}"> · Ada laporan analisis</sc-if></span>
+</a>
+<button type="button" class="{{r.bmCls}}" aria-pressed="{{r.watched}}" aria-label="{{r.bmAria}}" onClick="{{r.toggleWatch}}"><svg width="17" height="17" viewBox="0 0 24 24" fill="{{r.bmFill}}" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"></path></svg></button>
+</article>
+</sc-for>
+</div>
+
+<sc-if value="{{hasTemaRel}}" hint-placeholder-val="{{true}}">
+<div class="grp"><span class="lbl">Tema terkait</span>
+<div class="chiprow"><sc-for list="{{temaRel}}" as="t" hint-placeholder-count="2"><a class="echip" href="{{t.href}}"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="2.2"></circle><circle cx="19" cy="6" r="2.2"></circle><circle cx="19" cy="18" r="2.2"></circle><path d="M7 11l10-4M7 13l10 4"></path></svg>{{t.label}}<small>{{t.cnt}}</small></a></sc-for></div>
+</div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{noResults}}" hint-placeholder-val="{{false}}">
+<div class="ctr">
+<span class="eicon" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path><path d="M8.5 11h5"></path></svg></span>
+<span class="etitle">Tidak ada emiten yang cocok dengan “{{qShow}}”</span>
+<span class="etext">Coba kode saham 4 huruf seperti BBRI, atau sebagian nama perusahaan seperti “Telkom”.</span>
+</div>
+</sc-if>
+
+<sc-if value="{{showBrowse}}" hint-placeholder-val="{{false}}">
+<div class="grp"><span class="lbl">Jelajahi berdasarkan sektor</span>
+<div class="secgrid">
+<sc-for list="{{secCards}}" as="s" hint-placeholder-count="6">
+<button type="button" class="secc" onClick="{{s.pick}}">
+<span class="secc-h"><span class="tic secc-ic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{s.icon}}"></path></svg></span><span class="secc-t"><b>{{s.label}}</b><span>{{s.count}} emiten</span></span></span>
+<span class="secc-tk"><sc-for list="{{s.tks}}" as="k" hint-placeholder-count="3"><span>{{k.t}}</span></sc-for></span>
+</button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<div class="grp"><span class="lbl">Pencarian terakhir</span>
+<div class="chiprow"><sc-for list="{{recentQ}}" as="x" hint-placeholder-count="4"><button type="button" class="echip" onClick="{{x.use}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>{{x.l}}</button></sc-for></div>
+</div>
+
+<div class="or-row">atau</div>
+<div style="display: flex; justify-content: center"><a class="btn btn-o" href="Tema.dc.html"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="2.2"></circle><circle cx="19" cy="6" r="2.2"></circle><circle cx="19" cy="18" r="2.2"></circle><path d="M7 11l10-4M7 13l10 4"></path></svg>Jelajahi dari tema bisnis</a></div>
+
+</div>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { q: 'bu', sector: 'Semua', watch: { BUMI: true } };
+}
+renderVals() {
+var self = this;
+var st = this.state;
+var AVC = ['#1C1917', '#92400E', '#1D4ED8', '#15803D', '#6D28D9', '#BE185D'];
+var SEC = {
+'Energi': { icon: 'M13 2 3 14h8l-1 8 10-12h-8l1-8Z', cls: 'tic-amber', bar: 'bar-amber' },
+'Keuangan': { icon: 'M3 10h18L12 4z M5 10v8M10 10v8M14 10v8M19 10v8M3 20h18', cls: 'tic-blue', bar: 'bar-blue' },
+'Barang konsumsi': { icon: 'M4 9h16l-2 11H6z M9 9l3-5 3 5', cls: 'tic-green', bar: 'bar-green' },
+'Barang baku': { icon: 'M3 20 9 8l4 7 3-5 5 10H3Z', cls: 'tic-copper', bar: 'bar-copper' },
+'Infrastruktur': { icon: 'M12 3v18 M5 21l7-18 7 18 M8 14h8', cls: 'tic-cyan', bar: 'bar-cyan' },
+'Teknologi': { icon: 'M7 7h10v10H7z M10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4', cls: 'tic-indigo', bar: 'bar-indigo' },
+'Kesehatan': { icon: 'M12 5v14M5 12h14', cls: 'tic-rose', bar: 'bar-rose' },
+'Properti': { icon: 'M4 21V5l8-2v18 M12 9h8v12 M4 21h16', cls: 'tic-purple', bar: 'bar-purple' },
+'Perindustrian': { icon: 'M3 21h18M5 21V10l4-3v3l4-3v3l4-3v11', cls: 'tic-stone', bar: 'bar-stone' }
+};
+function sec(s) { return SEC[s] || { icon: 'M5 12h14', cls: 'tic-stone', bar: 'bar-stone' }; }
+var STAGES = ['Hulu', 'Tengah', 'Hilir'];
+	var SIZES = ['Kecil', 'Menengah', 'Besar'];
+
+// [tk, name, logo, sector, role, stage, inTesis, tema, size, report]
+var C = [
+['BUMI', 'Bumi Resources Tbk', '/_blob/d05174a2155f04e81025859fef041f66', 'Energi', 'Menambang dan menjual batu bara lewat anak usaha KPC dan Arutmin, plus mulai masuk ke mineral logam.', 'Hulu', false, 'Batubara', 'Besar', true],
+['PTBA', 'Bukit Asam Tbk', '/_blob/a7814f85d9b69b78f4edb98dc5be88d5', 'Energi', 'BUMN tambang batu bara yang lebih dari separuh penjualannya ke PLN, plus punya PLTU sendiri.', 'Hulu', true, 'Batubara', 'Menengah', false],
+['AADI', 'Adaro Andalan Indonesia Tbk', '/_blob/fee486793ba6867b5b69aaf44de9f6e7', 'Energi', 'Tambang batu bara sekaligus armada tongkang dan pelabuhan sendiri untuk mengangkutnya.', 'Tengah', true, 'Batubara', 'Besar', false],
+['ITMG', 'Indo Tambangraya Megah Tbk', '/_blob/cd0894862a9546ef41964447ba7224e5', 'Energi', 'Produsen batu bara kalori tinggi yang sebagian besar diekspor ke Asia.', 'Hulu', false, 'Batubara', 'Menengah', false],
+['UNTR', 'United Tractors Tbk', '/_blob/f5a059270c2b05fcd6c975eb7bbd11d3', 'Energi', 'Dibayar per volume galian lewat PAMA, ditambah bisnis alat berat Komatsu, emas, dan nikel.', 'Hulu', true, 'Batubara', 'Besar', false],
+['INDY', 'Indika Energy Tbk', '/_blob/8feb111705443327d88bc0d6249f7c1e', 'Energi', 'Induk beberapa tambang batu bara yang mulai merambah kendaraan listrik dan energi surya.', 'Hilir', false, 'Batubara', 'Menengah', false],
+['PGEO', 'Pertamina Geothermal Energy Tbk', '', 'Energi', 'Mengelola pembangkit listrik panas bumi dan menjual uap atau listriknya ke PLN.', '', false, 'Energi terbarukan', 'Besar', false],
+['PGAS', 'Perusahaan Gas Negara Tbk', '', 'Energi', 'Menyalurkan gas bumi lewat pipa ke industri, pembangkit, dan rumah tangga.', '', false, 'Minyak & gas', 'Menengah', true],
+['MEDC', 'Medco Energi Internasional Tbk', '', 'Energi', 'Mencari dan memproduksi minyak dan gas, dengan tambahan bisnis listrik dan tambang tembaga.', '', false, 'Minyak & gas', 'Menengah', false],
+['CUAN', 'Petrindo Jaya Kreasi Tbk', '', 'Energi', 'Pemilik tambang batu bara yang sedang memperluas bisnis ke mineral dan jasa tambang.', 'Hulu', false, 'Batubara', 'Besar', true],
+['DEWA', 'Darma Henwa Tbk', '', 'Energi', 'Kontraktor yang dibayar untuk mengupas tanah dan menggali batu bara milik perusahaan lain.', 'Hulu', false, 'Batubara', 'Kecil', true],
+['BBRI', 'Bank Rakyat Indonesia Tbk', '', 'Keuangan', 'Bank BUMN dengan jaringan terluas, sebagian besar kreditnya ke usaha mikro dan kecil.', '', false, 'Perbankan', 'Besar', true],
+['BMRI', 'Bank Mandiri Tbk', '', 'Keuangan', 'Bank BUMN terbesar dari sisi aset, kuat di kredit korporasi dan transaksi perusahaan.', '', false, 'Perbankan', 'Besar', true],
+['BBCA', 'Bank Central Asia Tbk', '', 'Keuangan', 'Bank swasta yang hidup dari dana transaksi harian nasabah yang murah dan stabil.', '', false, 'Perbankan', 'Besar', false],
+['BBNI', 'Bank Negara Indonesia Tbk', '', 'Keuangan', 'Bank BUMN dengan fokus korporasi dan jaringan cabang di luar negeri.', '', false, 'Perbankan', 'Besar', false],
+['PADI', 'Minna Padi Investama Sekuritas Tbk', '', 'Keuangan', 'Perusahaan sekuritas kecil yang labanya banyak bergantung pada hasil trading sendiri.', '', false, 'Perbankan', 'Kecil', true],
+['ICBP', 'Indofood CBP Sukses Makmur Tbk', '', 'Barang konsumsi', 'Pembuat Indomie dan makanan kemasan lain, dengan pasar besar di Timur Tengah dan Afrika.', '', false, 'Barang konsumsi', 'Besar', false],
+['SIDO', 'Industri Jamu Sido Muncul Tbk', '', 'Barang konsumsi', 'Pembuat jamu dan produk herbal seperti Tolak Angin, dengan margin laba tinggi.', '', false, 'Barang konsumsi', 'Menengah', true],
+['MYOR', 'Mayora Indah Tbk', '', 'Barang konsumsi', 'Pembuat biskuit, permen, dan kopi kemasan yang dijual di dalam dan luar negeri.', '', false, 'Barang konsumsi', 'Menengah', false],
+['UNVR', 'Unilever Indonesia Tbk', '', 'Barang konsumsi', 'Penjual sabun, sampo, dan kebutuhan rumah tangga merek Unilever di Indonesia.', '', false, 'Barang konsumsi', 'Menengah', false],
+['TAPG', 'Triputra Agro Persada Tbk', '', 'Barang konsumsi', 'Perkebunan kelapa sawit yang mengolah sendiri buahnya menjadi minyak sawit mentah.', '', false, 'Sawit', 'Menengah', true],
+['INCO', 'Vale Indonesia Tbk', '', 'Barang baku', 'Menambang dan mengolah nikel di Sulawesi untuk bahan baja tahan karat dan baterai.', '', false, 'Nikel', 'Menengah', true],
+['ANTM', 'Aneka Tambang Tbk', '', 'Barang baku', 'BUMN tambang nikel, emas, dan bauksit, juga penjual emas batangan Logam Mulia.', '', false, 'Nikel', 'Menengah', false],
+['TLKM', 'Telkom Indonesia Tbk', '', 'Infrastruktur', 'Operator telekomunikasi BUMN, pemilik Telkomsel, jaringan fiber, dan pusat data.', '', false, 'Telekomunikasi', 'Besar', true],
+['TOWR', 'Sarana Menara Nusantara Tbk', '', 'Infrastruktur', 'Menyewakan menara dan jaringan fiber ke operator seluler dengan kontrak jangka panjang.', '', false, 'Telekomunikasi', 'Menengah', false],
+['JSMR', 'Jasa Marga Tbk', '', 'Infrastruktur', 'BUMN pengelola jalan tol yang pendapatannya dari tarif kendaraan yang lewat.', '', false, 'Jalan tol', 'Menengah', false],
+['CDIA', 'Chandra Daya Investasi Tbk', '', 'Infrastruktur', 'Pengelola infrastruktur listrik, air, pelabuhan, dan tangki untuk kawasan industri.', '', false, 'Infrastruktur energi', 'Besar', true],
+['GTSI', 'GTS Internasional Tbk', '', 'Infrastruktur', 'Menyewakan kapal pengangkut dan penyimpanan gas alam cair (LNG).', '', false, 'Logistik energi', 'Kecil', true],
+['GOTO', 'GoTo Gojek Tokopedia Tbk', '', 'Teknologi', 'Aplikasi transportasi, pesan antar, dan pembayaran digital Gojek dan GoPay.', '', false, 'Ekonomi digital', 'Besar', false],
+['INET', 'Sinergi Inti Andalan Prima Tbk', '', 'Teknologi', 'Penyedia jaringan dan layanan internet untuk rumah dan bisnis.', '', false, 'Telekomunikasi', 'Kecil', true],
+['KLBF', 'Kalbe Farma Tbk', '', 'Kesehatan', 'Produsen obat, suplemen, dan susu kemasan, plus distribusi produk kesehatan.', '', false, 'Kesehatan', 'Menengah', false],
+['MIKA', 'Mitra Keluarga Karyasehat Tbk', '', 'Kesehatan', 'Jaringan rumah sakit swasta untuk pasien kelas menengah di kota besar.', '', false, 'Kesehatan', 'Menengah', false],
+['BSDE', 'Bumi Serpong Damai Tbk', '', 'Properti', 'Mengembangkan dan menjual rumah, ruko, serta kawasan BSD City di Tangerang.', '', false, 'Properti', 'Menengah', false],
+['CTRA', 'Ciputra Development Tbk', '', 'Properti', 'Pengembang perumahan dan kawasan kota mandiri di banyak kota di Indonesia.', '', false, 'Properti', 'Menengah', false],
+['ASII', 'Astra International Tbk', '', 'Perindustrian', 'Konglomerasi otomotif Toyota dan Honda, pembiayaan, alat berat, dan agribisnis.', '', false, 'Otomotif', 'Besar', false]
+];
+var SECTORS = ['Energi', 'Keuangan', 'Barang konsumsi', 'Barang baku', 'Infrastruktur', 'Teknologi', 'Kesehatan', 'Properti', 'Perindustrian'];
+var TEMA_PAGE = { 'Batubara': 'TemaDetail.dc.html' };
+var TEMA_SEC = { 'Batubara': 'Energi', 'Energi terbarukan': 'Energi', 'Minyak & gas': 'Energi', 'Perbankan': 'Keuangan', 'Barang konsumsi': 'Barang konsumsi', 'Sawit': 'Barang konsumsi', 'Nikel': 'Barang baku', 'Telekomunikasi': 'Infrastruktur', 'Jalan tol': 'Infrastruktur', 'Infrastruktur energi': 'Infrastruktur', 'Logistik energi': 'Infrastruktur', 'Ekonomi digital': 'Teknologi', 'Kesehatan': 'Kesehatan', 'Properti': 'Properti', 'Otomotif': 'Perindustrian' };
+
+var raw = (st.q || '');
+var q = raw.trim().toLowerCase();
+var watch = st.watch || {};
+function split(text, onlyPrefix) {
+var lo = text.toLowerCase(); var i = q ? lo.indexOf(q) : -1;
+if (i < 0 || (onlyPrefix && i !== 0)) return [text, '', ''];
+return [text.slice(0, i), text.slice(i, i + q.length), text.slice(i + q.length)];
+}
+function matchQ(e) { return !q || e[0].toLowerCase().indexOf(q) === 0 || e[1].toLowerCase().indexOf(q) >= 0 || e[7].toLowerCase().indexOf(q) >= 0; }
+function score(e) { var t = e[0].toLowerCase(); if (t === q) return 0; if (t.indexOf(q) === 0) return 1; if (e[1].toLowerCase().indexOf(q) === 0) return 2; return 3; }
+function av(e, i) { var has = !!e[2]; return { hasLogo: has, noLogo: !has, logo: e[2], ini: e[0].slice(0, 2), c: AVC[i % AVC.length] }; }
+function row(e, i) {
+var s = sec(e[3]); var a = av(e, i); var tk = split(e[0], true); var nm = split(e[1], false);
+var w = !!watch[e[0]]; var si = STAGES.indexOf(e[5]); var szi = SIZES.indexOf(e[8]);
+return {
+tk: e[0], name: e[1], role: e[4], sector: e[3], secCls: s.cls, secIcon: s.icon, barCls: s.bar,
+tkA: tk[0], tkB: tk[1], tkC: tk[2], nmA: nm[0], nmB: nm[1], nmC: nm[2],
+hasStage: si >= 0, noStage: si < 0, stage: e[5], chainLabel: si >= 0 ? 'Rantai nilai ' + e[7] : 'Rantai nilai',
+chain: STAGES.map(function (l, k) { return { l: l, line: k > 0, cls: k === si ? 'ch ch-on' : 'ch', mc: k === si ? 'mc mc-on' : 'mc' }; }),
+	scaleBars: [{ cls: 'sb sb1' + (szi >= 0 ? ' sb-on' : '') }, { cls: 'sb sb2' + (szi >= 1 ? ' sb-on' : '') }, { cls: 'sb sb3' + (szi >= 2 ? ' sb-on' : '') }],
+inTesis: e[6], tema: e[7], size: e[8], sizeLower: e[8].toLowerCase(), hasReport: e[9],
+hasLogo: a.hasLogo, noLogo: a.noLogo, logo: a.logo, ini: a.ini, c: a.c,
+watched: w, bmCls: w ? 'bm bm-on' : 'bm', bmFill: w ? 'currentColor' : 'none',
+bmAria: w ? 'Hapus ' + e[0] + ' dari watchlist' : 'Simpan ' + e[0] + ' ke watchlist',
+bmBtnCls: w ? 'btn btn-o btn-s btn-w-on' : 'btn btn-o btn-s', bmLabel: w ? 'Di watchlist' : 'Simpan ke watchlist',
+toggleWatch: function () { var nw = Object.assign({}, self.state.watch || {}); nw[e[0]] = !nw[e[0]]; self.setState({ watch: nw }); }
+};
+}
+
+var qMatches = C.filter(matchQ);
+var filtered = qMatches.filter(function (e) { return st.sector === 'Semua' || e[3] === st.sector; });
+if (q) filtered = filtered.slice().sort(function (a, b) { return score(a) - score(b); });
+var rows = filtered.map(row);
+var triedSearch = q !== '' || st.sector !== 'Semua';
+var feat = q && rows.length ? rows[0] : null;
+var others = feat ? rows.slice(1) : rows;
+
+var filters = ['Semua'].concat(SECTORS).map(function (s) {
+var n = s === 'Semua' ? qMatches.length : qMatches.filter(function (e) { return e[3] === s; }).length;
+var on = st.sector === s; var ic = s === 'Semua' ? null : sec(s);
+return { label: s, count: n, on: on, show: on || n > 0, cls: on ? 'fchip fchip-on' : 'fchip', chipCls: on ? 'echip echip-on' : 'echip', hasIcon: !!ic, icon: ic ? ic.icon : '', pick: function () { self.setState({ sector: s }); } };
+}).filter(function (f) { return f.show; });
+
+var temaMap = {}; var temaOrder = [];
+filtered.forEach(function (e, i) { var t = e[7]; if (!temaMap[t]) { temaMap[t] = []; temaOrder.push(t); } temaMap[t].push(av(e, i)); });
+var temaRel = temaOrder.slice(0, 4).map(function (t) {
+var s = sec(TEMA_SEC[t] || '');
+var n = C.filter(function (e) { return e[7] === t; }).length;
+return { cnt: n + ' emiten', label: t, cls: s.cls, icon: s.icon, href: TEMA_PAGE[t] || 'Tema.dc.html', avs: temaMap[t].slice(0, 3),
+sub: TEMA_PAGE[t] ? 'Lihat rantai nilai · ' + n + ' emiten' : n + ' emiten di tema ini' };
+});
+
+var secCards = SECTORS.map(function (s) {
+var ic = sec(s); var list = C.filter(function (e) { return e[3] === s; });
+return { label: s, cls: ic.cls, icon: ic.icon, count: list.length, tks: list.slice(0, 4).map(function (e) { return { t: e[0] }; }), pick: function () { self.setState({ sector: s }); } };
+});
+
+var recentQ = ['batubara', 'BBRI', 'nikel', 'Telkom'].map(function (l) { return { l: l, use: function () { self.setState({ q: l, sector: 'Semua' }); } }; });
+
+var n = filtered.length;
+return {
+q: raw, qShow: raw.trim(), hasQuery: q !== '', noQuery: q === '',
+onSearch: function (ev) { self.setState({ q: ev.target.value }); },
+clearQuery: function () { self.setState({ q: '', sector: 'Semua' }); },
+filters: filters,
+showResults: n > 0 && triedSearch, noResults: n === 0 && triedSearch, showBrowse: !triedSearch,
+hasFeat: !!feat, feat: feat || row(C[0], 0),
+others: others, hasOthers: others.length > 0,
+list: rows.map(function (r, i) { r.isTop = !!feat && i === 0; return r; }),
+sumLabel: n + ' emiten' + (q ? ' cocok' : '') + (st.sector !== 'Semua' ? ' di sektor ' + st.sector : ''),
+othersTitle: feat ? 'Hasil lainnya' : (st.sector === 'Semua' ? 'Semua hasil' : 'Sektor ' + st.sector),
+countLabel: n + ' emiten' + (st.sector !== 'Semua' ? ' di sektor ' + st.sector : '') + (q ? ' cocok' : ''),
+temaRel: temaRel, hasTemaRel: temaRel.length > 0,
+recentQ: recentQ, secCards: secCards, catalogCount: C.length
+};
+}
+}
+</script>
+</body>
+</html>

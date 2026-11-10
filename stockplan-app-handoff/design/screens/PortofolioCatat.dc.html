@@ -1,0 +1,860 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>StockPlan — Portofolio — catat transaksi</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+*{box-sizing:border-box}
+a{color:#1C1917}a:hover{color:#57534E}
+button,input,textarea,select{font-family:inherit}
+:focus-visible{outline:2px solid #1C1917;outline-offset:2px}
+.nv{display:flex;align-items:center;gap:10px;min-height:40px;padding:0 10px;border-radius:8px;font-size:14px;color:#57534E;text-decoration:none;border:1px solid transparent}
+.nv:hover{background:#F5F5F4;color:#1C1917}
+.nv-on,.nv-on:hover{background:#FFFFFF;color:#1C1917;font-weight:600;border-color:#E7E5E4;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.sec{font-size:11px;font-weight:600;color:#716A65;padding:16px 10px 6px;text-transform:uppercase;letter-spacing:.06em}
+.srch{display:flex;align-items:center;gap:8px;height:40px;min-width:260px;border:1px solid #E7E5E4;border-radius:8px;padding:0 10px;background:#FFFFFF;color:#716A65;font-size:14px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04);text-decoration:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 14px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer;border:1px solid transparent;white-space:nowrap}
+.btn-p{background:#FEA722;color:#1C1917}.btn-p:hover{background:#F59E0B;color:#1C1917}
+.btn-o{background:#FFFFFF;color:#1C1917;border-color:#E7E5E4}.btn-o:hover{background:#F5F5F4;color:#1C1917}
+.btn-g{background:transparent;color:#57534E;border-color:transparent}.btn-g:hover{background:#F5F5F4;color:#1C1917}
+.btn-d{background:#B91C1C;color:#FFFFFF}.btn-d:hover{background:#991B1B;color:#FFFFFF}
+.btn-dl{background:#FFFFFF;color:#B91C1C;border-color:#FECACA}.btn-dl:hover{background:#FEF2F2;color:#991B1B}
+.btn-s{min-height:34px;padding:0 12px;font-size:13px}
+.num{font-variant-numeric:tabular-nums}
+
+/* hero */
+.hero{position:relative;overflow:hidden;border-radius:18px;background:linear-gradient(125deg,#FFF6E6 0%,#FFFBF4 45%,#FFFFFF 100%);border:1px solid #F3E2C2;padding:22px 24px;display:flex;gap:24px;flex-wrap:wrap;align-items:center}
+.hero-dec{position:absolute;top:-70px;right:-50px;width:260px;height:260px;pointer-events:none}
+.kick{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#92400E;letter-spacing:.06em;text-transform:uppercase}
+.big{font-size:36px;font-weight:700;letter-spacing:-0.025em;line-height:1.1}
+.split{display:flex;gap:6px 18px;flex-wrap:wrap;font-size:13.5px;color:#57534E}
+.split b{color:#1C1917;font-weight:600}
+.split i{width:9px;height:9px;border-radius:3px;display:inline-block;margin-right:6px}
+.cap{margin:0;font-size:12.5px;color:#716A65}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;flex:1 1 440px;position:relative}
+.stat{background:rgba(255,255,255,.9);border:1px solid #F1E3C9;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.stat-ic{width:30px;height:30px;border-radius:9px;background:#FFF4E2;color:#92400E;display:inline-flex;align-items:center;justify-content:center}
+.stat b{font-size:24px;font-weight:700;letter-spacing:-0.02em;line-height:1.15;white-space:nowrap}
+.stat>span{font-size:12.5px;color:#716A65;white-space:nowrap;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.stat-cash{background:#1C1917;border-color:#1C1917}
+.stat-cash .stat-ic{background:rgba(254,167,34,.16);color:#FEA722}
+.stat-cash b{color:#FFFFFF}.stat-cash>span{color:#D6D3D1}
+.mini{border:0;background:rgba(255,255,255,.12);color:#FEA722;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;cursor:pointer}
+.mini:hover{background:rgba(255,255,255,.2)}
+
+/* tabs + groups */
+.ch{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 12px;border-radius:999px;border:1px solid #E7E5E4;background:#FFFFFF;color:#57534E;font-size:13px;font-weight:500;cursor:pointer}
+.tab:hover{background:#F5F5F4;color:#1C1917}
+.tab-on,.tab-on:hover{background:#1C1917;border-color:#1C1917;color:#FFFFFF}
+.tab i{width:8px;height:8px;border-radius:999px;display:block}
+.tab em{font-style:normal;font-family:'Geist Mono',monospace;font-size:11px;opacity:.7}
+.al-none{background:repeating-linear-gradient(135deg,#D6D3D1 0 3px,#F5F5F4 3px 6px)}
+.tg{border:1px solid #E7E5E4;border-radius:16px;background:#FFFFFF;overflow:hidden}
+.tg-h{display:flex;gap:14px;align-items:flex-start;padding:16px 18px;border-bottom:1px solid #F0EEEC;background:linear-gradient(180deg,#FCFBFA 0%,#FFFFFF 100%)}
+.tg-bar{width:4px;align-self:stretch;border-radius:999px;flex:none}
+.tg-t{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
+.tg-k{font-size:11.5px;font-weight:700;color:#716A65;letter-spacing:.05em;text-transform:uppercase}
+.tg-s{margin:0;font-size:15.5px;font-weight:600;line-height:1.4;color:#1C1917}
+.meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:0 9px;line-height:22px;border-radius:999px;background:#F5F5F4;color:#57534E;white-space:nowrap}
+.pill-late{background:#FEF2F2;color:#B91C1C}
+.pill-soon{background:#FFF4E2;color:#92400E}
+.tg-r{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:none;text-align:right}
+.tg-m{font-size:20px;font-weight:700;letter-spacing:-0.01em;line-height:1.1}
+.tg-m small{display:block;font-size:12px;font-weight:500;color:#716A65;letter-spacing:0;margin-top:2px}
+.rw{display:grid;grid-template-columns:minmax(190px,1.35fr) minmax(160px,1.25fr) minmax(130px,.9fr) minmax(110px,.8fr) 110px;gap:16px;align-items:center;padding:13px 18px;border-top:1px solid #F5F4F2}
+.rw:first-child{border-top:0}
+.rw-hd{padding:9px 18px;background:#FAFAF9;border-bottom:1px solid #F0EEEC;font-size:11.5px;font-weight:600;color:#716A65;text-transform:uppercase;letter-spacing:.04em}
+.rw-empty{padding:18px;font-size:13.5px;color:#716A65}
+.em{display:flex;align-items:center;gap:10px;text-decoration:none;color:#1C1917;min-width:0}
+.em:hover{color:#1C1917}.em:hover b{text-decoration:underline;text-underline-offset:3px;text-decoration-color:#D6D3D1}
+.em img,.em .ini{width:36px;height:36px;border-radius:9px;border:1px solid #E7E5E4;background:#FFFFFF;flex:none}
+.ini{display:inline-flex;align-items:center;justify-content:center;color:#FFFFFF;font-family:'Geist Mono',monospace;font-size:12px;font-weight:600;border:0 !important}
+.em-t{display:flex;flex-direction:column;line-height:1.3;min-width:0}
+.em-t b{font-family:'Geist Mono',monospace;font-size:14px}
+.em-t>span{font-size:12px;color:#716A65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stg{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
+.sg{font-size:10.5px;font-weight:600;padding:0 6px;line-height:17px;border-radius:5px}
+.sg-Hulu{background:#1C1917;color:#FFFFFF}.sg-Tengah{background:#FEA722;color:#1C1917}.sg-Hilir{background:#FCDDA8;color:#78350F}
+.w{display:flex;flex-direction:column;gap:6px}
+.w-l{display:flex;justify-content:space-between;align-items:baseline;gap:6px;font-size:13px}
+.w-l b{font-weight:700}
+.w-l>span{font-size:12px;color:#716A65}
+.wb{position:relative;height:8px;border-radius:999px;background:#F2F0EE}
+.wb-f{position:absolute;left:0;top:0;bottom:0;border-radius:999px}
+.f-ok{background:#57534E}.f-hi{background:#F59E0B}
+.wb-t{position:absolute;top:-4px;width:2px;height:16px;background:#1C1917;border-radius:2px;margin-left:-1px}
+.drift{font-size:11.5px;font-weight:600;color:#B45309}
+.lot{display:flex;flex-direction:column;line-height:1.35;font-size:13px}
+.lot>span{font-size:12px;color:#716A65;white-space:nowrap}
+.st{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:0 9px;line-height:22px;border-radius:999px;white-space:nowrap}
+.st i{width:6px;height:6px;border-radius:999px;background:currentColor;display:block}
+.st-ok{background:#F0FDF4;color:#15803D}.st-rv{background:#FFF4E2;color:#92400E}.st-no{background:#F5F5F4;color:#57534E}
+.rw-a{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.lnk{white-space:nowrap;border:0;background:none;padding:0;font-size:12px;font-weight:600;color:#92400E;cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-decoration-color:#FCDDA8}
+.lnk:hover{color:#78350F}
+.orph{border:1px dashed #D6D3D1;border-radius:16px;background:#FAFAF9;overflow:hidden}
+.orph .tg-h{background:transparent}
+.oic{width:40px;height:40px;border-radius:12px;background:#F5F5F4;color:#57534E;display:inline-flex;align-items:center;justify-content:center;flex:none}
+
+/* rail */
+.rail{display:flex;flex-direction:column;gap:14px}
+.rc{border:1px solid #E7E5E4;border-radius:16px;background:#FFFFFF;padding:16px;display:flex;flex-direction:column;gap:12px}
+.rc h3{margin:0;font-size:13px;font-weight:700;color:#44403C;text-transform:uppercase;letter-spacing:.05em}
+.dn{display:flex;justify-content:center;position:relative}
+.dn-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+.dn-c b{font-size:20px;font-weight:700;letter-spacing:-0.01em}
+.dn-c>span{font-size:11.5px;color:#716A65}
+.dl{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:2px}
+.dl li{display:grid;grid-template-columns:12px 1fr auto auto;gap:8px;align-items:center;font-size:13px;padding:5px 0;border-top:1px solid #F5F4F2}
+.dl li:first-child{border-top:0}
+.dl i{width:10px;height:10px;border-radius:3px;display:block}
+.dl em{font-style:normal;color:#716A65;font-size:12.5px}
+.dl b{font-weight:600;min-width:34px;text-align:right}
+.feed{margin:0;padding:0;list-style:none;display:flex;flex-direction:column}
+.feed li{display:flex;gap:10px;position:relative;padding-bottom:14px}
+.feed li:last-child{padding-bottom:0}
+.feed li:not(:last-child)::before{content:'';position:absolute;left:11px;top:24px;bottom:2px;width:2px;background:#F0EEEC}
+.fd-ic{width:24px;height:24px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;flex:none;background:#F5F5F4;color:#57534E}
+.k-rv{background:#FFF4E2;color:#92400E}
+.k-add{background:#F0FDF4;color:#15803D}
+.k-out{background:#FEF2F2;color:#B91C1C}
+.fd-t{display:flex;flex-direction:column;line-height:1.4;font-size:13px;min-width:0}
+.fd-t>span{font-size:11.5px;color:#716A65}
+.foot{margin:0;font-size:12px;color:#716A65;line-height:1.5}
+
+/* modal */
+.ov{position:fixed;inset:0;background:rgba(28,25,23,.42);display:flex;align-items:flex-start;justify-content:center;padding:56px 16px;z-index:50;overflow:auto}
+.md{width:100%;max-width:580px;background:#FFFFFF;border-radius:18px;box-shadow:0 30px 80px -24px rgba(0,0,0,.5);display:flex;flex-direction:column;overflow:hidden}
+.md-h{display:flex;align-items:flex-start;gap:12px;padding:18px 20px 14px;border-bottom:1px solid #F0EEEC}
+.md-ic{width:38px;height:38px;border-radius:11px;background:#FFF4E2;color:#92400E;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.md-h h2{margin:0;font-size:17px;font-weight:700;letter-spacing:-0.01em}
+.md-h p{margin:2px 0 0;font-size:13px;color:#716A65}
+.x{margin-left:auto;width:34px;height:34px;border-radius:8px;border:0;background:transparent;color:#716A65;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.x:hover{background:#F5F5F4;color:#1C1917}
+.md-b{padding:18px 20px;display:flex;flex-direction:column;gap:16px}
+.md-f{display:flex;align-items:center;gap:8px;padding:14px 20px;border-top:1px solid #F0EEEC;background:#FAFAF9}
+.md-f .sp{margin-right:auto}
+.err{font-size:13px;font-weight:500;color:#B91C1C;display:flex;align-items:center;gap:6px}
+.fld{display:flex;flex-direction:column;gap:6px;min-width:0}
+.lbl{font-size:13px;font-weight:600;color:#44403C;display:flex;justify-content:space-between;gap:8px}
+.lbl>span{font-weight:500;color:#716A65;font-size:12px}
+.ix{position:relative;display:flex;align-items:center}
+.ix .pre,.ix .suf{position:absolute;color:#A8A29E;font-size:13.5px;pointer-events:none}
+.ix .pre{left:12px}.ix .suf{right:12px}
+.inp{height:42px;border:1px solid #D6D3D1;border-radius:10px;padding:0 12px;font-size:14.5px;width:100%;background:#FFFFFF;color:#1C1917;-moz-appearance:textfield}
+.inp::-webkit-outer-spin-button,.inp::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.inp:focus{outline:none;border-color:#1C1917;box-shadow:0 0 0 3px rgba(28,25,23,.1)}
+.inp.pl{padding-left:38px}.inp.pr{padding-right:44px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;max-height:176px;overflow-y:auto;padding-right:2px}
+.ck{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 12px;border-radius:999px;border:1px solid #E7E5E4;background:#FFFFFF;color:#44403C;font-size:13px;font-weight:500;cursor:pointer}
+.ck:hover{border-color:#D6D3D1;background:#FAFAF9}
+.ck-on,.ck-on:hover{border-color:#1C1917;background:#1C1917;color:#FFFFFF}
+.ck i{width:8px;height:8px;border-radius:999px;display:block}
+.ck img,.ck .ini{width:20px;height:20px;border-radius:5px;font-size:9px;border:1px solid #E7E5E4;background:#FFFFFF}
+.seg{display:inline-flex;padding:3px;background:#F2F0EE;border-radius:11px;gap:2px;align-self:flex-start}
+.sb2{border:0;background:transparent;min-height:34px;padding:0 18px;border-radius:9px;font-size:13.5px;font-weight:600;color:#57534E;cursor:pointer}
+.sb2-on{background:#FFFFFF;color:#1C1917;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.res{display:flex;flex-direction:column;border:1px solid #E7E5E4;border-radius:12px;overflow:hidden}
+.ri{display:flex;align-items:center;gap:10px;padding:9px 12px;border:0;border-top:1px solid #F5F4F2;background:#FFFFFF;cursor:pointer;text-align:left;font:inherit;color:#1C1917}
+.ri:first-child{border-top:0}
+.ri:hover{background:#FFFBF3}
+.ri img,.ri .ini{width:30px;height:30px;border-radius:8px;border:1px solid #E7E5E4;background:#FFFFFF;flex:none;font-size:11px}
+.ri-t{display:flex;flex-direction:column;line-height:1.3;flex:1;min-width:0}
+.ri-t b{font-family:'Geist Mono',monospace;font-size:13px}
+.ri-t>span{font-size:12px;color:#716A65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ri-s{font-size:11.5px;font-weight:600;color:#57534E;background:#F5F5F4;border-radius:999px;padding:0 8px;line-height:20px;white-space:nowrap}
+.sel{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid #F1D9AE;border-radius:12px;background:#FFFBF3}
+.sel img,.sel .ini{width:40px;height:40px;border-radius:10px;border:1px solid #E7E5E4;background:#FFFFFF;flex:none}
+.pv{border:1px solid #F6E3C0;background:#FFFBF3;border-radius:12px;padding:12px 14px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.pv>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.pv small{font-size:11px;font-weight:700;color:#92400E;text-transform:uppercase;letter-spacing:.05em}
+.pv b{font-size:15px;font-weight:700;white-space:nowrap}
+.pv em{font-style:normal;font-size:11.5px;color:#716A65}
+.tgl{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid #E7E5E4;border-radius:12px;cursor:pointer;background:#FFFFFF;text-align:left;font:inherit;color:#1C1917;width:100%}
+.tgl:hover{background:#FAFAF9}
+.sw{width:36px;height:22px;border-radius:999px;background:#D6D3D1;position:relative;flex:none;transition:background .15s}
+.sw::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:999px;background:#FFFFFF;transition:left .15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.sw-on{background:#1C1917}.sw-on::after{left:17px}
+.tgl-t{display:flex;flex-direction:column;line-height:1.35;flex:1}
+.tgl-t b{font-size:13.5px;font-weight:600}
+.tgl-t>span{font-size:12.5px;color:#716A65}
+.hint{font-size:12.5px;color:#716A65;margin:0;line-height:1.5}
+.hint b{color:#1C1917}
+.hint b.over{color:#B91C1C}
+.amt-neg{color:#B91C1C}
+.amt-pos{color:#15803D}
+.danger{border:1px solid #FECACA;background:#FEF2F2;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.danger b{color:#991B1B;font-size:14px}
+.danger p{margin:0;font-size:13px;color:#7F1D1D;line-height:1.5}
+.dz{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:14px;border-top:1px dashed #E7E5E4}
+.dz p{margin:0;font-size:12.5px;color:#716A65;line-height:1.45}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1C1917;color:#FFFFFF;padding:10px 16px 10px 12px;border-radius:999px;font-size:13.5px;display:flex;gap:8px;align-items:center;z-index:60;box-shadow:0 12px 30px -10px rgba(0,0,0,.5)}
+.toast i{width:20px;height:20px;border-radius:999px;background:#22C55E;display:inline-flex;align-items:center;justify-content:center;color:#FFFFFF}
+@media (max-width:900px){.rw{grid-template-columns:1fr 1fr}.rw-hd{display:none}.rw-a{align-items:flex-start}.stats{grid-template-columns:1fr 1fr 1fr}.g3{grid-template-columns:1fr 1fr}}
+</style>
+</helmet>
+<div style="font-family: 'Geist', system-ui, sans-serif; color: #1C1917; background: #FFFFFF; font-size: 15px; line-height: 1.55; min-height: 100vh; display: flex; flex-wrap: wrap; align-items: stretch">
+
+<aside aria-label="Navigasi aplikasi" style="flex: 0 0 240px; border-right: 1px solid #E7E5E4; background: #FAFAF9; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px">
+<a href="Main.dc.html" aria-label="StockPlan, ke beranda" style="display: flex; align-items: center; gap: 8px; padding: 6px 10px 18px; text-decoration: none; color: #1C1917">
+<svg aria-hidden="true" viewBox="4 213 102 88" width="22" height="19"><g fill="#FEA722"><path d="M13.04,233.96c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.49s0-2.12,5.66-4.97l36.26-15.83c4.18-1.83,6.89-5.96,6.89-10.52v-16.89l-41.92,18.3Z"></path><path d="M96.89,280.81c4.18-1.83,6.89-5.96,6.89-10.52v-16.89h0v-2.49s0,2.12-5.66,4.97l-36.26,15.83c-4.18,1.83-6.89,5.96-6.89,10.52v16.89l41.92-18.3Z"></path><path d="M98.11,226.34l-36.26,15.83s-.07,.04-.1,.05l-48.71,21.26c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.79s0-2.12,5.66-4.97l36.26-15.83c.73-.32,1.4-.73,2.03-1.18l46.78-20.42c4.18-1.83,6.89-5.96,6.89-10.52h0v-16.89h0v-2.5s0,2.12-5.66,4.97Z"></path></g></svg>
+<span style="font-weight: 700; font-size: 15px; letter-spacing: -0.01em">StockPlan</span>
+<span style="margin-left: auto; font-size: 11px; font-weight: 600; color: #92400E; background: #FFF4E2; border: 1px solid #FCDDA8; padding: 0 6px; border-radius: 6px">Beta</span>
+</a>
+<a class="nv" href="Main.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>Beranda</a>
+<span class="sec">Riset</span>
+<a class="nv" href="Tema.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="2.2"></circle><circle cx="19" cy="6" r="2.2"></circle><circle cx="19" cy="18" r="2.2"></circle><path d="M7 11l10-4M7 13l10 4"></path></svg>Tema bisnis</a>
+<a class="nv" href="Emiten.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"></rect><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1"></path></svg>Emiten</a>
+<span class="sec">Perencanaan</span>
+<a class="nv" href="Tesis.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg>Tesis saya</a>
+<a class="nv nv-on" href="Portofolio.dc.html" aria-current="page"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>Portofolio</a>
+<a class="nv" href="Watchlist.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"></path></svg>Watchlist</a>
+<div style="margin-top: auto; padding-top: 24px">
+<a class="nv" href="#pengaturan"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"></path></svg>Pengaturan</a>
+</div>
+</aside>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+<header style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 28px; border-bottom: 1px solid #E7E5E4">
+<nav aria-label="Breadcrumb" style="font-size: 13px; color: #716A65">Perencanaan / <span style="color: #1C1917">Portofolio</span></nav>
+<a class="srch" href="EmitenSearch.dc.html" style="margin-left: auto"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg><span>Cari tema atau emiten…</span><span style="margin-left: auto; font-family: 'Geist Mono', monospace; font-size: 11px; border: 1px solid #E7E5E4; background: #FAFAF9; border-radius: 4px; padding: 0 5px; color: #57534E">⌘K</span></a>
+<a href="LayoutNotif.dc.html" aria-label="Notifikasi, 5 belum dibaca" style="position: relative; width: 40px; height: 40px; border-radius: 999px; border: 1px solid #E7E5E4; background: #FFFFFF; color: #44403C; display: inline-flex; align-items: center; justify-content: center; flex: none; text-decoration: none"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg><span aria-hidden="true" style="position: absolute; top: -4px; right: -5px; min-width: 19px; height: 19px; padding: 0 5px; box-sizing: border-box; border-radius: 999px; background: #DC2626; color: #FFFFFF; border: 2px solid #FFFFFF; font-family: 'Geist Mono', monospace; font-size: 10.5px; font-weight: 700; line-height: 15px; text-align: center">5</span></a>
+<button type="button" aria-label="Akun dan langganan" style="width: 40px; height: 40px; border-radius: 999px; border: 1px solid #E7E5E4; background: #1C1917; color: #FEA722; font-weight: 600; font-size: 14px; cursor: pointer">B</button>
+</header>
+
+<main style="padding: 24px 28px 40px; display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 1280px">
+
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em">Portofolio</h1>
+<p style="margin: 0; color: #716A65">Semua emiten yang Anda pegang, dikelompokkan menurut tesis yang jadi alasannya.</p>
+</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<button type="button" class="btn btn-o" onClick="{{openBuy}}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"></path><path d="m13 7 4 4"></path></svg>Catat transaksi</button>
+<button type="button" class="btn btn-p" onClick="{{openAdd}}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>Tambah emiten</button>
+</div>
+</div>
+
+<section class="hero" aria-labelledby="h-sum">
+<svg class="hero-dec" aria-hidden="true" viewBox="0 0 200 200"><circle cx="120" cy="80" r="70" fill="none" stroke="#FCDDA8" stroke-width="1.5"></circle><circle cx="120" cy="80" r="46" fill="none" stroke="#FDE7C2" stroke-width="1.5"></circle><circle cx="120" cy="80" r="22" fill="#FFEFD3"></circle><circle cx="52" cy="140" r="5" fill="#FEA722"></circle></svg>
+<div style="flex: 999 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 10px; position: relative">
+<span class="kick" id="h-sum"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>Total dana investasi</span>
+<div class="big num">{{grandLbl}}</div>
+<div class="split"><span><i style="background: #1C1917"></i>Saham <b class="num">{{stockLbl}}</b></span><span><i style="background: #D6D3D1"></i>Dana tunai <b class="num">{{cashLbl}}</b></span></div>
+<p class="cap">Nilai saham dihitung dari jumlah lot dan rata-rata harga beli yang Anda catat — bukan nilai pasar saat ini.</p>
+</div>
+<div class="stats">
+<div class="stat"><span class="stat-ic" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg></span><b class="num">{{nTh}}</b><span>tesis aktif</span></div>
+<div class="stat"><span class="stat-ic" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"></rect><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1"></path></svg></span><b class="num">{{nEm}}</b><span>emiten dipegang</span></div>
+<div class="stat stat-cash"><span class="stat-ic" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h15a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z"></path><path d="M3 7V6a2 2 0 0 1 2-2h11v3M16 13.5h2"></path></svg></span><b class="num">{{cashLbl}}</b><span>dana tunai<button type="button" class="mini" onClick="{{openCash}}">Ubah</button></span></div>
+</div>
+</section>
+
+<div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start">
+<div style="flex: 999 1 640px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
+
+<section aria-labelledby="h-list" style="display: flex; flex-direction: column; gap: 12px">
+<div class="ch"><h2 id="h-list" style="margin: 0; font-size: 16px; font-weight: 700">Emiten per tesis</h2>
+<div class="tabs" role="group" aria-label="Saring menurut tesis">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="4"><button type="button" class="{{t.cls}}" aria-pressed="{{t.on}}" onClick="{{t.pick}}"><sc-if value="{{t.hasDot}}" hint-placeholder-val="{{false}}"><i class="{{t.dotCls}}" style="background-color: {{t.c}}" aria-hidden="true"></i></sc-if>{{t.label}} <em>{{t.n}}</em></button></sc-for>
+</div>
+</div>
+
+<sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
+<article class="tg" aria-label="Tesis: {{g.short}}">
+<div class="tg-h">
+<span class="tg-bar" style="background: {{g.c}}" aria-hidden="true"></span>
+<div class="tg-t">
+<span class="tg-k">Tesis · {{g.short}}</span>
+<p class="tg-s">“{{g.statement}}”</p>
+<div class="meta">
+<span class="pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>{{g.horizon}}</span>
+<span class="{{g.evCls}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"></path></svg>{{g.evLbl}}</span>
+</div>
+</div>
+<div class="tg-r">
+<span class="tg-m num">{{g.modalLbl}}<small>{{g.shareLbl}}</small></span>
+<span style="display: flex; gap: 6px">
+<sc-if value="{{g.late}}" hint-placeholder-val="{{false}}"><a class="btn btn-p btn-s" href="TesisEvaluasi.dc.html">Mulai evaluasi</a></sc-if>
+<a class="btn btn-o btn-s" href="Tesis.dc.html">Buka tesis</a>
+</span>
+</div>
+</div>
+<sc-if value="{{g.hasRows}}" hint-placeholder-val="{{true}}">
+<div class="rw rw-hd" aria-hidden="true"><span>Emiten</span><span>Bobot · modal vs target</span><span>Lot · modal</span><span>Status</span><span></span></div>
+<div>
+<sc-for list="{{g.rows}}" as="r" hint-placeholder-count="3">
+<div class="rw">
+<a class="em" href="Emiten.dc.html">
+<sc-if value="{{r.hasLogo}}" hint-placeholder-val="{{true}}"><img src="{{r.logo}}" alt=""></sc-if>
+<sc-if value="{{r.noLogo}}" hint-placeholder-val="{{false}}"><span class="ini" style="background: {{r.c}}">{{r.ini}}</span></sc-if>
+<span class="em-t"><b>{{r.tk}}</b><span>{{r.role}}</span><span class="stg"><sc-for list="{{r.stages}}" as="s" hint-placeholder-count="1"><span class="{{s.cls}}">{{s.l}}</span></sc-for></span></span>
+</a>
+<div class="w">
+<div class="w-l"><b class="num">{{r.actLbl}}</b><span class="num">target {{r.tgtLbl}}</span></div>
+<div class="wb" role="img" aria-label="Bobot modal {{r.actLbl}}, target {{r.tgtLbl}}"><span class="{{r.fCls}}" style="width: {{r.actW}}%"></span><span class="wb-t" style="left: {{r.tgtW}}%"></span></div>
+<sc-if value="{{r.drift}}" hint-placeholder-val="{{false}}"><span class="drift">{{r.driftLbl}}</span></sc-if>
+</div>
+<div class="lot"><span style="color: #1C1917; font-size: 13px" class="num">{{r.lotLbl}} · {{r.modalLbl}}</span><span class="num">harga beli {{r.avgLbl}}</span></div>
+<div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px">
+<sc-if value="{{r.isOk}}" hint-placeholder-val="{{true}}"><span class="st st-ok"><i aria-hidden="true"></i>Sesuai tesis</span></sc-if>
+<sc-if value="{{r.isRv}}" hint-placeholder-val="{{false}}"><span class="st st-rv"><i aria-hidden="true"></i>Perlu ditinjau</span></sc-if>
+<sc-if value="{{r.isRv}}" hint-placeholder-val="{{false}}"><button type="button" class="lnk" onClick="{{r.resolve}}">Tandai ditinjau</button></sc-if>
+</div>
+<div class="rw-a">
+<button type="button" class="btn btn-o btn-s" aria-label="Kelola {{r.tk}}" onClick="{{r.edit}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg>Kelola</button>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{g.noRows}}" hint-placeholder-val="{{false}}"><div class="rw-empty">Belum ada emiten di tesis ini. <button type="button" class="lnk" onClick="{{openAdd}}">Tambah emiten</button></div></sc-if>
+</article>
+</sc-for>
+
+<sc-if value="{{showOrphan}}" hint-placeholder-val="{{true}}">
+<article class="orph" aria-label="Emiten tanpa tesis">
+<div class="tg-h">
+<span class="oic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"></path></svg></span>
+<div class="tg-t">
+<span class="tg-k">Belum terhubung ke tesis</span>
+<p class="tg-s" style="font-weight: 500; color: #44403C; font-size: 14px">{{orphCount}} emiten belum punya alasan tertulis, jadi tidak ikut saat tesis dievaluasi.</p>
+</div>
+<div class="tg-r">
+<span class="tg-m num">{{orphModal}}<small>{{orphShare}}</small></span>
+<a class="btn btn-o btn-s" href="TesisBuat.dc.html">Tulis tesis</a>
+</div>
+</div>
+<div>
+<div class="rw rw-hd" aria-hidden="true"><span>Emiten</span><span>Porsi dari total saham</span><span>Lot · modal</span><span>Status</span><span></span></div>
+<sc-for list="{{orphRows}}" as="r" hint-placeholder-count="1">
+<div class="rw">
+<a class="em" href="Emiten.dc.html">
+<sc-if value="{{r.hasLogo}}" hint-placeholder-val="{{false}}"><img src="{{r.logo}}" alt=""></sc-if>
+<sc-if value="{{r.noLogo}}" hint-placeholder-val="{{true}}"><span class="ini" style="background: {{r.c}}">{{r.ini}}</span></sc-if>
+<span class="em-t"><b>{{r.tk}}</b><span>{{r.role}}</span></span>
+</a>
+<div class="w"><div class="w-l"><b class="num">{{r.shareLbl}}</b><span>dari total saham</span></div><div class="wb"><span class="wb-f f-ok" style="width: {{r.shareW}}%"></span></div></div>
+<div class="lot"><span style="color: #1C1917; font-size: 13px" class="num">{{r.lotLbl}} · {{r.modalLbl}}</span><span class="num">harga beli {{r.avgLbl}}</span></div>
+<div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px"><span class="st st-no"><i aria-hidden="true"></i>Tanpa tesis</span><button type="button" class="lnk" onClick="{{r.edit}}">Masukkan ke tesis</button></div>
+<div class="rw-a">
+<button type="button" class="btn btn-o btn-s" aria-label="Kelola {{r.tk}}" onClick="{{r.edit}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg>Kelola</button>
+</div>
+</div>
+</sc-for>
+</div>
+</article>
+</sc-if>
+</section>
+
+<p class="foot">StockPlan tidak memproses transaksi dan tidak menampilkan harga real time. Jual beli tetap di sekuritas pilihan Anda. Bukan rekomendasi saham.</p>
+</div>
+
+<aside class="rail" style="flex: 1 1 280px; max-width: 340px" aria-label="Komposisi dan riwayat">
+<section class="rc" aria-labelledby="h-dn">
+<div class="ch"><h3 id="h-dn">Komposisi dana</h3><button type="button" class="lnk" onClick="{{donutToggle}}">{{donutToggleLbl}}</button></div>
+<div class="dn">
+<svg width="176" height="176" viewBox="0 0 176 176" role="img" aria-label="{{donutAria}}">
+<circle cx="88" cy="88" r="66" fill="none" stroke="#F2F0EE" stroke-width="20"></circle>
+<g transform="rotate(-90 88 88)">
+<sc-for list="{{donut}}" as="d" hint-placeholder-count="3"><circle cx="88" cy="88" r="66" fill="none" stroke="{{d.c}}" stroke-width="20" stroke-dasharray="{{d.dash}}" stroke-dashoffset="{{d.off}}"></circle></sc-for>
+</g>
+</svg>
+<span class="dn-c"><b class="num">{{grandShort}}</b><span>total dana</span></span>
+</div>
+<ul class="dl">
+<sc-for list="{{donut}}" as="d" hint-placeholder-count="3"><li><i style="background: {{d.c}}" aria-hidden="true"></i><span>{{d.label}}</span><em class="num">{{d.amt}}</em><b class="num">{{d.pct}}%</b></li></sc-for>
+</ul>
+</section>
+<section class="rc" aria-labelledby="h-fd">
+<h3 id="h-fd">Riwayat keputusan</h3>
+<ol class="feed">
+<sc-for list="{{feed}}" as="fe" hint-placeholder-count="3">
+<li><span class="{{fe.cls}}" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="{{fe.icon}}"></path></svg></span><span class="fd-t">{{fe.text}}<span>{{fe.date}} · {{fe.th}}</span></span></li>
+</sc-for>
+</ol>
+<sc-if value="{{feedHasMore}}" hint-placeholder-val="{{true}}"><button type="button" class="lnk" style="align-self: flex-start" onClick="{{feedToggle}}">{{feedToggleLbl}}</button></sc-if>
+</section>
+</aside>
+</div>
+
+</main>
+</div>
+
+<sc-if value="{{isAdd}}" hint-placeholder-val="{{false}}">
+<div class="ov">
+<div class="md" role="dialog" aria-modal="true" aria-labelledby="m-add">
+<div class="md-h"><span class="md-ic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg></span><div><h2 id="m-add">Tambah emiten</h2><p>Masukkan emiten yang sudah Anda beli, lalu hubungkan ke tesisnya.</p></div><button type="button" class="x" aria-label="Tutup" onClick="{{close}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></div>
+<div class="md-b">
+<div class="fld">
+<span class="lbl">Emiten</span>
+<sc-if value="{{aHasSel}}" hint-placeholder-val="{{false}}">
+<div class="sel">
+<sc-if value="{{aSel.hasLogo}}" hint-placeholder-val="{{false}}"><img src="{{aSel.logo}}" alt=""></sc-if>
+<sc-if value="{{aSel.noLogo}}" hint-placeholder-val="{{true}}"><span class="ini" style="background: {{aSel.c}}">{{aSel.ini}}</span></sc-if>
+<span class="ri-t"><b>{{aSel.tk}}</b><span>{{aSel.name}} · {{aSel.sektor}}</span></span>
+<button type="button" class="btn btn-g btn-s" onClick="{{aClearSel}}">Ganti</button>
+</div>
+</sc-if>
+<sc-if value="{{aNoSel}}" hint-placeholder-val="{{true}}">
+<div class="ix"><svg class="pre" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg><input type="text" class="inp pl" aria-label="Cari emiten" placeholder="Ketik kode atau nama, misalnya BBRI" value="{{f.q}}" onInput="{{fq}}"></div>
+<span class="hint">{{aResHint}}</span>
+<div class="res">
+<sc-for list="{{aRes}}" as="c" hint-placeholder-count="4">
+<button type="button" class="ri" onClick="{{c.pick}}">
+<sc-if value="{{c.hasLogo}}" hint-placeholder-val="{{false}}"><img src="{{c.logo}}" alt=""></sc-if>
+<sc-if value="{{c.noLogo}}" hint-placeholder-val="{{true}}"><span class="ini" style="background: {{c.c}}">{{c.ini}}</span></sc-if>
+<span class="ri-t"><b>{{c.tk}}</b><span>{{c.name}}</span></span>
+<span class="ri-s">{{c.sektor}}</span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+</div>
+<div class="fld">
+<span class="lbl">Masuk ke tesis</span>
+<sc-if value="{{thHasSearch}}" hint-placeholder-val="{{false}}"><div class="ix"><svg class="pre" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg><input type="text" class="inp pl" aria-label="Cari tesis" placeholder="Cari tesis di antara {{nTh}}" value="{{f.thq}}" onInput="{{fthq}}"></div></sc-if>
+<div class="chips"><sc-for list="{{thOpts}}" as="o" hint-placeholder-count="3"><button type="button" class="{{o.cls}}" aria-pressed="{{o.on}}" onClick="{{o.pick}}"><i class="{{o.dotCls}}" style="background-color: {{o.c}}" aria-hidden="true"></i>{{o.label}}</button></sc-for></div>
+</div>
+<div class="g3">
+<div class="fld"><label class="lbl" for="a-lot">Jumlah lot</label><div class="ix"><input id="a-lot" type="number" min="1" class="inp pr num" value="{{f.lot}}" onInput="{{flot}}" placeholder="0"><span class="suf">lot</span></div></div>
+<div class="fld"><label class="lbl" for="a-avg">Harga beli rata-rata</label><div class="ix"><span class="pre">Rp</span><input id="a-avg" type="number" min="1" class="inp pl num" value="{{f.avg}}" onInput="{{favg}}" placeholder="0"></div></div>
+<sc-if value="{{fHasTh}}" hint-placeholder-val="{{true}}"><div class="fld"><label class="lbl" for="a-tgt">Target bobot</label><div class="ix"><input id="a-tgt" type="number" min="0" max="100" class="inp pr num" value="{{f.tgt}}" onInput="{{ftgt}}" placeholder="0"><span class="suf">%</span></div></div></sc-if>
+</div>
+<sc-if value="{{fHasTh}}" hint-placeholder-val="{{true}}"><p class="hint">Emiten lain di tesis ini sudah memakai <b>{{thUsed}}%</b> target. Total setelah ditambah: <b class="{{thAfterCls}}">{{thAfter}}%</b>.</p></sc-if>
+<div class="pv">
+<div><small>Modal</small><b class="num">{{aModalLbl}}</b><em>{{aSharesLbl}}</em></div>
+<div><small>Dana tunai</small><b class="num">{{aCashAfter}}</b><em>{{aCashNote}}</em></div>
+<div><small>Total saham</small><b class="num">{{aStockAfter}}</b><em>setelah ditambah</em></div>
+</div>
+<button type="button" class="tgl" role="switch" aria-checked="{{f.useCash}}" onClick="{{fUseCash}}"><span class="{{swCls}}" aria-hidden="true"></span><span class="tgl-t"><b>Ambil dari dana tunai</b><span>Kurangi dana tunai sebesar modal pembelian ini.</span></span></button>
+</div>
+<div class="md-f">
+<span class="sp"><sc-if value="{{hasErr}}" hint-placeholder-val="{{false}}"><span class="err">{{err}}</span></sc-if></span>
+<button type="button" class="btn btn-o" onClick="{{close}}">Batal</button>
+<button type="button" class="btn btn-p" onClick="{{saveAdd}}">Tambahkan ke portofolio</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isBuy}}" hint-placeholder-val="{{false}}">
+<div class="ov">
+<div class="md" role="dialog" aria-modal="true" aria-labelledby="m-buy">
+<div class="md-h"><span class="md-ic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"></path><path d="m13 7 4 4"></path></svg></span><div><h2 id="m-buy">Catat transaksi</h2><p>Catat pembelian atau penjualan yang sudah Anda lakukan di sekuritas.</p></div><button type="button" class="x" aria-label="Tutup" onClick="{{close}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></div>
+<div class="md-b">
+<div class="seg" role="group" aria-label="Jenis transaksi"><sc-for list="{{kinds}}" as="k" hint-placeholder-count="2"><button type="button" class="{{k.cls}}" aria-pressed="{{k.on}}" onClick="{{k.pick}}">{{k.label}}</button></sc-for></div>
+<div class="fld">
+<span class="lbl">Emiten</span>
+<sc-if value="{{bHasSearch}}" hint-placeholder-val="{{false}}"><div class="ix"><svg class="pre" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg><input type="text" class="inp pl" aria-label="Cari emiten yang dipegang" placeholder="Cari di antara {{nEm}} emiten yang dipegang" value="{{f.bq}}" onInput="{{fbq}}"></div></sc-if>
+<div class="chips"><sc-for list="{{bOpts}}" as="o" hint-placeholder-count="5"><button type="button" class="{{o.cls}}" aria-pressed="{{o.on}}" onClick="{{o.pick}}"><sc-if value="{{o.hasLogo}}" hint-placeholder-val="{{true}}"><img src="{{o.logo}}" alt=""></sc-if><sc-if value="{{o.noLogo}}" hint-placeholder-val="{{false}}"><span class="ini" style="background: {{o.c}}">{{o.ini}}</span></sc-if>{{o.tk}}</button></sc-for></div>
+<sc-if value="{{bNoHits}}" hint-placeholder-val="{{false}}"><span class="hint">Tidak ada yang cocok.</span></sc-if>
+<span class="hint">Saat ini: <b class="num">{{bNowLbl}}</b></span>
+</div>
+<div class="g2">
+<div class="fld"><label class="lbl" for="b-lot">{{bLotLbl}}<span>{{bLotHint}}</span></label><div class="ix"><input id="b-lot" type="number" min="1" class="inp pr num" value="{{f.lot}}" onInput="{{flot}}" placeholder="0"><span class="suf">lot</span></div></div>
+<div class="fld"><label class="lbl" for="b-price">{{bPriceLbl}}</label><div class="ix"><span class="pre">Rp</span><input id="b-price" type="number" min="1" class="inp pl num" value="{{f.price}}" onInput="{{fprice}}" placeholder="0"></div></div>
+</div>
+<div class="pv">
+<div><small>Lot setelahnya</small><b class="num">{{bLotAfter}}</b><em>{{bLotDelta}}</em></div>
+<div><small>Harga beli rata-rata</small><b class="num">{{bAvgAfter}}</b><em>{{bAvgNote}}</em></div>
+<div><small>Dana tunai</small><b class="{{bCashCls}}">{{bCashAfter}}</b><em>{{bCashNote}}</em></div>
+</div>
+<button type="button" class="tgl" role="switch" aria-checked="{{f.useCash}}" onClick="{{fUseCash}}"><span class="{{swCls}}" aria-hidden="true"></span><span class="tgl-t"><b>{{bCashTglT}}</b><span>{{bCashTglD}}</span></span></button>
+<sc-if value="{{bDisabled}}" hint-placeholder-val="{{false}}"><p class="hint" style="color: #B91C1C">Dana tunai tidak cukup untuk transaksi ini. Matikan "ambil dari dana tunai" atau kurangi jumlahnya.</p></sc-if>
+</div>
+<div class="md-f">
+<span class="sp"><sc-if value="{{hasErr}}" hint-placeholder-val="{{false}}"><span class="err">{{err}}</span></sc-if></span>
+<button type="button" class="btn btn-o" onClick="{{close}}">Batal</button>
+<sc-if value="{{bDisabled}}" hint-placeholder-val="{{false}}"><button type="button" class="btn btn-p" disabled style="opacity: .5; cursor: not-allowed">{{bSaveLbl}}</button></sc-if>
+<sc-if value="{{bCanSave}}" hint-placeholder-val="{{true}}"><button type="button" class="btn btn-p" onClick="{{saveBuy}}">{{bSaveLbl}}</button></sc-if>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isEdit}}" hint-placeholder-val="{{false}}">
+<div class="ov">
+<div class="md" role="dialog" aria-modal="true" aria-labelledby="m-edit">
+<div class="md-h">
+<sc-if value="{{eH.hasLogo}}" hint-placeholder-val="{{true}}"><img src="{{eH.logo}}" alt="" width="38" height="38" style="width: 38px; height: 38px; border-radius: 10px; border: 1px solid #E7E5E4; flex: none"></sc-if>
+<sc-if value="{{eH.noLogo}}" hint-placeholder-val="{{false}}"><span class="ini" style="width: 38px; height: 38px; border-radius: 10px; flex: none; background: {{eH.c}}">{{eH.ini}}</span></sc-if>
+<div><h2 id="m-edit">Kelola {{eH.tk}}</h2><p>{{eH.name}}</p></div><button type="button" class="x" aria-label="Tutup" onClick="{{close}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></div>
+<div class="md-b">
+<sc-if value="{{eNotConfirm}}" hint-placeholder-val="{{true}}">
+<div class="g2">
+<div class="fld"><label class="lbl" for="e-lot">Jumlah lot</label><div class="ix"><input id="e-lot" type="number" min="1" class="inp pr num" value="{{f.lot}}" onInput="{{flot}}"><span class="suf">lot</span></div></div>
+<div class="fld"><label class="lbl" for="e-avg">Harga beli rata-rata</label><div class="ix"><span class="pre">Rp</span><input id="e-avg" type="number" min="1" class="inp pl num" value="{{f.avg}}" onInput="{{favg}}"></div></div>
+</div>
+<div class="pv" style="grid-template-columns: repeat(2, minmax(0, 1fr))">
+<div><small>Modal</small><b class="num">{{eModalLbl}}</b><em>{{eModalNote}}</em></div>
+<div><small>Porsi dari total saham</small><b class="num">{{eShareLbl}}</b><em>setelah diubah</em></div>
+</div>
+<div class="fld">
+<span class="lbl">Tesis</span>
+<div class="chips"><sc-for list="{{thOpts}}" as="o" hint-placeholder-count="3"><button type="button" class="{{o.cls}}" aria-pressed="{{o.on}}" onClick="{{o.pick}}"><i class="{{o.dotCls}}" style="background-color: {{o.c}}" aria-hidden="true"></i>{{o.label}}</button></sc-for></div>
+</div>
+<sc-if value="{{fHasTh}}" hint-placeholder-val="{{true}}">
+<div class="fld" style="max-width: 200px"><label class="lbl" for="e-tgt">Target bobot</label><div class="ix"><input id="e-tgt" type="number" min="0" max="100" class="inp pr num" value="{{f.tgt}}" onInput="{{ftgt}}"><span class="suf">%</span></div></div>
+<p class="hint">Emiten lain di tesis ini memakai <b>{{thUsed}}%</b>. Total setelah diubah: <b class="{{thAfterCls}}">{{thAfter}}%</b>.</p>
+</sc-if>
+<div class="dz"><p>Sudah tidak dipegang lagi? Keluarkan dari portofolio. Kalau sudah dijual, catat lewat <b>Catat transaksi → Jual</b> supaya hasilnya masuk ke dana tunai.</p><button type="button" class="btn btn-dl btn-s" onClick="{{askDrop}}">Keluarkan</button></div>
+</sc-if>
+<sc-if value="{{eConfirm}}" hint-placeholder-val="{{false}}">
+<div class="danger">
+<b>Keluarkan {{eH.tk}} dari portofolio?</b>
+<p>{{eH.lot}} lot dengan modal {{eH.modalLbl}} akan dihapus dari tesis “{{eH.thShort}}”, dan bobot emiten lain dihitung ulang. Riwayat keputusannya tetap tersimpan.</p>
+</div>
+<button type="button" class="tgl" role="switch" aria-checked="{{f.refund}}" onClick="{{fRefund}}"><span class="{{swRefCls}}" aria-hidden="true"></span><span class="tgl-t"><b>Kembalikan modal ke dana tunai</b><span>Tambah {{eH.modalLbl}} ke dana tunai, misalnya kalau sudah dijual di harga beli.</span></span></button>
+</sc-if>
+</div>
+<div class="md-f">
+<span class="sp"><sc-if value="{{hasErr}}" hint-placeholder-val="{{false}}"><span class="err">{{err}}</span></sc-if></span>
+<sc-if value="{{eNotConfirm}}" hint-placeholder-val="{{true}}"><button type="button" class="btn btn-o" onClick="{{close}}">Batal</button><button type="button" class="btn btn-p" onClick="{{saveEdit}}">Simpan perubahan</button></sc-if>
+<sc-if value="{{eConfirm}}" hint-placeholder-val="{{false}}"><button type="button" class="btn btn-o" onClick="{{cancelDrop}}">Batal</button><button type="button" class="btn btn-d" onClick="{{doDrop}}">Ya, keluarkan</button></sc-if>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isCash}}" hint-placeholder-val="{{false}}">
+<div class="ov">
+<div class="md" role="dialog" aria-modal="true" aria-labelledby="m-cash" style="max-width: 460px">
+<div class="md-h"><span class="md-ic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h15a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z"></path><path d="M3 7V6a2 2 0 0 1 2-2h11v3M16 13.5h2"></path></svg></span><div><h2 id="m-cash">Dana tunai</h2><p>Uang yang siap dipakai untuk membeli, misalnya saldo RDN.</p></div><button type="button" class="x" aria-label="Tutup" onClick="{{close}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></div>
+<div class="md-b">
+<div class="fld"><label class="lbl" for="c-amt">Jumlah dana tunai</label><div class="ix"><span class="pre">Rp</span><input id="c-amt" type="number" min="0" class="inp pl num" value="{{f.amt}}" onInput="{{famt}}"></div><span class="hint">Terbaca: <b class="num">{{cAmtLbl}}</b></span></div>
+<div class="pv" style="grid-template-columns: repeat(2, minmax(0, 1fr))">
+<div><small>Total dana</small><b class="num">{{cGrandLbl}}</b><em>saham + tunai</em></div>
+<div><small>Porsi tunai</small><b class="num">{{cPctLbl}}</b><em>dari total dana</em></div>
+</div>
+</div>
+<div class="md-f">
+<span class="sp"><sc-if value="{{hasErr}}" hint-placeholder-val="{{false}}"><span class="err">{{err}}</span></sc-if></span>
+<button type="button" class="btn btn-o" onClick="{{close}}">Batal</button>
+<button type="button" class="btn btn-p" onClick="{{saveCash}}">Simpan</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}"><div class="toast" role="status"><i aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"></path></svg></i>{{toast}}</div></sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = Object.assign(this.fresh(), { modal: 'buy', form: { kind: 'beli', tk: 'PTBA', lot: '10', price: '2650', useCash: true } });
+}
+fresh() {
+var L = { PTBA: '/_blob/a7814f85d9b69b78f4edb98dc5be88d5', AADI: '/_blob/fee486793ba6867b5b69aaf44de9f6e7', UNTR: '/_blob/f5a059270c2b05fcd6c975eb7bbd11d3', ITMG: '/_blob/cd0894862a9546ef41964447ba7224e5', INDY: '/_blob/8feb111705443327d88bc0d6249f7c1e' };
+return {
+tab: 'semua', feedOpen: false, donutDetail: false, cash: 8570000, modal: '', form: {}, err: '', toast: '', log: [],
+hold: [
+{ tk: 'PTBA', name: 'Bukit Asam Tbk', logo: L.PTBA, role: 'Pemilik tambang · PLTU', stages: ['Hulu', 'Hilir'], sektor: 'Energi', th: 'energi', tgt: 40, lot: 60, avg: 2400, st: 'ok' },
+{ tk: 'AADI', name: 'Adaro Andalan Indonesia Tbk', logo: L.AADI, role: 'Tambang · logistik', stages: ['Hulu', 'Tengah'], sektor: 'Energi', th: 'energi', tgt: 35, lot: 12, avg: 8000, st: 'ok' },
+{ tk: 'UNTR', name: 'United Tractors Tbk', logo: L.UNTR, role: 'Kontraktor tambang', stages: ['Hulu'], sektor: 'Energi', th: 'energi', tgt: 25, lot: 2, avg: 30000, st: 'rv' },
+{ tk: 'ITMG', name: 'Indo Tambangraya Megah Tbk', logo: L.ITMG, role: 'Pemilik tambang', stages: ['Hulu'], sektor: 'Energi', th: 'batubara2', tgt: 55, lot: 4, avg: 25500, st: 'ok' },
+{ tk: 'INDY', name: 'Indika Energy Tbk', logo: L.INDY, role: 'Induk tambang · energi baru', stages: ['Hulu', 'Hilir'], sektor: 'Energi', th: 'batubara2', tgt: 45, lot: 50, avg: 1600, st: 'ok' },
+{ tk: 'TLKM', name: 'Telkom Indonesia Tbk', logo: '', role: 'Operator telekomunikasi', stages: [], sektor: 'Infrastruktur', th: '', tgt: 0, lot: 10, avg: 2800, st: 'ok' }
+]
+};
+}
+renderVals() {
+var self = this;
+var st = this.state;
+var f = st.form || {};
+var TODAY = '5 Nov 2026';
+var AVC = ['#1D4ED8', '#15803D', '#6D28D9', '#BE185D', '#0E7490', '#9A3412'];
+var I = {
+rv: 'M12 9v4M12 17h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z',
+orph: 'M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1',
+add: 'M12 5v14M5 12h14', make: 'M14 3H6v18h12V7zM14 3v4h4', ok: 'M5 12l4 4 10-10',
+out: 'M5 12h14', edit: 'M4 20h4L19 9l-4-4L4 16z', cash: 'M3 7h15a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z'
+};
+var TH = [
+{ id: 'energi', short: 'Kebutuhan energi naik', statement: 'Kebutuhan energi Indonesia terus naik dalam 5 tahun ke depan.', horizon: '3–5 tahun', days: 20, c: '#FEA722' },
+{ id: 'batubara2', short: 'Harga batu bara membaik', statement: 'Harga batu bara dunia membaik dalam 1–2 tahun, menguntungkan emiten berbiaya produksi rendah.', horizon: '1–3 tahun', days: -45, c: '#1C1917' }
+];
+function thOf(id) { return TH.filter(function (t) { return t.id === id; })[0]; }
+var CAT = [
+['BUMI', 'Bumi Resources Tbk', '/_blob/d05174a2155f04e81025859fef041f66', 'Energi', 'Tambang batu bara', ['Hulu']],
+['PTBA', 'Bukit Asam Tbk', '', 'Energi', '', []], ['AADI', 'Adaro Andalan Indonesia Tbk', '', 'Energi', '', []], ['UNTR', 'United Tractors Tbk', '', 'Energi', '', []],
+['ITMG', 'Indo Tambangraya Megah Tbk', '', 'Energi', '', []], ['INDY', 'Indika Energy Tbk', '', 'Energi', '', []],
+['PGAS', 'Perusahaan Gas Negara Tbk', '', 'Energi', 'Distribusi gas bumi', []],
+['PGEO', 'Pertamina Geothermal Energy Tbk', '', 'Energi', 'Pembangkit panas bumi', []],
+['MEDC', 'Medco Energi Internasional Tbk', '', 'Energi', 'Produsen minyak dan gas', []],
+['BBRI', 'Bank Rakyat Indonesia Tbk', '', 'Keuangan', 'Bank, fokus usaha mikro', []],
+['BMRI', 'Bank Mandiri Tbk', '', 'Keuangan', 'Bank, fokus korporasi', []],
+['BBCA', 'Bank Central Asia Tbk', '', 'Keuangan', 'Bank swasta, dana transaksi', []],
+['TLKM', 'Telkom Indonesia Tbk', '', 'Infrastruktur', '', []],
+['ANTM', 'Aneka Tambang Tbk', '', 'Barang baku', 'Tambang nikel dan emas', []],
+['INCO', 'Vale Indonesia Tbk', '', 'Barang baku', 'Tambang dan olah nikel', []],
+['ICBP', 'Indofood CBP Sukses Makmur Tbk', '', 'Barang konsumsi', 'Makanan kemasan', []],
+['SIDO', 'Industri Jamu Sido Muncul Tbk', '', 'Barang konsumsi', 'Jamu dan herbal', []],
+['TAPG', 'Triputra Agro Persada Tbk', '', 'Barang konsumsi', 'Perkebunan sawit', []]
+];
+var SEKC = { 'Energi': '#1C1917', 'Infrastruktur': '#FEA722', 'Keuangan': '#1D4ED8', 'Barang baku': '#9A3412', 'Barang konsumsi': '#15803D', 'Dana tunai': '#D6D3D1' };
+
+function thou(n) { return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+function jt(v) { return 'Rp ' + (v / 1e6).toFixed(1).replace('.', ',') + ' jt'; }
+function rp(v) { return 'Rp ' + thou(v); }
+function num(v) { var n = parseInt(String(v == null ? '' : v).replace(/[^\d]/g, ''), 10); return isNaN(n) ? 0 : n; }
+function modal(h) { return h.lot * 100 * h.avg; }
+function pct(a, b) { return b ? Math.round(a / b * 100) : 0; }
+function sum(arr, fn) { return arr.reduce(function (s, x) { return s + fn(x); }, 0); }
+function findH(tk) { return self.state.hold.filter(function (h) { return h.tk === tk; })[0]; }
+function logE(text, th, cls, icon) { return { date: TODAY, text: text, th: th, cls: 'fd-ic ' + cls, icon: icon }; }
+function thName(id) { var t = thOf(id); return t ? t.short : 'Tanpa tesis'; }
+function flash(msg) { setTimeout(function () { if (self.state.toast === msg) self.setState({ toast: '' }); }, 2600); return msg; }
+function setF(k) { return function (ev) { var nf = Object.assign({}, self.state.form); nf[k] = ev.target.value; self.setState({ form: nf, err: '' }); }; }
+function setFv(k, v) { var nf = Object.assign({}, self.state.form); nf[k] = v; self.setState({ form: nf, err: '' }); }
+
+var hold = st.hold;
+var stockTotal = sum(hold, modal);
+var cash = st.cash;
+var grand = stockTotal + cash;
+var thModal = {}; TH.forEach(function (t) { thModal[t.id] = sum(hold.filter(function (h) { return h.th === t.id; }), modal); });
+var orph = hold.filter(function (h) { return !h.th; });
+var orphModalV = sum(orph, modal);
+
+// donut: saham per sektor atau per emiten + dana tunai
+var sekM = {}; var sekO = [];
+hold.forEach(function (h) { if (!sekM[h.sektor]) { sekM[h.sektor] = 0; sekO.push(h.sektor); } sekM[h.sektor] += modal(h); });
+sekO.sort(function (a, b) { return sekM[b] - sekM[a]; });
+var sektorParts = sekO.map(function (s) { return { label: s, v: sekM[s] }; });
+var emParts = hold.slice().sort(function (a, b) { return modal(b) - modal(a); }).map(function (h) { return { label: h.tk, v: modal(h) }; });
+var parts = (st.donutDetail ? emParts : sektorParts).slice();
+if (cash > 0) parts.push({ label: 'Dana tunai', v: cash });
+var CIRC = 2 * Math.PI * 66; var cum = 0;
+var donut = parts.map(function (p, i) {
+var len = grand ? CIRC * p.v / grand : 0; var gap = parts.length > 1 ? 2 : 0;
+var color = p.label === 'Dana tunai' ? '#D6D3D1' : (st.donutDetail ? AVC[i % AVC.length] : (SEKC[p.label] || '#6D28D9'));
+var d = { label: p.label, c: color, amt: jt(p.v), pct: pct(p.v, grand), dash: Math.max(len - gap, 0).toFixed(2) + ' ' + CIRC.toFixed(2), off: (-cum).toFixed(2) };
+cum += len; return d;
+});
+var donutToggle = function () { self.setState({ donutDetail: !self.state.donutDetail }); };
+
+// tabs + groups
+var tabs = [{ id: 'semua', label: 'Semua', n: hold.length, c: '' }].concat(TH.map(function (t) { return { id: t.id, label: t.short, n: hold.filter(function (h) { return h.th === t.id; }).length, c: t.c }; }));
+if (orph.length) tabs.push({ id: 'tanpa', label: 'Tanpa tesis', n: orph.length, c: 'transparent' });
+var tab = st.tab;
+if (tab === 'tanpa' && !orph.length) tab = 'semua';
+tabs = tabs.map(function (t) { var on = tab === t.id; return { label: t.label, n: t.n, c: t.c, on: on, cls: on ? 'tab tab-on' : 'tab', hasDot: !!t.c, dotCls: t.id === 'tanpa' ? 'al-none' : '', pick: function () { self.setState({ tab: t.id }); } }; });
+
+function openEdit(h) { return function () { self.setState({ modal: 'edit', err: '', form: { tk: h.tk, lot: String(h.lot), avg: String(h.avg), tgt: String(h.tgt || ''), th: h.th || 'none', confirm: false, refund: false } }); }; }
+function rowOf(h, i, base, withTgt) {
+var m = modal(h); var a = pct(m, base); var d = a - (h.tgt || 0); var has = !!h.logo;
+return {
+tk: h.tk, name: h.name, role: h.role, logo: h.logo, hasLogo: has, noLogo: !has, ini: h.tk.slice(0, 2), c: AVC[i % AVC.length],
+stages: (h.stages || []).map(function (s) { return { l: s, cls: 'sg sg-' + s }; }),
+actLbl: a + '%', actW: Math.min(a, 100), tgtLbl: (h.tgt || 0) + '%', tgtW: Math.min(h.tgt || 0, 100),
+drift: withTgt && Math.abs(d) > 5, driftLbl: (d > 0 ? '+' : '') + d + '% dari target',
+fCls: 'wb-f ' + (withTgt && d > 5 ? 'f-hi' : 'f-ok'),
+shareLbl: pct(m, stockTotal) + '%', shareW: pct(m, stockTotal),
+lotLbl: h.lot + ' lot', avgLbl: rp(h.avg), modalLbl: jt(m),
+isOk: h.st === 'ok', isRv: h.st === 'rv',
+edit: openEdit(h),
+resolve: function () { self.setState({ hold: self.state.hold.map(function (x) { return x.tk === h.tk ? Object.assign({}, x, { st: 'ok' }) : x; }), log: [logE(h.tk + ' sudah ditinjau, tetap di tesis', thName(h.th), 'k-add', I.ok)].concat(self.state.log), toast: flash(h.tk + ' ditandai sudah ditinjau') }); }
+};
+}
+var groups = TH.map(function (t) {
+var hs = hold.filter(function (h) { return h.th === t.id; });
+return {
+id: t.id, short: t.short, statement: t.statement, horizon: t.horizon, c: t.c, late: t.days < 0,
+evLbl: t.days < 0 ? 'Evaluasi terlambat ' + (-t.days) + ' hari' : 'Evaluasi ' + t.days + ' hari lagi',
+evCls: t.days < 0 ? 'pill pill-late' : (t.days <= 30 ? 'pill pill-soon' : 'pill'),
+modalLbl: jt(thModal[t.id]), shareLbl: pct(thModal[t.id], stockTotal) + '% dari total saham',
+rows: hs.map(function (h, k) { return rowOf(h, k, thModal[t.id], true); }), hasRows: hs.length > 0, noRows: hs.length === 0
+};
+}).filter(function (g) { return tab === 'semua' || tab === g.id; });
+var orphRows = orph.map(function (h, k) { return rowOf(h, k, stockTotal, false); });
+
+// feed
+var base = [
+logE('UNTR ditandai perlu ditinjau', 'Kebutuhan energi naik', 'k-rv', I.rv),
+logE('TLKM dicatat tanpa tesis, 10 lot', 'Tanpa tesis', '', I.orph),
+logE('UNTR ditambahkan, bobot 40 / 35 / 25', 'Kebutuhan energi naik', 'k-add', I.add),
+logE('Tesis dibuat dengan PTBA dan AADI', 'Kebutuhan energi naik', '', I.make),
+logE('Tesis dibuat dengan ITMG dan INDY', 'Harga batu bara membaik', '', I.make)
+];
+['30 Okt 2026', '14 Okt 2026', '2 Sep 2026', '12 Agu 2026', '10 Mei 2026'].forEach(function (d, i) { base[i].date = d; });
+var feedAll = (st.log || []).concat(base);
+var FEED_N = 3;
+var feed = st.feedOpen ? feedAll : feedAll.slice(0, FEED_N);
+
+// ---------- modals ----------
+var close = function () { self.setState({ modal: '', err: '' }); };
+var openAdd = function () { self.setState({ modal: 'add', err: '', form: { q: '', tk: '', th: tab !== 'semua' && tab !== 'tanpa' ? tab : (tab === 'tanpa' ? 'none' : 'energi'), lot: '', avg: '', tgt: '', useCash: true } }); };
+var openBuy = function () { self.setState({ modal: 'buy', err: '', form: { kind: 'beli', tk: hold.length ? hold[0].tk : '', lot: '', price: '', useCash: true } }); };
+var openCash = function () { self.setState({ modal: 'cash', err: '', form: { amt: String(self.state.cash) } }); };
+var fUseCash = function () { setFv('useCash', !self.state.form.useCash); };
+
+// thesis chips (add + edit)
+var curTh = f.th || 'energi';
+var thq = String(f.thq || '').trim().toLowerCase();
+var thHasSearch = TH.length > 6;
+var thRaw = TH.map(function (t) { return { id: t.id, label: t.short, c: t.c, dotCls: '' }; }).concat([{ id: 'none', label: 'Tanpa tesis', c: 'transparent', dotCls: 'al-none' }]);
+var thPool = (thHasSearch && thq) ? thRaw.filter(function (o) { return o.label.toLowerCase().indexOf(thq) >= 0; }) : thRaw;
+var thOpts = thPool.map(function (o) {
+var on = curTh === o.id; return { label: o.label, c: o.c, dotCls: o.dotCls, on: on, cls: on ? 'ck ck-on' : 'ck', pick: function () { setFv('th', o.id); } };
+});
+var fHasTh = curTh !== 'none';
+var others = hold.filter(function (h) { return h.th === curTh && h.tk !== f.tk; });
+var thUsed = sum(others, function (h) { return h.tgt || 0; });
+var thAfter = thUsed + num(f.tgt);
+
+// add
+var heldTk = {}; hold.forEach(function (h) { heldTk[h.tk] = true; });
+var q = String(f.q || '').trim().toLowerCase();
+var pool = CAT.filter(function (c) { return !heldTk[c[0]]; });
+var hits = q ? pool.filter(function (c) { return c[0].toLowerCase().indexOf(q) === 0 || c[1].toLowerCase().indexOf(q) >= 0; }) : pool;
+function catItem(c, i) { var has = !!c[2]; return { tk: c[0], name: c[1], logo: c[2], hasLogo: has, noLogo: !has, ini: c[0].slice(0, 2), c: AVC[i % AVC.length], sektor: c[3], pick: function () { setFv('tk', c[0]); } }; }
+var aRes = hits.slice(0, 5).map(catItem);
+var aResHint = q ? (hits.length ? hits.length + ' emiten cocok' + (hits.length > 5 ? ', menampilkan 5 teratas' : '') : 'Tidak ada yang cocok. Emiten yang sudah ada di portofolio tidak ditampilkan.') : 'Belum ada di portofolio Anda';
+var selC = CAT.filter(function (c) { return c[0] === f.tk; })[0];
+var aSel = selC ? catItem(selC, 0) : { tk: '', name: '', logo: '', hasLogo: false, noLogo: true, ini: '', c: '#1C1917', sektor: '' };
+var aM = num(f.lot) * 100 * num(f.avg);
+var aCash = f.useCash ? cash - aM : cash;
+var saveAdd = function () {
+var S = self.state, F = S.form; var c = CAT.filter(function (x) { return x[0] === F.tk; })[0];
+var lot = num(F.lot), avg = num(F.avg), tgt = num(F.tgt), m = lot * 100 * avg;
+if (!c) return self.setState({ err: 'Pilih emitennya dulu.' });
+if (!lot || !avg) return self.setState({ err: 'Isi jumlah lot dan harga beli.' });
+if (F.th !== 'none' && (tgt < 1 || tgt > 100)) return self.setState({ err: 'Target bobot antara 1–100%.' });
+if (F.useCash && m > S.cash) return self.setState({ err: 'Dana tunai tidak cukup (sisa ' + jt(S.cash) + ').' });
+var nh = { tk: c[0], name: c[1], logo: c[2], role: c[4] || c[3], stages: c[5], sektor: c[3], th: F.th === 'none' ? '' : F.th, tgt: F.th === 'none' ? 0 : tgt, lot: lot, avg: avg, st: 'ok' };
+self.setState({ hold: S.hold.concat([nh]), cash: F.useCash ? S.cash - m : S.cash, modal: '', err: '', log: [logE(c[0] + ' ditambahkan, ' + lot + ' lot @ ' + rp(avg), thName(nh.th), 'k-add', I.add)].concat(S.log), toast: flash(c[0] + ' ditambahkan ke portofolio') });
+};
+
+// buy / sell
+var kind = f.kind || 'beli'; var isJual = kind === 'jual';
+var kinds = [['beli', 'Beli'], ['jual', 'Jual']].map(function (k) { var on = kind === k[0]; return { label: k[1], on: on, cls: on ? 'sb2 sb2-on' : 'sb2', pick: function () { setFv('kind', k[0]); } }; });
+var bH = hold.filter(function (h) { return h.tk === f.tk; })[0] || hold[0] || { tk: '', lot: 0, avg: 0 };
+var bHasSearch = hold.length > 10;
+var bq = String(f.bq || '').trim().toLowerCase();
+var bPool = (bHasSearch && bq) ? hold.filter(function (h) { return h.tk.toLowerCase().indexOf(bq) >= 0 || h.name.toLowerCase().indexOf(bq) >= 0; }) : hold;
+var bNoHits = bHasSearch && !!bq && bPool.length === 0;
+var bOpts = bPool.map(function (h, i) { var on = h.tk === bH.tk; var has = !!h.logo; return { tk: h.tk, logo: h.logo, hasLogo: has, noLogo: !has, ini: h.tk.slice(0, 2), c: AVC[i % AVC.length], on: on, cls: on ? 'ck ck-on' : 'ck', pick: function () { setFv('tk', h.tk); } }; });
+var bLot = num(f.lot), bPrice = num(f.price), bVal = bLot * 100 * bPrice;
+var bNewLot = isJual ? bH.lot - bLot : bH.lot + bLot;
+var bNewAvg = isJual || !bNewLot ? bH.avg : Math.round((bH.lot * bH.avg + bLot * bPrice) / bNewLot);
+var bCash = f.useCash ? (isJual ? cash + bVal : cash - bVal) : cash;
+var bDisabled = f.useCash && !isJual && bCash < 0;
+var bCanSave = !bDisabled;
+var bCashCls = 'num' + (bCash < 0 ? ' amt-neg' : (isJual && f.useCash ? ' amt-pos' : ''));
+var saveBuy = function () {
+var S = self.state, F = S.form; var h = S.hold.filter(function (x) { return x.tk === F.tk; })[0];
+var lot = num(F.lot), price = num(F.price), v = lot * 100 * price, jual = F.kind === 'jual';
+if (!h) return self.setState({ err: 'Pilih emitennya dulu.' });
+if (!lot || !price) return self.setState({ err: 'Isi jumlah lot dan harga.' });
+if (jual && lot > h.lot) return self.setState({ err: 'Anda hanya memegang ' + h.lot + ' lot ' + h.tk + '.' });
+if (!jual && F.useCash && v > S.cash) return self.setState({ err: 'Dana tunai tidak cukup (sisa ' + jt(S.cash) + ').' });
+var nl = jual ? h.lot - lot : h.lot + lot;
+var na = jual ? h.avg : Math.round((h.lot * h.avg + lot * price) / nl);
+var nh = nl > 0 ? S.hold.map(function (x) { return x.tk === h.tk ? Object.assign({}, x, { lot: nl, avg: na }) : x; }) : S.hold.filter(function (x) { return x.tk !== h.tk; });
+var nc = F.useCash ? (jual ? S.cash + v : S.cash - v) : S.cash;
+var txt = (jual ? 'Jual ' : 'Beli ') + h.tk + ' ' + lot + ' lot @ ' + rp(price) + (nl === 0 ? ', posisi ditutup' : '');
+self.setState({ hold: nh, cash: nc, modal: '', err: '', log: [logE(txt, thName(h.th), jual ? 'k-out' : 'k-add', jual ? I.out : I.add)].concat(S.log), toast: flash('Transaksi ' + h.tk + ' dicatat') });
+};
+
+// edit
+var eHo = findH(f.tk) || hold[0];
+var eHas = !!(eHo && eHo.logo);
+var eH = eHo ? { tk: eHo.tk, name: eHo.name, logo: eHo.logo, hasLogo: eHas, noLogo: !eHas, ini: eHo.tk.slice(0, 2), c: '#1D4ED8', lot: eHo.lot, modalLbl: jt(modal(eHo)), thShort: thName(eHo.th) } : {};
+var eM = num(f.lot) * 100 * num(f.avg);
+var eDelta = eHo ? eM - modal(eHo) : 0;
+var eStock = stockTotal - (eHo ? modal(eHo) : 0) + eM;
+var saveEdit = function () {
+var S = self.state, F = S.form; var lot = num(F.lot), avg = num(F.avg), tgt = num(F.tgt);
+if (!lot || !avg) return self.setState({ err: 'Lot dan harga beli harus lebih dari 0.' });
+if (F.th !== 'none' && (tgt < 1 || tgt > 100)) return self.setState({ err: 'Target bobot antara 1–100%.' });
+var old = S.hold.filter(function (x) { return x.tk === F.tk; })[0];
+var nth = F.th === 'none' ? '' : F.th;
+var nh = S.hold.map(function (x) { return x.tk === F.tk ? Object.assign({}, x, { lot: lot, avg: avg, tgt: nth ? tgt : 0, th: nth }) : x; });
+var bits = [];
+if (old.lot !== lot || old.avg !== avg) bits.push('modal jadi ' + jt(lot * 100 * avg));
+if (old.th !== nth) bits.push('dipindah ke ' + thName(nth));
+else if ((old.tgt || 0) !== (nth ? tgt : 0)) bits.push('target ' + tgt + '%');
+self.setState({ hold: nh, modal: '', err: '', log: bits.length ? [logE(F.tk + ' diubah: ' + bits.join(', '), thName(nth), '', I.edit)].concat(S.log) : S.log, toast: flash(F.tk + ' diperbarui') });
+};
+var askDrop = function () { setFv('confirm', true); };
+var cancelDrop = function () { setFv('confirm', false); };
+var fRefund = function () { setFv('refund', !self.state.form.refund); };
+var doDrop = function () {
+var S = self.state, F = S.form; var h = S.hold.filter(function (x) { return x.tk === F.tk; })[0];
+var nc = F.refund ? S.cash + modal(h) : S.cash;
+self.setState({ hold: S.hold.filter(function (x) { return x.tk !== F.tk; }), cash: nc, modal: '', err: '', log: [logE(h.tk + ' dikeluarkan dari portofolio', thName(h.th), 'k-out', I.out)].concat(S.log), toast: flash(h.tk + ' dikeluarkan') });
+};
+
+// cash
+var cAmt = num(f.amt);
+var saveCash = function () {
+var S = self.state; var v = num(S.form.amt);
+self.setState({ cash: v, modal: '', err: '', log: v !== S.cash ? [logE('Dana tunai diperbarui jadi ' + jt(v), 'Dana tunai', '', I.cash)].concat(S.log) : S.log, toast: flash('Dana tunai disimpan') });
+};
+
+var fv = { q: f.q || '', lot: f.lot || '', avg: f.avg || '', tgt: f.tgt || '', price: f.price || '', amt: f.amt || '', thq: f.thq || '', bq: f.bq || '', useCash: !!f.useCash, refund: !!f.refund };
+
+return {
+grandLbl: jt(grand), grandShort: jt(grand), stockLbl: jt(stockTotal), cashLbl: jt(cash),
+nEm: hold.length, nTh: TH.length,
+donut: donut, donutAria: donut.map(function (d) { return d.label + ' ' + d.pct + '%'; }).join(', '),
+donutToggle: donutToggle, donutToggleLbl: st.donutDetail ? 'Per sektor' : 'Per emiten',
+tabs: tabs, groups: groups,
+showOrphan: orph.length > 0 && (tab === 'semua' || tab === 'tanpa'),
+orphRows: orphRows, orphCount: orph.length, orphModal: jt(orphModalV), orphShare: pct(orphModalV, stockTotal) + '% dari total saham',
+feed: feed, feedHasMore: feedAll.length > FEED_N,
+feedToggleLbl: st.feedOpen ? 'Sembunyikan' : 'Lihat semua (' + feedAll.length + ')',
+feedToggle: function () { self.setState({ feedOpen: !self.state.feedOpen }); },
+
+openAdd: openAdd, openBuy: openBuy, openCash: openCash, close: close,
+isAdd: st.modal === 'add', isBuy: st.modal === 'buy', isEdit: st.modal === 'edit', isCash: st.modal === 'cash',
+f: fv, err: st.err, hasErr: !!st.err, toast: st.toast, hasToast: !!st.toast,
+fq: setF('q'), flot: setF('lot'), favg: setF('avg'), ftgt: setF('tgt'), fprice: setF('price'), famt: setF('amt'),
+fUseCash: fUseCash, swCls: f.useCash ? 'sw sw-on' : 'sw', swRefCls: f.refund ? 'sw sw-on' : 'sw',
+thOpts: thOpts, fHasTh: fHasTh, thUsed: thUsed, thAfter: thAfter, thAfterCls: thAfter > 100 ? 'over' : '', thHasSearch: thHasSearch, fthq: setF('thq'),
+
+aHasSel: !!selC, aNoSel: !selC, aSel: aSel, aClearSel: function () { setFv('tk', ''); },
+aRes: aRes, aResHint: aResHint,
+aModalLbl: jt(aM), aSharesLbl: thou(num(f.lot) * 100) + ' lembar saham',
+aCashAfter: jt(aCash), aCashNote: f.useCash ? (aCash < 0 ? 'tidak cukup' : 'sisa setelah dibeli') : 'tidak berubah',
+aStockAfter: jt(stockTotal + aM), saveAdd: saveAdd,
+
+kinds: kinds, bOpts: bOpts, bHasSearch: bHasSearch, fbq: setF('bq'), bNoHits: bNoHits,
+bNowLbl: bH.lot + ' lot · harga beli rata-rata ' + rp(bH.avg),
+bLotLbl: isJual ? 'Lot dijual' : 'Lot dibeli', bLotHint: isJual ? 'maks. ' + bH.lot : '',
+bPriceLbl: isJual ? 'Harga jual per lembar' : 'Harga beli per lembar',
+bLotAfter: Math.max(bNewLot, 0) + ' lot', bLotDelta: bLot ? (isJual ? '−' : '+') + bLot + ' lot' : 'belum diisi',
+bAvgAfter: rp(bNewAvg), bAvgNote: isJual ? 'tidak berubah saat menjual' : (bLot && bPrice ? 'dari ' + rp(bH.avg) : 'isi lot dan harga'),
+bCashAfter: jt(bCash), bCashCls: bCashCls, bDisabled: bDisabled, bCanSave: bCanSave,
+bCashNote: f.useCash ? (isJual ? '+' + jt(bVal) : (bCash < 0 ? 'tidak cukup' : '−' + jt(bVal))) : 'tidak berubah',
+bCashTglT: isJual ? 'Masukkan hasil penjualan ke dana tunai' : 'Ambil dari dana tunai',
+bCashTglD: isJual ? 'Tambah dana tunai sebesar nilai penjualan.' : 'Kurangi dana tunai sebesar nilai pembelian.',
+bSaveLbl: isJual ? 'Catat penjualan' : 'Catat pembelian', saveBuy: saveBuy,
+
+eH: eH, eConfirm: !!f.confirm, eNotConfirm: !f.confirm,
+eModalLbl: jt(eM), eModalNote: eDelta === 0 ? 'tidak berubah' : (eDelta > 0 ? '+' : '−') + jt(Math.abs(eDelta)) + ' dari sebelumnya',
+eShareLbl: pct(eM, eStock) + '%', saveEdit: saveEdit, askDrop: askDrop, cancelDrop: cancelDrop, fRefund: fRefund, doDrop: doDrop,
+
+cAmtLbl: rp(cAmt), cGrandLbl: jt(stockTotal + cAmt), cPctLbl: pct(cAmt, stockTotal + cAmt) + '%', saveCash: saveCash
+};
+}
+}
+</script>
+</body>
+</html>

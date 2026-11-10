@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>StockPlan — Beranda kosong</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+*{box-sizing:border-box}
+a{color:#1C1917}a:hover{color:#57534E}
+button,input,textarea,select{font-family:inherit}
+:focus-visible{outline:2px solid #1C1917;outline-offset:2px}
+.nv{display:flex;align-items:center;gap:10px;min-height:40px;padding:0 10px;border-radius:8px;font-size:14px;color:#57534E;text-decoration:none;border:1px solid transparent}
+.nv:hover{background:#F5F5F4;color:#1C1917}
+.nv-on,.nv-on:hover{background:#FFFFFF;color:#1C1917;font-weight:600;border-color:#E7E5E4;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.sec{font-size:11px;font-weight:600;color:#716A65;padding:16px 10px 6px;text-transform:uppercase;letter-spacing:.06em}
+.srch{display:flex;align-items:center;gap:8px;height:40px;min-width:260px;border:1px solid #E7E5E4;border-radius:8px;padding:0 10px;background:#FFFFFF;color:#716A65;font-size:14px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:0 14px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer;border:1px solid transparent;white-space:nowrap}
+.btn-p{background:#FEA722;color:#1C1917}.btn-p:hover{background:#F59E0B;color:#1C1917}
+.btn-o{background:#FFFFFF;color:#1C1917;border-color:#E7E5E4}.btn-o:hover{background:#F5F5F4;color:#1C1917}
+.card{border:1px solid #E7E5E4;border-radius:12px;box-shadow:0 1px 2px rgba(0,0,0,.04);background:#FFFFFF}
+.ch{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:14px 16px}
+.h2{margin:0;font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
+.cnt{font-size:12px;font-weight:600;padding:0 7px;border-radius:999px;background:#F5F5F4;color:#716A65}
+.empty{border-top:1px solid #E7E5E4;padding:26px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.eicon{width:44px;height:44px;border-radius:999px;color:#92400E;background:#FFF4E2;border:1px dashed #FCDDA8;display:inline-flex;align-items:center;justify-content:center}
+.eicon-b{color:#1D4ED8;background:#EFF6FF;border-color:#BFDBFE}
+.eicon-g{color:#15803D;background:#F0FDF4;border-color:#BBF7D0}
+.etitle{font-weight:600;font-size:15px}
+.etext{font-size:13px;color:#716A65;max-width:400px;line-height:1.5}
+.step{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-top:1px solid #E7E5E4}
+.step:first-child{border-top:0}
+.num{width:36px;height:36px;border-radius:10px;flex:none;display:inline-flex;align-items:center;justify-content:center;border:1px solid #E7E5E4;color:#A8A29E;background:#FAFAF9}
+.num-on{background:#FFF4E2;border-color:#FCDDA8;color:#92400E}
+.prev{display:flex;gap:8px;align-items:center;font-size:13px;color:#57534E}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+.dot-live{animation:pulse 2.2s ease-in-out infinite}
+.tip{display:flex;gap:10px;align-items:flex-start;border-top:1px dashed #E7E5E4;margin-top:4px;padding-top:14px}
+.tip-ic{width:26px;height:26px;border-radius:8px;flex:none;background:#EFF6FF;color:#1D4ED8;display:inline-flex;align-items:center;justify-content:center}
+</style>
+</helmet>
+<div style="font-family: 'Geist', system-ui, sans-serif; color: #1C1917; background: #FFFFFF; font-size: 15px; line-height: 1.55; min-height: 100vh; display: flex; flex-wrap: wrap; align-items: stretch">
+
+<aside aria-label="Navigasi aplikasi" style="flex: 0 0 240px; border-right: 1px solid #E7E5E4; background: #FAFAF9; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px">
+<a href="BerandaKosong.dc.html" aria-label="StockPlan, ke beranda" style="display: flex; align-items: center; gap: 8px; padding: 6px 10px 18px; text-decoration: none; color: #1C1917">
+<svg aria-hidden="true" viewBox="4 213 102 88" width="22" height="19"><g fill="#FEA722"><path d="M13.04,233.96c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.49s0-2.12,5.66-4.97l36.26-15.83c4.18-1.83,6.89-5.96,6.89-10.52v-16.89l-41.92,18.3Z"></path><path d="M96.89,280.81c4.18-1.83,6.89-5.96,6.89-10.52v-16.89h0v-2.49s0,2.12-5.66,4.97l-36.26,15.83c-4.18,1.83-6.89,5.960-6.89,10.52v16.89l41.92-18.3Z"></path><path d="M98.11,226.34l-36.26,15.83s-.07,.04-.1,.05l-48.71,21.26c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.79s0-2.12,5.66-4.97l36.26-15.83c.73-.32,1.4-.73,2.03-1.18l46.78-20.42c4.18-1.83,6.89-5.96,6.89-10.52h0v-16.89h0v-2.5s0,2.12-5.66,4.97Z"></path></g></svg>
+<span style="font-weight: 700; font-size: 15px; letter-spacing: -0.01em">StockPlan</span>
+<span style="margin-left: auto; font-size: 11px; font-weight: 600; color: #92400E; background: #FFF4E2; border: 1px solid #FCDDA8; padding: 0 6px; border-radius: 6px">Beta</span>
+</a>
+<a class="nv nv-on" href="BerandaKosong.dc.html" aria-current="page"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>Beranda</a>
+<span class="sec">Riset</span>
+<a class="nv" href="Tema.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="2.2"></circle><circle cx="19" cy="6" r="2.2"></circle><circle cx="19" cy="18" r="2.2"></circle><path d="M7 11l10-4M7 13l10 4"></path></svg>Tema bisnis</a>
+<a class="nv" href="Emiten.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"></rect><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1"></path></svg>Emiten</a>
+<span class="sec">Perencanaan</span>
+<a class="nv" href="Tesis.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg>Tesis saya</a>
+<a class="nv" href="Portofolio.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>Portofolio</a>
+<a class="nv" href="Watchlist.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"></path></svg>Watchlist</a>
+<div style="margin-top: auto; padding-top: 24px; display: flex; flex-direction: column; gap: 8px">
+<div style="border: 1px solid #E7E5E4; background: #FFFFFF; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 13px; font-weight: 600">Akses beta tester</span>
+<span style="font-size: 12px; color: #716A65; line-height: 1.45">Semua fitur terbuka selama beta. Langganan premium berlaku setelah rilis.</span>
+</div>
+<a class="nv" href="#pengaturan"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"></path></svg>Pengaturan</a>
+</div>
+</aside>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+<header style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 28px; border-bottom: 1px solid #E7E5E4">
+<nav aria-label="Breadcrumb" style="font-size: 13px; color: #716A65">Beranda</nav>
+<button type="button" class="srch" style="margin-left: auto"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg><span>Cari tema atau emiten…</span><span style="margin-left: auto; font-family: 'Geist Mono', monospace; font-size: 11px; border: 1px solid #E7E5E4; background: #FAFAF9; border-radius: 4px; padding: 0 5px; color: #57534E">⌘K</span></button>
+<a href="LayoutNotif.dc.html" aria-label="Notifikasi, 5 belum dibaca" style="position: relative; width: 40px; height: 40px; border-radius: 999px; border: 1px solid #E7E5E4; background: #FFFFFF; color: #44403C; display: inline-flex; align-items: center; justify-content: center; flex: none; text-decoration: none"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg><span aria-hidden="true" style="position: absolute; top: -4px; right: -5px; min-width: 19px; height: 19px; padding: 0 5px; box-sizing: border-box; border-radius: 999px; background: #DC2626; color: #FFFFFF; border: 2px solid #FFFFFF; font-family: 'Geist Mono', monospace; font-size: 10.5px; font-weight: 700; line-height: 15px; text-align: center">5</span></a>
+<button type="button" aria-label="Akun dan langganan" style="width: 40px; height: 40px; border-radius: 999px; border: 1px solid #E7E5E4; background: #1C1917; color: #FEA722; font-weight: 600; font-size: 14px; cursor: pointer">B</button>
+</header>
+
+<main style="padding: 28px; display: flex; flex-direction: column; gap: 20px; max-width: 1240px; width: 100%">
+<section aria-label="Sambutan" style="position: relative; overflow: hidden; border-radius: 16px; background: linear-gradient(135deg, #FFF8EC 0%, #FFFFFF 65%); border: 1px solid #F3E7D1; padding: 26px 28px">
+<div aria-hidden="true" style="position: absolute; top: -36px; right: -20px; width: 200px; height: 200px; pointer-events: none">
+<svg viewBox="0 0 200 200" width="200" height="200"><g fill="#FEA722"><path d="M20 55 L95 18 L95 55 L20 92 Z" opacity=".14"></path><path d="M50 100 L125 63 L125 100 L50 137 Z" opacity=".26"></path><path d="M80 145 L155 108 L155 145 L80 182 Z" opacity=".45"></path></g></svg>
+</div>
+<div style="position: relative; display: flex; flex-direction: column; gap: 7px; max-width: 580px">
+<span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #92400E; background: #FFF4E2; border: 1px solid #FCDDA8; width: fit-content; padding: 2px 9px; border-radius: 999px"><span aria-hidden="true" class="dot-live" style="width: 6px; height: 6px; border-radius: 999px; background: #FEA722"></span>Langkah pertama Anda</span>
+<h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em">Selamat datang di StockPlan, B</h1>
+<p style="margin: 0; color: #716A65">Beranda ini akan hidup begitu Anda punya tesis dan portofolio — isinya bukan harga saham, tapi alasan Anda memegangnya, dan kapan alasan itu mulai goyah.</p>
+</div>
+</section>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+
+<div style="flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+
+<section class="card" aria-labelledby="h-start" style="padding: 18px 20px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap">
+<h2 id="h-start" class="h2">Mulai dalam 3 langkah</h2>
+<span style="font-size: 13px; color: #716A65">0 dari 3 selesai · sekitar 10 menit</span>
+</div>
+<div aria-hidden="true" style="height: 4px; border-radius: 999px; background: #F5F5F4; margin: 6px 0 4px"><span style="display: block; width: 4%; height: 4px; border-radius: 999px; background: #FEA722"></span></div>
+<ol style="margin: 0; padding: 0; list-style: none">
+<li class="step">
+<span class="num num-on" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="2.2"></circle><circle cx="19" cy="6" r="2.2"></circle><circle cx="19" cy="18" r="2.2"></circle><path d="M7 11l10-4M7 13l10 4"></path></svg></span>
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+<span style="font-weight: 600">Pilih tema bisnis yang Anda pahami</span>
+<span style="font-size: 13px; color: #716A65">Lihat emiten mana saja yang bergerak di rantai nilainya, dari hulu sampai hilir.</span>
+</div>
+<a class="btn btn-p" href="Tema.dc.html">Jelajahi tema</a>
+</li>
+<li class="step">
+<span class="num" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg></span>
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+<span style="font-weight: 600">Tulis tesis investasi</span>
+<span style="font-size: 13px; color: #716A65">Satu kalimat yang Anda yakini, plus kapan Anda anggap tesis itu salah.</span>
+</div>
+<a class="btn btn-o" href="TesisBuat.dc.html">Tulis tesis</a>
+</li>
+<li class="step">
+<span class="num" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg></span>
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+<span style="font-weight: 600">Masukkan emiten yang Anda pegang</span>
+<span style="font-size: 13px; color: #716A65">Isi jumlah lot dan harga beli. StockPlan tidak terhubung ke sekuritas.</span>
+</div>
+<a class="btn btn-o" href="Portofolio.dc.html">Tambah emiten</a>
+</li>
+</ol>
+<div class="tip">
+<span class="tip-ic" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-6 6c0 2.2 1.2 3.6 2 4.5.6.7 1 1.3 1 2.5h6c0-1.2.4-1.8 1-2.5.8-.9 2-2.3 2-4.5a6 6 0 0 0-6-6z"></path></svg></span>
+<span style="font-size: 13px; color: #57534E; line-height: 1.5">Belum tahu mau mulai dari tema apa? <a class="lnk" href="Tema.dc.html" style="font-weight: 600; text-decoration: underline">Lihat semua tema</a> dulu — Anda bisa balik ke langkah ini kapan saja, StockPlan menyimpan progres Anda.</span>
+</div>
+</section>
+
+<section class="card" aria-labelledby="h-act" style="overflow: hidden">
+<div class="ch">
+<h2 id="h-act" class="h2">Perlu tindakan<span class="cnt">0</span></h2>
+</div>
+<div class="empty">
+<span class="eicon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0-6 6v4l-2 3h16l-2-3V9a6 6 0 0 0-6-6zM10 19a2 2 0 0 0 4 0"></path></svg></span>
+<span class="etitle">Belum ada yang dipantau</span>
+<span class="etext">Setelah Anda menambah emiten, hal yang menuntut keputusan akan muncul di sini:</span>
+<div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 4px">
+<span style="font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 6px; color: #991B1B; background: #FEF2F2; border: 1px solid #FECACA">Suspensi</span>
+<span style="font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 6px; color: #92400E; background: #FFF4E2; border: 1px solid #FCDDA8">Kondisi tesis terpicu</span>
+<span style="font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 6px; color: #1D4ED8; background: #EFF6FF; border: 1px solid #BFDBFE">Bobot melenceng</span>
+</div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="h-chg" style="overflow: hidden">
+<div class="ch">
+<h2 id="h-chg" class="h2">Perubahan bisnis</h2>
+</div>
+<div class="empty">
+<span class="eicon eicon-b" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"></path><path d="M8 9h8M8 13h8M8 17h5"></path></svg></span>
+<span class="etitle">StockPlan membaca data BEI untuk Anda</span>
+<span class="etext">Perubahan pada emiten yang Anda pegang akan dirangkum di sini, tanpa perlu membaca laporan keuangan sendiri.</span>
+<div style="display: flex; flex-direction: column; gap: 6px; margin-top: 6px; text-align: left">
+<span class="prev"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 999px; background: #A8A29E"></span>Pergantian pemegang saham utama</span>
+<span class="prev"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 999px; background: #A8A29E"></span>Anak usaha baru</span>
+<span class="prev"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 999px; background: #A8A29E"></span>Pergantian direksi dan komisaris</span>
+</div>
+</div>
+</section>
+</div>
+
+<div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+
+<section class="card" aria-labelledby="h-th" style="overflow: hidden">
+<div class="ch">
+<h2 id="h-th" class="h2">Kesehatan tesis</h2>
+</div>
+<div class="empty">
+<span class="eicon eicon-g" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg></span>
+<span class="etitle">Belum ada tesis</span>
+<span class="etext">Tesis adalah alasan Anda berinvestasi. Contoh: "Kebutuhan energi Indonesia terus naik dalam 5 tahun."</span>
+<a class="btn btn-o" href="TesisBuat.dc.html" style="margin-top: 6px">Tulis tesis pertama</a>
+</div>
+</section>
+
+<section class="card" aria-labelledby="h-alok" style="padding: 14px 16px; display: flex; flex-direction: column; gap: 12px">
+<h2 id="h-alok" class="h2">Alokasi</h2>
+<div style="display: flex; align-items: center; gap: 14px">
+<svg aria-hidden="true" width="104" height="104" viewBox="0 0 120 120" style="flex: none">
+<circle cx="60" cy="60" r="48" fill="none" stroke="#F0EEED" stroke-width="18"></circle>
+<circle class="dot-live" cx="60" cy="60" r="48" fill="none" stroke="#FCDDA8" stroke-width="18" stroke-dasharray="6 10" stroke-linecap="round"></circle>
+<text x="60" y="57" text-anchor="middle" style="font-family: 'Geist', system-ui, sans-serif; font-size: 15px; font-weight: 700; fill: #A8A29E">Rp 0</text>
+<text x="60" y="73" text-anchor="middle" style="font-family: 'Geist', system-ui, sans-serif; font-size: 11px; fill: #716A65">0 emiten</text>
+</svg>
+<span style="font-size: 13px; color: #716A65; line-height: 1.5">Porsi tiap emiten, tema, dan tesis akan terlihat setelah Anda mengisi portofolio.</span>
+</div>
+<a class="btn btn-o" href="Portofolio.dc.html">Tambah emiten</a>
+</section>
+</div>
+</div>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1080}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

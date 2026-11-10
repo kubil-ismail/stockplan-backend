@@ -1,0 +1,82 @@
+[
+  {
+    "id": "n1",
+    "group": "today",
+    "kind": "thesis_eval",
+    "title": "Evaluasi tesis batu bara sudah lewat 45 hari",
+    "body": "Cek lagi apakah alasan Anda membeli PTBA dan ITMG masih berlaku.",
+    "timeLabel": "08.00",
+    "href": "/tesis/energi/evaluasi",
+    "unread": true
+  },
+  {
+    "id": "n2",
+    "group": "today",
+    "kind": "ticket_reply",
+    "title": "Tim StockPlan membalas tiket Anda",
+    "body": "SP-2610-0418 · Pengingat jadwal evaluasi tesis lewat email",
+    "timeLabel": "07.42",
+    "href": "/akun/bantuan/masukan",
+    "unread": true
+  },
+  {
+    "id": "n3",
+    "group": "today",
+    "kind": "report_published",
+    "title": "Laporan keuangan Q3 2026 PTBA sudah terbit",
+    "body": "Ringkasan pendapatan, laba, dan utang di halaman emiten sudah diperbarui.",
+    "timeLabel": "06.15",
+    "href": "/emiten/PTBA",
+    "unread": true
+  },
+  {
+    "id": "n4",
+    "group": "week",
+    "kind": "data_delayed",
+    "title": "Data Q3 BUMI belum masuk dari BEI",
+    "body": "Angka yang tampil masih dari laporan Q2. Kami kabari begitu datanya masuk.",
+    "timeLabel": "Kemarin, 19.20",
+    "href": "/emiten/BUMI",
+    "unread": true
+  },
+  {
+    "id": "n5",
+    "group": "week",
+    "kind": "ipo",
+    "title": "ABNU akan tercatat di BEI 12 Nov 2026",
+    "body": "Masa penawaran sedang berjalan. Baca ringkasan prospektus sebelum memutuskan.",
+    "timeLabel": "Kemarin, 09.00",
+    "href": "/emiten/ABNU",
+    "unread": true
+  },
+  {
+    "id": "n6",
+    "group": "week",
+    "kind": "thesis_eval",
+    "title": "Evaluasi tesis energi 20 hari lagi",
+    "body": "Jadwal tiap 3 bulan. Siapkan catatan perkembangan UNTR, PGAS, dan PTBA.",
+    "timeLabel": "Selasa, 3 Nov",
+    "href": "/tesis",
+    "unread": false
+  },
+  {
+    "id": "n7",
+    "group": "week",
+    "kind": "theme_update",
+    "title": "Tema Nikel & baterai EV diperbarui",
+    "body": "2 emiten ditambahkan ke tahap smelter di rantai nilai.",
+    "timeLabel": "Senin, 2 Nov",
+    "href": "/tema/nikel-baterai-ev",
+    "unread": false
+  },
+  {
+    "id": "n8",
+    "group": "week",
+    "kind": "feature",
+    "title": "Baru: catat dana tunai di portofolio",
+    "body": "Lihat porsi uang yang belum diinvestasikan di samping saham Anda.",
+    "timeLabel": "Sabtu, 31 Okt",
+    "href": "/portofolio?dialog=dana-tunai",
+    "unread": false
+  }
+]

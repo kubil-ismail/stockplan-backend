@@ -1,0 +1,89 @@
+/*
+  StockPlan design tokens — format CSS variables shadcn/ui (Tailwind v4 / v3 sama-sama bisa).
+  Salin blok :root ke app/globals.css. Nilai diambil dari CSS board di design/screens/.
+  Hanya tema terang yang didesain. Jangan buat dark mode sebelum ada desainnya.
+*/
+:root {
+  /* shadcn core */
+  --background: #FFFFFF;
+  --foreground: #1C1917;          /* ink */
+  --card: #FFFFFF;
+  --card-foreground: #1C1917;
+  --popover: #FFFFFF;
+  --popover-foreground: #1C1917;
+  --primary: #FEA722;             /* accent amber: tombol utama */
+  --primary-foreground: #1C1917;  /* jangan putih di atas amber (kontras gagal) */
+  --secondary: #1C1917;           /* tombol "dark" */
+  --secondary-foreground: #FFFFFF;
+  --muted: #F5F5F4;               /* bg-mute: hover, chip netral */
+  --muted-foreground: #716A65;    /* teks keterangan, 5.31:1 di putih */
+  --accent: #FAFAF9;              /* bg-soft: sidebar, hover baris, footer popover */
+  --accent-foreground: #1C1917;
+  --destructive: #DC2626;
+  --destructive-foreground: #FFFFFF;
+  --border: #E7E5E4;
+  --input: #D6D3D1;
+  --ring: #1C1917;
+  --radius: 0.5rem;               /* 8px: tombol & input. kartu 12px, chip 6px */
+
+  /* StockPlan extra */
+  --sp-ink-2: #44403C;
+  --sp-icon: #57534E;
+  --sp-faint: #A8A29E;            /* 2.52:1, hanya dekoratif / disabled, bukan teks penting */
+  --sp-line-soft: #F0EEEC;
+  --sp-primary-hover: #F59E0B;
+  --sp-amber-bg: #FFF4E2;
+  --sp-amber-text: #92400E;
+  --sp-amber-border: #FCDDA8;
+  --sp-unread-bg: #FFFBF3;
+  --sp-success: #15803D;
+  --sp-success-bg: #F0FDF4;
+  --sp-success-border: #BBF7D0;
+  --sp-danger-text: #B91C1C;
+  --sp-danger-bg: #FEF2F2;
+  --sp-danger-border: #FECACA;
+  --sp-info: #1D4ED8;
+  --sp-info-bg: #EFF6FF;
+  --sp-info-border: #BFDBFE;
+  --sp-warn-text: #92400E;
+  --sp-warn-bg: #FFFBEB;
+  --sp-warn-border: #FCDDA8;
+  /* kategori (avatar emiten tanpa logo, donut, grafik) */
+  --sp-cat-1: #1D4ED8;
+  --sp-cat-2: #15803D;
+  --sp-cat-3: #6D28D9;
+  --sp-cat-4: #BE185D;
+  --sp-cat-5: #0E7490;
+  --sp-cat-6: #9A3412;
+  /* tahap rantai nilai */
+  --sp-stage-hulu: #92400E;       /* bg #FFF4E2 */
+  --sp-stage-tengah: #1D4ED8;     /* bg #EFF6FF */
+  --sp-stage-hilir: #15803D;      /* bg #F0FDF4 */
+  /* skeleton */
+  --sp-skeleton: #F0EEED;
+  --sp-skeleton-shine: #F7F5F4;
+
+  /* layout */
+  --sp-sidebar-w: 240px;
+  --sp-header-h: 64px;
+  --sp-content-pad: 28px;
+  --sp-content-max: 1240px;
+  --sp-shadow-popover: 0 24px 48px -16px rgba(28,25,23,.25), 0 2px 6px rgba(28,25,23,.05);
+  --sp-shadow-card: 0 1px 2px rgba(0,0,0,.04);
+}
+
+/* Skeleton shimmer + fallback reduced motion */
+@keyframes sp-shimmer { 0% { background-position: -200px 0 } 100% { background-position: calc(200px + 100%) 0 } }
+.sp-skeleton {
+  border-radius: 6px;
+  background-color: var(--sp-skeleton);
+  background-image: linear-gradient(90deg, var(--sp-skeleton) 0px, var(--sp-skeleton-shine) 40px, var(--sp-skeleton) 80px);
+  background-size: 200px 100%;
+  animation: sp-shimmer 1.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sp-skeleton { animation: none; background-image: none; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }

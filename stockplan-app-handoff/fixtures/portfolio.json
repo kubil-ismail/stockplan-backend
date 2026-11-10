@@ -1,0 +1,115 @@
+{
+  "cashIdr": 8570000,
+  "holdings": [
+    {
+      "tk": "PTBA",
+      "name": "Bukit Asam Tbk",
+      "logo": "/logos/emiten/logo-ptba.svg",
+      "role": "Pemilik tambang · PLTU",
+      "stages": [
+        "Hulu",
+        "Hilir"
+      ],
+      "sektor": "Energi",
+      "th": "energi",
+      "tgt": 40,
+      "lot": 60,
+      "avg": 2400,
+      "st": "ok"
+    },
+    {
+      "tk": "AADI",
+      "name": "Adaro Andalan Indonesia Tbk",
+      "logo": "/logos/emiten/logo-aadi.svg",
+      "role": "Tambang · logistik",
+      "stages": [
+        "Hulu",
+        "Tengah"
+      ],
+      "sektor": "Energi",
+      "th": "energi",
+      "tgt": 35,
+      "lot": 12,
+      "avg": 8000,
+      "st": "ok"
+    },
+    {
+      "tk": "UNTR",
+      "name": "United Tractors Tbk",
+      "logo": "/logos/emiten/logo-untr.svg",
+      "role": "Kontraktor tambang",
+      "stages": [
+        "Hulu"
+      ],
+      "sektor": "Energi",
+      "th": "energi",
+      "tgt": 25,
+      "lot": 2,
+      "avg": 30000,
+      "st": "rv"
+    },
+    {
+      "tk": "ITMG",
+      "name": "Indo Tambangraya Megah Tbk",
+      "logo": "/logos/emiten/logo-itmg.svg",
+      "role": "Pemilik tambang",
+      "stages": [
+        "Hulu"
+      ],
+      "sektor": "Energi",
+      "th": "batubara2",
+      "tgt": 55,
+      "lot": 4,
+      "avg": 25500,
+      "st": "ok"
+    },
+    {
+      "tk": "INDY",
+      "name": "Indika Energy Tbk",
+      "logo": "/logos/emiten/logo-indy.svg",
+      "role": "Induk tambang · energi baru",
+      "stages": [
+        "Hulu",
+        "Hilir"
+      ],
+      "sektor": "Energi",
+      "th": "batubara2",
+      "tgt": 45,
+      "lot": 50,
+      "avg": 1600,
+      "st": "ok"
+    },
+    {
+      "tk": "TLKM",
+      "name": "Telkom Indonesia Tbk",
+      "logo": "",
+      "role": "Operator telekomunikasi",
+      "stages": [],
+      "sektor": "Infrastruktur",
+      "th": "",
+      "tgt": 0,
+      "lot": 10,
+      "avg": 2800,
+      "st": "ok"
+    }
+  ],
+  "theses": [
+    {
+      "id": "energi",
+      "short": "Kebutuhan energi naik",
+      "statement": "Kebutuhan energi Indonesia terus naik dalam 5 tahun ke depan.",
+      "horizon": "3–5 tahun",
+      "days": 20,
+      "c": "#FEA722"
+    },
+    {
+      "id": "batubara2",
+      "short": "Harga batu bara membaik",
+      "statement": "Harga batu bara dunia membaik dalam 1–2 tahun, menguntungkan emiten berbiaya produksi rendah.",
+      "horizon": "1–3 tahun",
+      "days": -45,
+      "c": "#1C1917"
+    }
+  ],
+  "note": "modal per emiten = lot × 100 × avg. Tidak ada harga realtime."
+}

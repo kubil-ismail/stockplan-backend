@@ -1,0 +1,167 @@
+{
+  "energi": {
+    "statement": "Kebutuhan energi Indonesia terus naik dalam 5 tahun ke depan.",
+    "horizon": "3–5 tahun",
+    "evalSchedule": "tiap 3 bulan",
+    "created": "12 Agu 2026",
+    "updated": "2 Sep 2026",
+    "days": 20,
+    "reasons": [
+      "Smelter nikel, kawasan industri, dan pusat data baru terus menambah kebutuhan listrik.",
+      "Batu bara masih jadi sumber terbesar pembangkit PLN untuk beberapa tahun ke depan.",
+      "Kewajiban pasok dalam negeri (DMO) menjaga sebagian produksi tetap terserap di Indonesia."
+    ],
+    "kills": [
+      [
+        "Konsumsi listrik nasional turun dua tahun berturut-turut.",
+        "Belum terjadi",
+        "st st-ok"
+      ],
+      [
+        "Pemerintah mempercepat pensiun PLTU batu bara secara besar-besaran.",
+        "Perlu dipantau",
+        "st st-rv"
+      ],
+      [
+        "Mayoritas emiten di tesis ini rugi dua tahun berturut-turut.",
+        "Belum terjadi",
+        "st st-ok"
+      ]
+    ],
+    "em": [
+      {
+        "tk": "PTBA",
+        "name": "Bukit Asam Tbk",
+        "logo": "/logos/emiten/logo-ptba.svg",
+        "w": 40,
+        "st": "ok",
+        "tags": [
+          [
+            "Hulu",
+            "Pemilik tambang"
+          ],
+          [
+            "Hilir",
+            "Pembangkit"
+          ]
+        ],
+        "why": "BUMN dengan lebih dari separuh penjualan ke PLN, plus punya PLTU sendiri — paling langsung terhubung ke kebutuhan listrik dalam negeri."
+      },
+      {
+        "tk": "AADI",
+        "name": "Adaro Andalan Indonesia Tbk",
+        "logo": "/logos/emiten/logo-aadi.svg",
+        "w": 35,
+        "st": "ok",
+        "tags": [
+          [
+            "Hulu",
+            "Pemilik tambang"
+          ],
+          [
+            "Tengah",
+            "Logistik"
+          ]
+        ],
+        "why": "Punya tambang sekaligus armada pengangkutan sendiri, jadi ikut untung dari dua sisi kalau volume batu bara naik."
+      },
+      {
+        "tk": "UNTR",
+        "name": "United Tractors Tbk",
+        "logo": "/logos/emiten/logo-untr.svg",
+        "w": 25,
+        "st": "rv",
+        "tags": [
+          [
+            "Hulu",
+            "Kontraktor tambang"
+          ]
+        ],
+        "why": "Dibayar per volume galian lewat anak usahanya, PAMA — makin banyak batu bara ditambang, makin banyak pekerjaan.",
+        "rvNote": "Sebagian pendapatan UNTR datang dari alat berat, emas, dan nikel. Kaitannya ke kebutuhan listrik tidak sepenuhnya langsung — putuskan saat evaluasi apakah tetap masuk."
+      }
+    ],
+    "history": [
+      [
+        "12 Agu 2026",
+        "Tesis dibuat dengan PTBA dan AADI",
+        ""
+      ],
+      [
+        "2 Sep 2026",
+        "UNTR ditambahkan, bobot disusun 40 / 35 / 25",
+        ""
+      ],
+      [
+        "30 Okt 2026",
+        "UNTR ditandai perlu ditinjau: sebagian pendapatan bukan dari batu bara",
+        ""
+      ]
+    ]
+  },
+  "batubara2": {
+    "statement": "Harga batu bara dunia membaik dalam 1–2 tahun, menguntungkan emiten berbiaya produksi rendah.",
+    "horizon": "1–3 tahun",
+    "evalSchedule": "tiap 3 bulan",
+    "created": "10 Mei 2026",
+    "updated": "10 Mei 2026",
+    "days": -45,
+    "reasons": [
+      "Harga acuan batu bara termal mulai pulih dari titik terendah, didorong permintaan musim dingin di Asia Timur Laut.",
+      "Produsen dengan biaya tunai rendah tetap untung walau harga belum setinggi 2022."
+    ],
+    "kills": [
+      [
+        "Harga batu bara acuan turun lagi ke bawah biaya produksi rata-rata industri.",
+        "Belum terjadi",
+        "st st-ok"
+      ],
+      [
+        "Permintaan impor dari Tiongkok dan India turun signifikan dua kuartal berturut-turut.",
+        "Perlu dipantau",
+        "st st-rv"
+      ]
+    ],
+    "em": [
+      {
+        "tk": "ITMG",
+        "name": "Indo Tambangraya Megah Tbk",
+        "logo": "/logos/emiten/logo-itmg.svg",
+        "w": 55,
+        "st": "ok",
+        "tags": [
+          [
+            "Hulu",
+            "Pemilik tambang"
+          ]
+        ],
+        "why": "Produsen batu bara kalori tinggi dengan biaya tunai relatif rendah, jadi lebih tahan saat harga melemah."
+      },
+      {
+        "tk": "INDY",
+        "name": "Indika Energy Tbk",
+        "logo": "/logos/emiten/logo-indy.svg",
+        "w": 45,
+        "st": "ok",
+        "tags": [
+          [
+            "Hulu",
+            "Induk usaha tambang"
+          ],
+          [
+            "Hilir",
+            "Diversifikasi energi"
+          ]
+        ],
+        "why": "Induk dari beberapa tambang batu bara sekaligus mulai merambah energi baru — ikut untung kalau harga batu bara naik, dengan sedikit penyangga dari bisnis lain."
+      }
+    ],
+    "history": [
+      [
+        "10 Mei 2026",
+        "Tesis dibuat dengan ITMG dan INDY",
+        ""
+      ]
+    ]
+  }
+}

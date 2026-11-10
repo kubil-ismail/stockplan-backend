@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>StockPlan — Tema bisnis</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+*{box-sizing:border-box}
+a{color:#1C1917}a:hover{color:#57534E}
+button,input,textarea,select{font-family:inherit}
+:focus-visible{outline:2px solid #1C1917;outline-offset:2px}
+.nv{display:flex;align-items:center;gap:10px;min-height:40px;padding:0 10px;border-radius:8px;font-size:14px;color:#57534E;text-decoration:none;border:1px solid transparent}
+.nv:hover{background:#F5F5F4;color:#1C1917}
+.nv-on,.nv-on:hover{background:#FFFFFF;color:#1C1917;font-weight:600;border-color:#E7E5E4;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.sec{font-size:11px;font-weight:600;color:#716A65;padding:16px 10px 6px;text-transform:uppercase;letter-spacing:.06em}
+.srch{display:flex;align-items:center;gap:8px;height:40px;min-width:260px;border:1px solid #E7E5E4;border-radius:8px;padding:0 10px;background:#FFFFFF;color:#716A65;font-size:14px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:0 12px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;cursor:pointer;border:1px solid transparent;white-space:nowrap}
+.btn-o{background:#FFFFFF;color:#1C1917;border-color:#E7E5E4}.btn-o:hover{background:#F5F5F4;color:#1C1917}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px;border:1px solid;white-space:nowrap}
+.p-ok{color:#15803D;background:#F0FDF4;border-color:#BBF7D0}
+.p-soon{color:#716A65;background:#F5F5F4;border-color:#E7E5E4}
+.p-new{color:#92400E;background:#FFF4E2;border-color:#FCDDA8}
+.nd{width:6px;height:6px;border-radius:999px;background:#FEA722;flex:none}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.nd-live{animation:pulse 2s ease-in-out infinite}
+.lg{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#716A65}
+.sct{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:12px;border:1px solid #E7E5E4;background:#FFFFFF;text-decoration:none;color:#1C1917;min-height:132px;box-shadow:0 1px 2px rgba(0,0,0,.04);transition:transform .12s ease,box-shadow .12s ease}
+a.sct:hover{border-color:#A8A29E;color:#1C1917;transform:translateY(-2px);box-shadow:0 8px 20px -8px rgba(28,25,23,.18)}
+.sct-soon{background:#FAFAF9;box-shadow:none;color:#716A65}
+.sct-soon:hover{transform:none;box-shadow:none}
+.sic{width:34px;height:34px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.sic-amber{background:#FFF4E2;color:#92400E}
+.sic-blue{background:#EFF6FF;color:#1D4ED8}
+.sic-green{background:#F0FDF4;color:#15803D}
+.sic-purple{background:#F5F3FF;color:#6D28D9}
+.sic-rose{background:#FDF2F8;color:#BE185D}
+.sic-stone{background:#F5F5F4;color:#57534E}
+.sct-soon .sic{background:#F0EEED !important;color:#A8A29E !important}
+.match{font-size:11px;color:#92400E;background:#FFFBEB;border:1px solid #FCDDA8;border-radius:5px;padding:0 6px;display:inline-flex;align-items:center;gap:4px;width:fit-content}
+.flt{display:flex;gap:6px;flex-wrap:wrap}
+.fchip{min-height:32px;padding:0 12px;border-radius:999px;border:1px solid #E7E5E4;background:#FFFFFF;color:#57534E;font-size:13px;font-weight:500;cursor:pointer}
+.fchip:hover{background:#F5F5F4}
+.fchip-on,.fchip-on:hover{background:#1C1917;border-color:#1C1917;color:#FFFFFF}
+.sinp{width:100%;height:42px;border:1px solid #D6D3D1;border-radius:10px;padding:0 14px 0 40px;font-size:14px;color:#1C1917;background:#FFFFFF}
+.sinp::placeholder{color:#8A837D}
+.sinp:focus{outline:none;border-color:#1C1917;box-shadow:0 0 0 3px rgba(28,25,23,.1)}
+.empty2{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:40px 16px;color:#716A65}
+.lead{display:flex;align-items:center;gap:8px}
+.lead-avs{display:flex;align-items:center}
+.lead-avs img,.lead-avs .av{width:22px;height:22px;border-radius:999px;border:2px solid #FFFFFF;box-shadow:0 0 0 1px #E7E5E4;margin-left:-7px;flex:none}
+.lead-avs img:first-child,.lead-avs .av:first-child{margin-left:0}
+.av{display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#FFFFFF;font-family:'Geist Mono',monospace}
+.av-more{background:#E7E5E4;color:#57534E;font-size:7px}
+</style>
+</helmet>
+<div style="font-family: 'Geist', system-ui, sans-serif; color: #1C1917; background: #FFFFFF; font-size: 15px; line-height: 1.55; min-height: 100vh; display: flex; flex-wrap: wrap; align-items: stretch">
+<aside aria-label="Navigasi aplikasi" style="flex: 0 0 240px; border-right: 1px solid #E7E5E4; background: #FAFAF9; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px">
+<a href="Main.dc.html" aria-label="StockPlan, ke beranda" style="display: flex; align-items: center; gap: 8px; padding: 6px 10px 18px; text-decoration: none; color: #1C1917">
+<svg aria-hidden="true" viewBox="4 213 102 88" width="22" height="19"><g fill="#FEA722"><path d="M13.04,233.96c-4.18,1.830-6.890,5.960-6.890,10.520v16.890h0v2.490s0-2.120,5.660-4.970l36.260-15.830c4.180-1.830,6.890-5.960,6.890-10.520v-16.890l-41.920,18.300Z"></path><path d="M96.89,280.81c4.18-1.83,6.89-5.96,6.89-10.52v-16.89h0v-2.49s0,2.12-5.66,4.97l-36.26,15.83c-4.18,1.83-6.89,5.96-6.89,10.52v16.89l41.92-18.3Z"></path><path d="M98.11,226.34l-36.26,15.83s-.07,.04-.1,.05l-48.71,21.26c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.79s0-2.12,5.66-4.97l36.26-15.83c.73-.32,1.4-.73,2.03-1.18l46.78-20.42c4.18-1.83,6.89-5.96,6.89-10.52h0v-16.89h0v-2.5s0,2.12-5.66,4.97Z"></path></g></svg>
+<span style="font-weight: 700; font-size: 15px; letter-spacing: -0.01em">StockPlan</span>
+<span style="margin-left: auto; font-size: 11px; font-weight: 600; color: #92400E; background: #FFF4E2; border: 1px solid #FCDDA8; padding: 0 6px; border-radius: 6px">Beta</span>
+</a>
+<a class="nv" href="Main.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>Beranda</a>
+<span class="sec">Riset</span>
+<a class="nv nv-on" href="Tema.dc.html" aria-current="page"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="2.2"></circle><circle cx="19" cy="6" r="2.2"></circle><circle cx="19" cy="18" r="2.2"></circle><path d="M7 11l10-4M7 13l10 4"></path></svg>Tema bisnis</a>
+<a class="nv" href="Emiten.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"></rect><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1"></path></svg>Emiten</a>
+<span class="sec">Perencanaan</span>
+<a class="nv" href="Tesis.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg>Tesis saya</a>
+<a class="nv" href="Portofolio.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>Portofolio</a>
+<a class="nv" href="Watchlist.dc.html"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"></path></svg>Watchlist</a>
+<div style="margin-top: auto; padding-top: 24px">
+<a class="nv" href="#pengaturan"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"></path></svg>Pengaturan</a>
+</div>
+</aside>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+<header style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 28px; border-bottom: 1px solid #E7E5E4">
+<nav aria-label="Breadcrumb" style="font-size: 13px; color: #716A65">Riset / <span style="color: #1C1917">Tema bisnis</span></nav>
+<button type="button" class="srch" style="margin-left: auto"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg><span>Cari tema atau emiten…</span><span style="margin-left: auto; font-family: 'Geist Mono', monospace; font-size: 11px; border: 1px solid #E7E5E4; background: #FAFAF9; border-radius: 4px; padding: 0 5px; color: #57534E">⌘K</span></button>
+<a href="LayoutNotif.dc.html" aria-label="Notifikasi, 5 belum dibaca" style="position: relative; width: 40px; height: 40px; border-radius: 999px; border: 1px solid #E7E5E4; background: #FFFFFF; color: #44403C; display: inline-flex; align-items: center; justify-content: center; flex: none; text-decoration: none"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg><span aria-hidden="true" style="position: absolute; top: -4px; right: -5px; min-width: 19px; height: 19px; padding: 0 5px; box-sizing: border-box; border-radius: 999px; background: #DC2626; color: #FFFFFF; border: 2px solid #FFFFFF; font-family: 'Geist Mono', monospace; font-size: 10.5px; font-weight: 700; line-height: 15px; text-align: center">5</span></a>
+<button type="button" aria-label="Akun dan langganan" style="width: 40px; height: 40px; border-radius: 999px; border: 1px solid #E7E5E4; background: #1C1917; color: #FEA722; font-weight: 600; font-size: 14px; cursor: pointer">B</button>
+</header>
+
+<main style="padding: 28px; display: flex; flex-direction: column; gap: 20px; max-width: 1240px; width: 100%">
+<div style="position: relative; overflow: hidden; border-radius: 16px; background: linear-gradient(120deg, #FFF8EC 0%, #FFFFFF 70%); border: 1px solid #F3E7D1; padding: 20px 24px; display: flex; flex-direction: column; gap: 4px">
+<div aria-hidden="true" style="position: absolute; top: -34px; right: -24px; width: 170px; height: 170px; pointer-events: none">
+<svg viewBox="0 0 170 170" width="170" height="170"><g fill="#FEA722"><path d="M15 45 L80 15 L80 45 L15 75 Z" opacity=".14"></path><path d="M40 85 L105 55 L105 85 L40 115 Z" opacity=".24"></path><path d="M65 125 L130 95 L130 125 L65 155 Z" opacity=".4"></path></g></svg>
+</div>
+<h1 style="position: relative; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em">Tema bisnis</h1>
+<p style="position: relative; margin: 0; color: #716A65; max-width: 640px">Pilih sektor, lalu lihat industri apa saja di dalamnya. Pengelompokan mengikuti klasifikasi resmi BEI (IDX-IC).</p>
+</div>
+
+<div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center">
+<div style="position: relative; flex: 1 1 280px; min-width: 220px; max-width: 420px">
+<label for="cari-sektor" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Cari sektor atau industri</label>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#716A65" stroke-width="1.8" stroke-linecap="round" style="position: absolute; left: 13px; top: 13px"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+<input id="cari-sektor" class="sinp" type="search" placeholder="Cari sektor atau industri, misalnya nikel, bank" value="{{q}}" onInput="{{onQuery}}">
+</div>
+<div role="group" aria-label="Filter status data" class="flt">
+<sc-for list="{{filters}}" as="f" hint-placeholder-count="4">
+<button type="button" class="{{f.cls}}" aria-pressed="{{f.on}}" onClick="{{f.pick}}">{{f.label}}</button>
+</sc-for>
+</div>
+</div>
+
+<div style="display: flex; gap: 16px; flex-wrap: wrap">
+<span class="lg"><span class="pill p-ok">Siap</span>Data lengkap</span>
+<span class="lg"><span class="pill p-new"><span class="nd nd-live"></span>Baru</span>Data diperbarui 7 hari terakhir</span>
+<span class="lg"><span class="pill p-soon">Segera hadir</span>Data sedang disiapkan</span>
+</div>
+
+<sc-if value="{{hasResults}}" hint-placeholder-val="{{true}}">
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px">
+<sc-for list="{{sectors}}" as="s" hint-placeholder-count="11">
+<sc-if value="{{s.ready}}" hint-placeholder-val="{{true}}">
+<a class="sct" href="{{s.href}}">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px">
+<span class="{{s.sic}}" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{s.icon}}"></path></svg></span>
+<sc-if value="{{s.isNew}}" hint-placeholder-val="{{false}}"><span class="pill p-new"><span class="nd nd-live"></span>Baru</span></sc-if>
+<sc-if value="{{s.isOk}}" hint-placeholder-val="{{true}}"><span class="pill p-ok">Siap</span></sc-if>
+</div>
+<span style="font-size: 16px; font-weight: 600; line-height: 1.3">{{s.name}}</span>
+<span style="font-size: 13px; color: #716A65">{{s.meta}}</span>
+<sc-if value="{{s.hasLeaders}}" hint-placeholder-val="{{true}}">
+<div class="lead-avs" aria-hidden="true" style="margin-top: auto">
+<sc-for list="{{s.leaders}}" as="ld" hint-placeholder-count="3">
+<sc-if value="{{ld.hasLogo}}" hint-placeholder-val="{{false}}"><img src="{{ld.logo}}" alt=""></sc-if>
+<sc-if value="{{ld.noLogo}}" hint-placeholder-val="{{true}}"><span class="av" style="background: {{ld.c}}">{{ld.ini}}</span></sc-if>
+</sc-for>
+<sc-if value="{{s.hasMore}}" hint-placeholder-val="{{false}}"><span class="av av-more">{{s.moreText}}</span></sc-if>
+</div>
+</sc-if>
+<sc-if value="{{s.hasMatch}}" hint-placeholder-val="{{false}}"><span class="match" style="margin-top: auto"><svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>cocok: {{s.matchText}}</span></sc-if>
+</a>
+</sc-if>
+<sc-if value="{{s.soon}}" hint-placeholder-val="{{false}}">
+<div class="sct sct-soon">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px">
+<span class="{{s.sic}}" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{s.icon}}"></path></svg></span>
+<span class="pill p-soon">Segera hadir</span>
+</div>
+<span style="font-size: 16px; font-weight: 600; line-height: 1.3">{{s.name}}</span>
+<span style="font-size: 13px">Data industri sedang disiapkan</span>
+<sc-if value="{{s.hasMatch}}" hint-placeholder-val="{{false}}"><span class="match" style="margin-top: auto">cocok: {{s.matchText}}</span></sc-if>
+</div>
+</sc-if>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{noResults}}" hint-placeholder-val="{{false}}">
+<div class="empty2">
+<svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+<span style="font-weight: 600; color: #1C1917">Tidak ada sektor atau industri yang cocok</span>
+<span style="font-size: 13px">Coba kata lain, misalnya nama komoditas atau jenis bisnis.</span>
+</div>
+</sc-if>
+<p style="margin: 0; font-size: 12px; color: #716A65">Sumber: klasifikasi IDX-IC, BEI (12 sektor, 35 subsektor, 69 industri). Sektor Produk Investasi Tercatat tidak ditampilkan. Angka dalam kurung siku diisi dari data BEI.</p>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { q: '', filter: 'Semua' };
+}
+renderVals() {
+var self = this;
+var st = this.state;
+var I = {
+'Energi': 'M13 2 3 14h8l-1 8 10-12h-8l1-8Z',
+'Barang Baku': 'M12 3 3 8v8l9 5 9-5V8z M3 8l9 5 9-5 M12 13v8',
+'Perindustrian': 'M3 21V10l6 4V10l6 4V6l6 3v12z',
+'Barang Konsumen Primer': 'M4 9h16l-2 11H6z M9 9l3-5 3 5',
+'Barang Konsumen Non-Primer': 'M6 7h12l1 14H5z M9 7a3 3 0 0 1 6 0',
+'Kesehatan': 'M12 5v14M5 12h14',
+'Keuangan': 'M3 10h18L12 4z M5 10v8M10 10v8M14 10v8M19 10v8M3 20h18',
+'Properti & Real Estat': 'M4 21V5l8-2v18 M12 9h8v12 M4 21h16',
+'Teknologi': 'M7 7h10v10H7z M10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4',
+'Infrastruktur': 'M12 3v18 M5 21l7-18 7 18 M8 14h8',
+'Transportasi & Logistik': 'M3 7h11v9H3z M14 10h4l3 3v3h-7'
+};
+var S = {
+'Energi': 'new', 'Barang Baku': 'ok', 'Keuangan': 'new', 'Infrastruktur': 'ok'
+};
+var M = {
+'Energi': '[n] emiten · 5 industri · diperbarui 3 Nov',
+'Barang Baku': '[n] emiten · [n] industri',
+'Keuangan': '[n] emiten · [n] industri · diperbarui 1 Nov',
+'Infrastruktur': '[n] emiten · [n] industri'
+};
+var IND = {
+'Energi': ['Minyak & gas', 'Batu bara', 'Jasa & peralatan migas', 'Energi alternatif'],
+'Barang Baku': ['Nikel', 'Emas', 'Timah', 'Semen', 'Petrokimia', 'Pulp & kertas'],
+'Perindustrian': ['Otomotif', 'Alat berat', 'Komponen elektronik'],
+'Barang Konsumen Primer': ['Kelapa sawit', 'Makanan & minuman', 'Produk rumah tangga'],
+'Barang Konsumen Non-Primer': ['Ritel', 'Tekstil & garmen', 'Otomotif konsumen'],
+'Kesehatan': ['Rumah sakit', 'Farmasi', 'Alat kesehatan'],
+'Keuangan': ['Perbankan', 'Multifinance', 'Asuransi', 'Sekuritas'],
+'Properti & Real Estat': ['Properti residensial', 'Properti komersial', 'Manajemen properti'],
+'Teknologi': ['Perangkat lunak', 'E-commerce', 'Layanan digital'],
+'Infrastruktur': ['Telekomunikasi', 'Jalan tol', 'Menara telekomunikasi'],
+'Transportasi & Logistik': ['Logistik', 'Pelayaran', 'Penerbangan']
+};
+var palette = ['sic-amber', 'sic-stone', 'sic-blue', 'sic-green', 'sic-rose', 'sic-purple'];
+var LOGO = {
+PTBA: '/_blob/a7814f85d9b69b78f4edb98dc5be88d5',
+AADI: '/_blob/fee486793ba6867b5b69aaf44de9f6e7',
+UNTR: '/_blob/f5a059270c2b05fcd6c975eb7bbd11d3',
+ITMG: '/_blob/cd0894862a9546ef41964447ba7224e5'
+};
+var AVC = ['#1C1917', '#92400E', '#1D4ED8', '#15803D', '#6D28D9', '#BE185D'];
+var mkLeader = function (tk, i) {
+return LOGO[tk]
+? { hasLogo: true, noLogo: false, logo: LOGO[tk], ini: '', c: '' }
+: { hasLogo: false, noLogo: true, logo: '', ini: tk.slice(0, 2), c: AVC[i % AVC.length] };
+};
+var LEADERS = {
+'Energi': { tks: ['PTBA', 'AADI', 'UNTR'], total: 7 },
+'Barang Baku': { tks: ['ANTM', 'INCO', 'TINS'], total: 11 },
+'Keuangan': { tks: ['BBCA', 'BBRI', 'BMRI'], total: 9 },
+'Infrastruktur': { tks: ['TLKM', 'JSMR', 'EXCL'], total: 4 }
+};
+var names = Object.keys(I);
+var q = (st.q || '').trim().toLowerCase();
+var norm = function (x) { return x.toLowerCase(); };
+var sectors = names.map(function (n, i) {
+var s = S[n];
+var inds = IND[n] || [];
+var nameHit = q !== '' && norm(n).indexOf(q) >= 0;
+var indHit = q !== '' && inds.filter(function (x) { return norm(x).indexOf(q) >= 0; });
+var matched = q === '' || nameHit || (indHit && indHit.length > 0);
+var ld = s ? LEADERS[n] : null;
+var tks = ld ? ld.tks : [];
+var more = ld ? Math.max(0, ld.total - tks.length) : 0;
+return {
+name: n, icon: I[n], meta: M[n] || (inds.length + ' industri'),
+sic: palette[i % palette.length],
+ready: !!s, soon: !s, isNew: s === 'new', isOk: s === 'ok',
+href: n === 'Energi' ? 'TemaSektor.dc.html' : '#',
+hasMatch: q !== '' && !nameHit && indHit && indHit.length > 0,
+matchText: indHit && indHit.length ? indHit.join(', ') : '',
+hasLeaders: tks.length > 0,
+leaders: tks.map(mkLeader),
+hasMore: more > 0,
+moreText: '+' + more,
+_matched: matched,
+_status: s || 'soon'
+};
+});
+var filterDefs = [['Semua', 'Semua'], ['ok', 'Siap'], ['new', 'Baru'], ['soon', 'Segera hadir']];
+var filtered = sectors.filter(function (s) {
+return s._matched && (st.filter === 'Semua' || s._status === st.filter);
+});
+return {
+q: st.q,
+onQuery: function (e) { self.setState({ q: e.target.value }); },
+filters: filterDefs.map(function (f) {
+var on = st.filter === f[0];
+return { label: f[1], on: on, cls: on ? 'fchip fchip-on' : 'fchip', pick: function () { self.setState({ filter: f[0] }); } };
+}),
+sectors: filtered,
+hasResults: filtered.length > 0,
+noResults: filtered.length === 0
+};
+}
+}
+</script>
+</body>
+</html>

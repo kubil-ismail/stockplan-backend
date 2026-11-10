@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>StockPlan — Syarat layanan</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+
+body{margin:0;background:#FFFFFF}
+*{box-sizing:border-box}
+a{color:#1C1917}a:hover{color:#57534E}
+button,input,textarea,select{font-family:inherit}
+:focus-visible{outline:2px solid #1C1917;outline-offset:2px}
+.wrap{font-family:'Geist',system-ui,sans-serif;color:#1C1917;background:#FFFFFF;font-size:15px;line-height:1.55;min-height:100vh;display:flex;flex-direction:column}
+.bar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid #E7E5E4}
+.bar-in{max-width:1180px;margin:0 auto;padding:14px 32px;display:flex;align-items:center;gap:24px}
+.brand{display:flex;align-items:center;gap:9px;text-decoration:none;color:#1C1917;font-weight:700;font-size:16px;letter-spacing:-0.01em}
+.brand>em{font-style:normal;font-size:11px;font-weight:600;color:#92400E;background:#FFF4E2;border:1px solid #FCDDA8;padding:0 6px;border-radius:6px}
+.nav{display:flex;gap:4px;margin-left:8px}
+.nav>a{font-size:14px;color:#57534E;text-decoration:none;padding:6px 10px;border-radius:8px}
+.nav>a:hover{background:#F5F5F4;color:#1C1917}
+.nav>.on{color:#1C1917;font-weight:600}
+.bar-r{margin-left:auto;display:flex;gap:8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:38px;padding:0 14px;border-radius:9px;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer;border:1px solid transparent;white-space:nowrap;font-family:inherit}
+.btn-p{background:#FEA722;color:#1C1917}.btn-p:hover{background:#F59E0B;color:#1C1917}
+.btn-o{background:#FFFFFF;color:#1C1917;border-color:#E7E5E4}.btn-o:hover{background:#F5F5F4;color:#1C1917}
+.btn-l{min-height:44px;padding:0 18px;font-size:15px}
+.hero{background:#FAFAF9;border-bottom:1px solid #E7E5E4}
+.hero-in{max-width:1180px;margin:0 auto;padding:48px 32px 40px;display:flex;flex-direction:column;gap:10px}
+.kick{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:#92400E;letter-spacing:.08em;text-transform:uppercase}
+.kick>i{width:6px;height:6px;border-radius:999px;background:#FEA722;display:block}
+.hero h1{margin:0;font-size:40px;font-weight:700;letter-spacing:-0.025em;line-height:1.15}
+.hero p{margin:0;color:#716A65;font-size:16px;max-width:680px}
+.meta{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:#716A65;margin-top:4px}
+.meta b{color:#1C1917;font-weight:600}
+.body{max-width:1180px;width:100%;margin:0 auto;padding:40px 32px 64px;display:grid;grid-template-columns:240px minmax(0,1fr);gap:56px;align-items:start}
+.toc{position:sticky;top:88px;display:flex;flex-direction:column;gap:2px}
+.toc>small{font-size:11px;font-weight:600;color:#716A65;text-transform:uppercase;letter-spacing:.06em;padding:0 10px 8px}
+.toc>a{font-size:13.5px;color:#57534E;text-decoration:none;padding:6px 10px;border-radius:7px;border-left:2px solid transparent;line-height:1.4}
+.toc>a:hover{color:#1C1917;background:#F5F5F4}
+.toc>.on{color:#1C1917;font-weight:600;background:#FFF8EC;border-left-color:#FEA722;border-radius:0 7px 7px 0}
+.toc-alt{margin-top:18px;padding:14px 10px 0;border-top:1px solid #E7E5E4;display:flex;flex-direction:column;gap:6px;font-size:13px;color:#716A65}
+.toc-alt a{font-weight:600}
+.doc{max-width:720px;display:flex;flex-direction:column;gap:36px}
+.tldr{border:1px solid #FCDDA8;background:#FFF8EC;border-radius:14px;padding:20px 22px;display:flex;flex-direction:column;gap:12px}
+.tldr>b{font-size:15px;color:#78350F}
+.tldr ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px}
+.tldr li{display:flex;gap:10px;font-size:14.5px;color:#44403C;line-height:1.55}
+.tldr li>svg{flex:none;margin-top:4px;color:#92400E}
+.sec{display:flex;flex-direction:column;gap:12px;scroll-margin-top:96px}
+.sec h2{margin:0;font-size:20px;font-weight:700;letter-spacing:-0.015em;line-height:1.3;display:flex;gap:12px;align-items:baseline}
+.sec h2>span{font-family:'Geist Mono',monospace;font-size:13px;font-weight:600;color:#A8A29E;flex:none;width:26px}
+.sec p,.sec li{font-size:15px;color:#44403C;line-height:1.7;margin:0}
+.sec ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.sec .ind{padding-left:38px;display:flex;flex-direction:column;gap:12px}
+.callout{border-left:3px solid #1C1917;background:#FAFAF9;padding:12px 16px;border-radius:0 10px 10px 0;font-size:14.5px;color:#1C1917;line-height:1.6}
+.tblw{border:1px solid #E7E5E4;border-radius:10px;overflow:hidden}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;background:#FAFAF9;font-weight:600;font-size:12.5px;color:#57534E;padding:10px 14px;border-bottom:1px solid #E7E5E4}
+.tbl td{padding:11px 14px;border-top:1px solid #F0EEEC;color:#44403C;vertical-align:top;line-height:1.5}
+.tbl td:first-child{font-weight:600;color:#1C1917;white-space:nowrap}
+.foot{border-top:1px solid #E7E5E4;margin-top:auto}
+.foot-in{max-width:1180px;margin:0 auto;padding:22px 32px;display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:#A8A29E;align-items:center}
+.foot-in a{color:#716A65;text-decoration:none}
+.foot-in a:hover{color:#1C1917;text-decoration:underline}
+.foot-in>span:last-child{margin-left:auto}
+/* help */
+.srch{position:relative;max-width:640px;margin-top:10px}
+.srch>svg{position:absolute;left:15px;top:15px;color:#716A65}
+.inp{width:100%;height:44px;border:1px solid #D6D3D1;border-radius:9px;padding:0 12px;font-size:15px;color:#1C1917;background:#FFFFFF;font-family:inherit}
+.inp::placeholder{color:#A8A29E}
+.inp:focus{outline:none;border-color:#1C1917;box-shadow:0 0 0 3px rgba(28,25,23,.1)}
+.inp-err{border-color:#DC2626}
+textarea.inp{height:auto;min-height:120px;padding:10px 12px;line-height:1.5;resize:vertical}
+select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23716A65' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+.hb{max-width:1180px;width:100%;margin:0 auto;padding:36px 32px 64px;display:flex;flex-direction:column;gap:40px}
+.h2{margin:0 0 14px;font-size:20px;font-weight:700;letter-spacing:-0.015em}
+.quick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.qc{border:1px solid #E7E5E4;border-radius:12px;padding:16px;display:flex;gap:12px;align-items:flex-start;text-decoration:none;color:#1C1917;background:#FFFFFF}
+.qc:hover{border-color:#D6D3D1;background:#FAFAF9;color:#1C1917}
+.qc>span:last-child{display:flex;flex-direction:column;gap:2px;line-height:1.4}
+.qc b{font-size:14.5px}
+.qc small{font-size:13px;color:#716A65}
+.ic{width:36px;height:36px;border-radius:10px;background:#FFF4E2;color:#92400E;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.two{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:32px;align-items:start}
+.faq{border:1px solid #E7E5E4;border-radius:12px;overflow:hidden}
+.faq>div{border-top:1px solid #F0EEEC}.faq>div:first-child{border-top:0}
+.fq{width:100%;display:flex;justify-content:space-between;gap:12px;align-items:center;padding:15px 18px;border:0;background:transparent;cursor:pointer;text-align:left;font-family:inherit;font-size:14.5px;font-weight:600;color:#1C1917}
+.fq:hover{background:#FAFAF9}
+.fq>span:last-child{color:#716A65;font-size:18px;line-height:1;flex:none}
+.fa{margin:0;padding:0 18px 16px;font-size:14px;color:#44403C;line-height:1.65}
+.card{border:1px solid #E7E5E4;border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px;background:#FFFFFF}
+.fld{display:flex;flex-direction:column;gap:6px}
+.fld>label{font-size:13.5px;font-weight:600}
+.fld>label>small{font-weight:400;color:#716A65;margin-left:6px}
+.err{font-size:13px;color:#B91C1C}
+.help{font-size:12.5px;color:#716A65;line-height:1.45}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;min-height:34px;padding:0 13px;border-radius:999px;border:1px solid #E7E5E4;background:#FFFFFF;color:#44403C;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit}
+.chip:hover{border-color:#D6D3D1;color:#1C1917}
+.chip-on,.chip-on:hover{background:#1C1917;border-color:#1C1917;color:#FFFFFF}
+.cta{border-radius:14px;background:#1C1917;color:#E7E5E4;padding:24px 28px;display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap}
+.cta b{font-size:18px;color:#FFFFFF;display:block}
+.cta span{font-size:14px;color:#A8A29E}
+@media (max-width:900px){.body{grid-template-columns:1fr;gap:24px}.toc{position:static}.quick,.two{grid-template-columns:1fr}.nav{display:none}.hero h1{font-size:30px}}
+
+</style>
+</helmet>
+<div class="wrap">
+<header class="bar"><div class="bar-in">
+<a class="brand" href="Login.dc.html" aria-label="StockPlan"><svg aria-hidden="true" viewBox="4 213 102 88" width="24" height="21"><g fill="#FEA722"><path d="M13.04,233.96c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.49s0-2.12,5.66-4.97l36.26-15.83c4.18-1.83,6.89-5.96,6.89-10.52v-16.89l-41.92,18.3Z"></path><path d="M96.89,280.81c4.18-1.83,6.89-5.96,6.89-10.52v-16.89h0v-2.49s0,2.12-5.66,4.97l-36.26,15.83c-4.18,1.83-6.89,5.960-6.89,10.52v16.89l41.92-18.3Z"></path><path d="M98.11,226.34l-36.26,15.83s-.07,.04-.1,.05l-48.71,21.26c-4.18,1.83-6.89,5.96-6.89,10.52v16.89h0v2.79s0-2.12,5.66-4.97l36.26-15.83c.73-.32,1.4-.73,2.03-1.18l46.78-20.42c4.18-1.83,6.89-5.96,6.89-10.52h0v-16.89h0v-2.5s0,2.12-5.66,4.97Z"></path></g></svg>StockPlan<em>Beta</em></a>
+<nav class="nav" aria-label="Informasi"><a href="BantuanPublik.dc.html">Bantuan</a><a href="SyaratLayanan.dc.html" class="on" aria-current="page">Syarat layanan</a><a href="KebijakanPrivasi.dc.html">Kebijakan privasi</a></nav>
+<div class="bar-r"><a class="btn btn-o" href="Login.dc.html">Masuk</a><a class="btn btn-p" href="Register.dc.html">Daftar gratis</a></div>
+</div></header>
+<div class="hero"><div class="hero-in">
+<span class="kick"><i aria-hidden="true"></i>Ketentuan</span>
+<h1>Syarat Layanan</h1>
+<p>Aturan main memakai StockPlan, ditulis sesederhana mungkin.</p>
+<div class="meta"><span>Berlaku sejak <b>1 November 2026</b></span><span>Waktu baca sekitar <b>6 menit</b></span></div>
+</div></div>
+<div class="body">
+<nav class="toc" aria-label="Daftar isi"><small>Daftar isi</small><a href="#layanan" class="{{toc.layanan}}" onClick="{{go.layanan}}">1. Tentang layanan ini</a><a href="#bukan-saran" class="{{toc.bukan-saran}}" onClick="{{go.bukan-saran}}">2. Bukan nasihat investasi</a><a href="#akun" class="{{toc.akun}}" onClick="{{go.akun}}">3. Akun Anda</a><a href="#beta" class="{{toc.beta}}" onClick="{{go.beta}}">4. Masa beta dan langganan</a><a href="#data" class="{{toc.data}}" onClick="{{go.data}}">5. Data dan sumber informasi</a><a href="#konten" class="{{toc.konten}}" onClick="{{go.konten}}">6. Konten milik Anda</a><a href="#larangan" class="{{toc.larangan}}" onClick="{{go.larangan}}">7. Hal yang tidak boleh dilakukan</a><a href="#hki" class="{{toc.hki}}" onClick="{{go.hki}}">8. Hak kekayaan intelektual</a><a href="#tanggung-jawab" class="{{toc.tanggung-jawab}}" onClick="{{go.tanggung-jawab}}">9. Batasan tanggung jawab</a><a href="#penghentian" class="{{toc.penghentian}}" onClick="{{go.penghentian}}">10. Penghentian akun</a><a href="#perubahan" class="{{toc.perubahan}}" onClick="{{go.perubahan}}">11. Perubahan syarat</a><a href="#hukum" class="{{toc.hukum}}" onClick="{{go.hukum}}">12. Hukum yang berlaku dan kontak</a><div class="toc-alt"><span>Baca juga</span><a href="KebijakanPrivasi.dc.html">Kebijakan privasi →</a><a href="BantuanPublik.dc.html">Pusat bantuan →</a></div></nav>
+<article class="doc">
+<div class="tldr"><b>Ringkasnya</b><ul><li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l4 4 10-10"></path></svg><span>StockPlan adalah alat riset dan perencanaan, <b>bukan rekomendasi beli atau jual saham</b>. Keputusan investasi tetap di tangan Anda.</span></li><li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l4 4 10-10"></path></svg><span>Gratis selama beta. Kami memberi tahu minimal 14 hari sebelum ada biaya, dan tidak ada penagihan otomatis.</span></li><li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l4 4 10-10"></path></svg><span>Tesis, portofolio, dan catatan Anda adalah milik Anda. Bisa diunduh atau dihapus kapan saja.</span></li></ul><span class="help" style="color: #92400E">Ringkasan ini membantu Anda membaca, tetapi yang berlaku adalah isi lengkap di bawah.</span></div>
+<section class="sec" id="layanan"><h2><span>01</span>Tentang layanan ini</h2><div class="ind"><p>StockPlan adalah aplikasi riset dan perencanaan investasi saham untuk investor di Indonesia. Kami membantu Anda memahami bisnis emiten yang tercatat di Bursa Efek Indonesia (BEI), memetakannya ke tema dan rantai nilai, lalu menyusun dan memantau tesis serta portofolio Anda sendiri.</p>
+<p>Dengan membuat akun atau memakai StockPlan, Anda menyetujui Syarat Layanan ini dan <a href="KebijakanPrivasi.dc.html">Kebijakan Privasi</a> kami. Bila Anda tidak setuju, mohon jangan memakai layanan ini.</p></div></section><section class="sec" id="bukan-saran"><h2><span>02</span>Bukan nasihat investasi</h2><div class="ind"><div class="callout">StockPlan bukan penasihat investasi, manajer investasi, atau perusahaan efek, dan tidak memberikan rekomendasi untuk membeli, menjual, atau menahan saham apa pun.</div>
+<p>Semua informasi di StockPlan — termasuk peta rantai nilai, ringkasan bisnis, dan pengingat evaluasi tesis — disediakan untuk membantu riset Anda sendiri. Keputusan investasi sepenuhnya menjadi tanggung jawab Anda. Investasi saham mengandung risiko, termasuk kehilangan sebagian atau seluruh modal.</p>
+<p>StockPlan tidak memproses transaksi jual beli dan tidak terhubung ke rekening efek Anda.</p></div></section><section class="sec" id="akun"><h2><span>03</span>Akun Anda</h2><div class="ind"><ul>
+<li>Anda harus berusia minimal 18 tahun atau sudah cakap hukum menurut hukum Indonesia.</li>
+<li>Data yang Anda berikan saat mendaftar harus benar dan Anda perbarui bila berubah.</li>
+<li>Satu akun untuk satu orang. Akun tidak boleh dipinjamkan, dijual, atau dipakai bersama.</li>
+<li>Anda bertanggung jawab menjaga kerahasiaan password. Beri tahu kami segera di <a href="mailto:bantuan@stockplan.id">help@stockplan.id</a> bila Anda menduga akun Anda dipakai orang lain.</li>
+</ul></div></section><section class="sec" id="beta"><h2><span>04</span>Masa beta dan langganan</h2><div class="ind"><p>Selama masa beta, StockPlan dapat dipakai tanpa biaya dan fitur dapat berubah, ditambah, atau dihentikan sewaktu-waktu.</p>
+<p>Setelah rilis resmi, StockPlan hanya tersedia bagi pengguna yang berlangganan. Kami akan memberi tahu Anda melalui email minimal 14 hari sebelum biaya langganan mulai berlaku. Tidak ada penagihan otomatis dari masa beta — Anda sendiri yang memilih untuk berlangganan.</p>
+<p>Ketentuan harga, perpanjangan, pembatalan, dan pengembalian dana akan dijelaskan di halaman langganan sebelum Anda membayar.</p></div></section><section class="sec" id="data"><h2><span>05</span>Data dan sumber informasi</h2><div class="ind"><p>Data emiten di StockPlan bersumber dari Bursa Efek Indonesia, termasuk profil perusahaan, anak usaha, manajemen, indeks kategori, dan keterbukaan informasi. Pemetaan ke tema dan rantai nilai disusun oleh tim kami berdasarkan data tersebut.</p>
+<p>Kami berusaha menjaga data tetap akurat dan terbaru, tetapi tidak menjamin data bebas dari kesalahan, keterlambatan, atau kekurangan. Bila menemukan data yang keliru, laporkan lewat <a href="BantuanPublik.dc.html">halaman Bantuan</a>.</p></div></section><section class="sec" id="konten"><h2><span>06</span>Konten milik Anda</h2><div class="ind"><p>Tesis, catatan, portofolio, transaksi, dan watchlist yang Anda buat adalah milik Anda. Kami hanya memakainya untuk menjalankan layanan untuk Anda, misalnya menyimpan, menampilkan, dan mengingatkan jadwal evaluasi.</p>
+<p>Kami tidak menerbitkan konten Anda dan tidak membagikannya kepada pengguna lain. Anda dapat mengunduh atau menghapus konten Anda kapan saja dari menu Pengaturan.</p></div></section><section class="sec" id="larangan"><h2><span>07</span>Hal yang tidak boleh dilakukan</h2><div class="ind"><p>Saat memakai StockPlan, Anda tidak boleh:</p>
+<ul>
+<li>mengambil data secara otomatis (scraping, crawling, atau bot) tanpa izin tertulis dari kami;</li>
+<li>menjual kembali, menyebarluaskan, atau menerbitkan ulang data dan konten StockPlan untuk tujuan komersial;</li>
+<li>mencoba membobol, mengganggu, atau membongkar sistem StockPlan;</li>
+<li>memakai StockPlan untuk menyebarkan informasi menyesatkan tentang emiten atau memanipulasi pasar.</li>
+</ul></div></section><section class="sec" id="hki"><h2><span>08</span>Hak kekayaan intelektual</h2><div class="ind"><p>Nama, logo, desain, perangkat lunak, serta susunan peta tema dan rantai nilai di StockPlan dilindungi hak kekayaan intelektual milik StockPlan. Anda mendapat izin terbatas untuk memakainya bagi keperluan pribadi selama akun Anda aktif.</p></div></section><section class="sec" id="tanggung-jawab"><h2><span>09</span>Batasan tanggung jawab</h2><div class="ind"><p>Sejauh diizinkan oleh hukum yang berlaku, StockPlan tidak bertanggung jawab atas kerugian investasi, kehilangan keuntungan, atau kerugian tidak langsung lainnya yang timbul dari pemakaian layanan ini atau keputusan yang Anda ambil berdasarkan informasi di dalamnya.</p></div></section><section class="sec" id="penghentian"><h2><span>10</span>Penghentian akun</h2><div class="ind"><p>Anda dapat menghapus akun kapan saja dari menu Pengaturan. Kami dapat menangguhkan atau menghentikan akun yang melanggar Syarat Layanan ini, dan akan memberi tahu Anda alasannya kecuali dilarang oleh hukum.</p></div></section><section class="sec" id="perubahan"><h2><span>11</span>Perubahan syarat</h2><div class="ind"><p>Kami dapat memperbarui Syarat Layanan ini. Untuk perubahan penting, kami memberi tahu Anda melalui email atau di dalam aplikasi minimal 14 hari sebelum berlaku. Tanggal berlaku terbaru selalu tercantum di bagian atas halaman ini.</p></div></section><section class="sec" id="hukum"><h2><span>12</span>Hukum yang berlaku dan kontak</h2><div class="ind"><p>Syarat Layanan ini tunduk pada hukum Republik Indonesia. Perselisihan akan diupayakan selesai secara musyawarah terlebih dahulu.</p>
+<p>Pertanyaan tentang Syarat Layanan dapat dikirim ke <a href="mailto:bantuan@stockplan.id">help@stockplan.id</a>.</p></div></section>
+</article>
+</div>
+<footer class="foot"><div class="foot-in"><span>© 2026 StockPlan</span><a href="SyaratLayanan.dc.html">Syarat layanan</a><a href="KebijakanPrivasi.dc.html">Kebijakan privasi</a><a href="BantuanPublik.dc.html">Bantuan</a><span>Data bersumber dari Bursa Efek Indonesia. StockPlan bukan rekomendasi saham.</span></div></footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":3280}}'>
+class Component extends DCLogic {
+constructor(p){ super(p); this.state = { on: 'layanan' }; }
+renderVals(){
+const self = this, ids = ['layanan', 'bukan-saran', 'akun', 'beta', 'data', 'konten', 'larangan', 'hki', 'tanggung-jawab', 'penghentian', 'perubahan', 'hukum'], toc = {}, go = {};
+ids.forEach(id => { toc[id] = self.state.on === id ? 'on' : ''; go[id] = () => self.setState({ on: id }); });
+return { toc, go };
+}
+}
+</script>
+</body>
+</html>

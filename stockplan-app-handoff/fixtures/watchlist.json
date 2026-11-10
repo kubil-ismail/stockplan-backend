@@ -1,0 +1,133 @@
+[
+  {
+    "tk": "ADMR",
+    "name": "Adaro Minerals Indonesia Tbk",
+    "logo": "",
+    "tema": "Batubara",
+    "stages": [
+      "Tengah"
+    ],
+    "role": "Batu bara metalurgi",
+    "note": "Pasokan batu bara kokas untuk smelter dalam negeri. Kalau hilirisasi jalan, permintaannya ikut naik.",
+    "saved": 64,
+    "touched": 3,
+    "chk": [
+      true,
+      true,
+      true,
+      true
+    ],
+    "sig": {
+      "t": "Laporan keuangan Q3 2026 terbit",
+      "ago": 2,
+      "src": "Keterbukaan BEI"
+    }
+  },
+  {
+    "tk": "BUMI",
+    "name": "Bumi Resources Tbk",
+    "logo": "/logos/emiten/logo-bumi.png",
+    "tema": "Batubara",
+    "stages": [
+      "Hulu"
+    ],
+    "role": "Pemilik tambang",
+    "note": "Produsen terbesar, tapi utangnya perlu saya pahami dulu sebelum masuk tesis batu bara.",
+    "saved": 41,
+    "touched": 6,
+    "chk": [
+      true,
+      true,
+      false,
+      false
+    ],
+    "sig": {
+      "t": "Paparan publik dijadwalkan 12 Nov",
+      "ago": 5,
+      "src": "Keterbukaan BEI"
+    }
+  },
+  {
+    "tk": "PGEO",
+    "name": "Pertamina Geothermal Energy Tbk",
+    "logo": "",
+    "tema": "Energi baru",
+    "stages": [
+      "Hilir"
+    ],
+    "role": "Pembangkit panas bumi",
+    "note": "Kandidat untuk tesis kebutuhan energi naik, sisi energi bersih.",
+    "saved": 22,
+    "touched": 9,
+    "chk": [
+      true,
+      false,
+      false,
+      false
+    ],
+    "sig": null
+  },
+  {
+    "tk": "INCO",
+    "name": "Vale Indonesia Tbk",
+    "logo": "",
+    "tema": "Nikel & baterai",
+    "stages": [
+      "Hulu",
+      "Tengah"
+    ],
+    "role": "Tambang dan olah nikel",
+    "note": "Ingin paham rantai nikel ke baterai sebelum menulis tesis baru.",
+    "saved": 58,
+    "touched": 44,
+    "chk": [
+      true,
+      false,
+      false,
+      false
+    ],
+    "sig": {
+      "t": "Perubahan susunan direksi",
+      "ago": 9,
+      "src": "Keterbukaan BEI"
+    }
+  },
+  {
+    "tk": "MEDC",
+    "name": "Medco Energi Internasional Tbk",
+    "logo": "",
+    "tema": "Minyak & gas",
+    "stages": [
+      "Hulu"
+    ],
+    "role": "Produsen minyak dan gas",
+    "note": "Belum sempat dibaca. Disimpan dari tema migas.",
+    "saved": 12,
+    "touched": 12,
+    "chk": [
+      false,
+      false,
+      false,
+      false
+    ],
+    "sig": null
+  },
+  {
+    "tk": "BBRI",
+    "name": "Bank Rakyat Indonesia Tbk",
+    "logo": "",
+    "tema": "Perbankan",
+    "stages": [],
+    "role": "Bank, fokus usaha mikro",
+    "note": "Alternatif di luar energi supaya portofolio tidak satu sektor.",
+    "saved": 30,
+    "touched": 15,
+    "chk": [
+      true,
+      true,
+      true,
+      false
+    ],
+    "sig": null
+  }
+]
