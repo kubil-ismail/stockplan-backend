@@ -21,6 +21,11 @@ module.exports = (sequelize, DataTypes) => {
     dataDelayed: DataTypes.JSONB, // { lastUpdatedAt, nextCheckAt, handling } → "Data BEI tertunda" banner; null = up to date
     profile: { type: DataTypes.JSONB, allowNull: false, defaultValue: {} },
     ipo: DataTypes.JSONB,
+    // Admin editorial workflow (docs/HANDOFF.md §5 Admin). DB defaults mark seeded rows published; no model defaults on purpose.
+    publishStatus: DataTypes.STRING(20),
+    publishedAt: DataTypes.DATE, // NULL = never published → hidden from customer endpoints
+    draft: DataTypes.JSONB,
+    updatedByName: DataTypes.STRING,
   }, { tableName: 'market_companies' });
 
   Company.associate = (models) => {

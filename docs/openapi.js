@@ -42,7 +42,7 @@ const errorResponse = (description, code, message, fields) => ({
 module.exports = {
   openapi: '3.0.3',
   info: { title: 'StockPlan API', version: '0.1.0', description: 'REST API StockPlan. Sesi memakai cookie httpOnly `sid`.' },
-  tags: [{ name: 'Auth' }, { name: 'Profil' }, { name: 'Pengaturan' }, { name: 'Tema bisnis' }, { name: 'Emiten' }, { name: 'Watchlist' }, { name: 'Admin: Auth' }],
+  tags: [{ name: 'Auth' }, { name: 'Profil' }, { name: 'Pengaturan' }, { name: 'Tema bisnis' }, { name: 'Emiten' }, { name: 'Watchlist' }, { name: 'Admin: Auth' }, { name: 'Admin: Emiten' }],
   security: [{ cookieAuth: [] }],
   paths: {
     '/auth/register': {
@@ -258,6 +258,105 @@ module.exports = {
         security: [{ adminCookie: [] }],
         summary: 'Admin yang sedang masuk',
         responses: { 200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: { admin: { $ref: '#/components/schemas/Admin' } } } } } }, 401: errorResponse('Belum masuk / sesi berakhir', 'UNAUTHENTICATED', 'Sesi admin berakhir. Masuk lagi.') },
+      },
+    },
+    '/admin/api/companies': {
+      get: {
+        tags: ['Admin: Emiten'],
+        security: [{ adminCookie: [] }],
+        summary: 'Daftar emiten (AdminEmiten)',
+        description: 'Izin `em:view`. Hitungan `tabs` mengikuti `q` + `sector`; `tab` hanya menyaring baris. `completeness` = 5 bagian (Profil BEI, Ringkasan bisnis, Sumber pendapatan, Anak usaha, Pemetaan tema). `status`: `ok` (Siap terbit), `review`, `draft`, `new` (IPO baru, belum pernah terbit). Diurutkan dari yang terakhir diperbarui.',
+        parameters: [
+          { name: 'q', in: 'query', schema: { type: 'string' }, description: 'Kode atau nama' },
+          { name: 'tab', in: 'query', schema: { type: 'string', enum: ['all', 'review', 'incomplete', 'ready'], default: 'all' } },
+          { name: 'sector', in: 'query', schema: { type: 'string' }, description: 'Slug sektor' },
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'pageSize', in: 'query', schema: { type: 'integer', default: 14, maximum: 100 } },
+        ],
+        responses: {
+          200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: {
+            total: { type: 'integer' }, page: { type: 'integer' }, pageSize: { type: 'integer' },
+            tabs: { type: 'object', properties: { all: { type: 'integer' }, review: { type: 'integer' }, incomplete: { type: 'integer' }, ready: { type: 'integer' } } },
+            sectors: { type: 'array', items: { type: 'object', properties: { slug: { type: 'string' }, name: { type: 'string' } } } },
+            items: { type: 'array', items: { $ref: '#/components/schemas/AdminCompanyRow' } },
+          } } } } },
+          401: errorResponse('Belum masuk', 'UNAUTHENTICATED', 'Sesi admin berakhir. Masuk lagi.'),
+          403: errorResponse('Tanpa izin', 'FORBIDDEN', 'Peran Anda tidak punya izin untuk aksi ini.'),
+        },
+      },
+      post: {
+        tags: ['Admin: Emiten'],
+        security: [{ adminCookie: [] }],
+        summary: 'Buat emiten IPO sebagai draf (AdminEmitenIPO "Simpan draf")',
+        description: 'Izin `em:edit`. Hanya `ticker` (4 huruf) dan `name` yang wajib; bagian lain boleh menyusul lewat PATCH. Emiten tidak tampil ke customer sampai diterbitkan.',
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/AdminCompanyForm' }, example: { ticker: 'ABNU', name: 'PT Andalan Baterai Nusantara Tbk', sectorSlug: 'barang-baku', subsector: 'Nikel & bahan baterai' } } } },
+        responses: {
+          201: { description: 'Dibuat', content: { 'application/json': { schema: { $ref: '#/components/schemas/AdminCompanyEdit' } } } },
+          409: errorResponse('Kode sudah dipakai', 'TICKER_TAKEN', 'Kode ABNU sudah dipakai emiten lain. Cek lagi kode dari pengumuman BEI.', { ticker: 'Kode ABNU sudah dipakai emiten lain. Cek lagi kode dari pengumuman BEI.' }),
+          422: errorResponse('Isian tidak valid', 'VALIDATION', 'Periksa lagi isian Anda.', { ticker: 'Kode saham harus 4 huruf.' }),
+        },
+      },
+    },
+    '/admin/api/companies/export.csv': {
+      get: {
+        tags: ['Admin: Emiten'],
+        security: [{ adminCookie: [] }],
+        summary: 'Ekspor CSV',
+        description: 'Izin `em:view`. Tanpa `tickers` = semua emiten. Sel yang diawali `= + - @` diberi awalan `\'` agar tidak dieksekusi spreadsheet.',
+        parameters: [{ name: 'tickers', in: 'query', schema: { type: 'string', example: 'BUMI,PTBA' }, description: 'Dipisah koma (emiten terpilih)' }],
+        responses: { 200: { description: 'CSV', content: { 'text/csv': { schema: { type: 'string' } } } } },
+      },
+    },
+    '/admin/api/companies/bulk-review': {
+      post: {
+        tags: ['Admin: Emiten'],
+        security: [{ adminCookie: [] }],
+        summary: 'Tandai perlu ditinjau (aksi massal)',
+        description: 'Izin `em:edit`. 1–200 kode.',
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['tickers'], properties: { tickers: { type: 'array', items: { type: 'string' }, example: ['BUMI', 'PTBA'] } } } } } },
+        responses: {
+          200: { description: 'Jumlah emiten yang berubah', content: { 'application/json': { schema: { type: 'object', properties: { updated: { type: 'integer' } } } } } },
+          422: errorResponse('Daftar kosong / terlalu banyak', 'VALIDATION', 'Pilih 1–200 emiten.', { tickers: 'Pilih 1–200 emiten.' }),
+        },
+      },
+    },
+    '/admin/api/companies/{ticker}': {
+      parameters: [{ name: 'ticker', in: 'path', required: true, schema: { type: 'string', example: 'BUMI' } }],
+      get: {
+        tags: ['Admin: Emiten'],
+        security: [{ adminCookie: [] }],
+        summary: 'Isi form edit + kelengkapan (AdminEmitenEdit / AdminEmitenIPO)',
+        description: 'Izin `em:view`. `form` = draf bila ada, jika tidak versi terbit. `sections` = daftar kelengkapan; `canPublish` true bila semuanya `ok`. Emiten berstatus `ipo` memakai 4 bagian IPO (Identitas, Jadwal IPO, Detail penawaran, Penggunaan dana), lainnya 12 bagian.',
+        responses: {
+          200: { description: 'OK', content: { 'application/json': { schema: { $ref: '#/components/schemas/AdminCompanyEdit' } } } },
+          404: errorResponse('Tidak ada', 'NOT_FOUND', 'Emiten tidak ditemukan.'),
+        },
+      },
+      patch: {
+        tags: ['Admin: Emiten'],
+        security: [{ adminCookie: [] }],
+        summary: 'Simpan draf',
+        description: 'Izin `em:edit`. Hanya bagian yang dikirim yang diganti (satu bagian diganti utuh). Aturan kelengkapan (jumlah 100%, panjang 60/100/400) tidak menolak draf, hanya menahan penerbitan; batas teknis (tipe, panjang maksimum, jumlah baris) tetap ditolak 422. Pengguna tetap melihat versi terakhir yang terbit.',
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/AdminCompanyForm' } } } },
+        responses: {
+          200: { description: 'Draf tersimpan', content: { 'application/json': { schema: { $ref: '#/components/schemas/AdminCompanyEdit' } } } },
+          404: errorResponse('Tidak ada', 'NOT_FOUND', 'Emiten tidak ditemukan.'),
+          422: errorResponse('Isian tidak valid', 'VALIDATION', 'Periksa lagi isian Anda.', { 'risks[0].level': 'Isian tidak valid.' }),
+        },
+      },
+    },
+    '/admin/api/companies/{ticker}/publish': {
+      post: {
+        tags: ['Admin: Emiten'],
+        security: [{ adminCookie: [] }],
+        summary: 'Terbitkan',
+        description: 'Izin `em:publish`. Menyalin draf ke data yang dilihat customer dan mengosongkan draf. 422 `INCOMPLETE` bila ada bagian belum lengkap (`fields` = catatan per bagian).',
+        parameters: [{ name: 'ticker', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          200: { description: 'Terbit', content: { 'application/json': { schema: { $ref: '#/components/schemas/AdminCompanyEdit' } } } },
+          403: errorResponse('Tanpa izin terbit', 'FORBIDDEN', 'Peran Anda tidak punya izin untuk aksi ini.'),
+          422: errorResponse('Belum lengkap', 'INCOMPLETE', 'Belum bisa terbit: Ringkasan bisnis, Sumber pendapatan', { summary: 'Perlu dicek', revenue: 'kurang 100%' }),
+        },
       },
     },
     '/sectors': {
@@ -752,6 +851,63 @@ module.exports = {
           name: { type: 'string' },
           email: { type: 'string', example: 'admin@stockplan.id' },
           role: { type: 'string', enum: ['super', 'data', 'tema', 'support', 'view'] },
+        },
+      },
+      AdminCompanyRow: {
+        type: 'object',
+        properties: {
+          ticker: { type: 'string', example: 'BUMI' }, name: { type: 'string' }, logoUrl: { type: 'string', nullable: true },
+          sector: { type: 'object', nullable: true, properties: { slug: { type: 'string' }, name: { type: 'string' } } },
+          completeness: { type: 'object', properties: { done: { type: 'integer', example: 4 }, total: { type: 'integer', example: 5 }, missing: { type: 'array', items: { type: 'string' }, example: ['Sumber pendapatan'] } } },
+          theme: { type: 'string', example: 'Batubara · 2 tahap', description: '"Belum dipetakan" bila belum masuk tema' },
+          status: { type: 'string', enum: ['ok', 'review', 'draft', 'new'] }, statusLabel: { type: 'string', example: 'Perlu ditinjau' },
+          reportCount: { type: 'integer', description: 'Laporan pengguna; selalu 0 sampai modul Masukan ada' },
+          hasDraft: { type: 'boolean' }, updatedAt: { type: 'string', format: 'date-time' }, updatedBy: { type: 'string', example: 'Sistem' },
+        },
+      },
+      AdminCompanyForm: {
+        type: 'object',
+        description: 'Bagian form (semua opsional pada PATCH; bagian tak dikenal ditolak). Uang dalam Rupiah utuh, persen sebagai angka. `ipo` hanya untuk emiten berstatus ipo (pada GET bernilai null untuk emiten biasa). Logo, laporan keuangan (XBRL/PDF), dan prospektus belum ada (belum ada penyimpanan file).',
+        properties: {
+          ticker: { type: 'string', description: 'Hanya pada POST; tidak bisa diubah setelahnya' },
+          name: { type: 'string' }, sectorSlug: { type: 'string', example: 'energi' }, subsector: { type: 'string', example: 'Batu bara' },
+          trading: { type: 'object', properties: { state: { type: 'string', enum: ['active', 'suspended', 'monitoring', 'delisted'] }, since: { type: 'string', format: 'date', nullable: true }, source: { type: 'string' }, reason: { type: 'string' } } },
+          keyNumbers: { type: 'object', properties: { marketCap: { type: 'number', nullable: true, example: 44900000000000 }, pbv: { type: 'number', nullable: true }, roePct: { type: 'number', nullable: true }, grossMarginPct: { type: 'number', nullable: true }, debtToAssetPct: { type: 'number', nullable: true }, tips: { type: 'object', additionalProperties: { type: 'string' } }, priceDate: { type: 'string', format: 'date', nullable: true }, financialPeriod: { type: 'string', example: 'H1-2026' }, asOfSource: { type: 'string' } } },
+          summary: { type: 'object', properties: { short: { type: 'string', description: 'Terbit: 1–100 karakter' }, overview: { type: 'string', description: 'Terbit: 1–400 karakter, `**tebal**` didukung' }, source: { type: 'string' } } },
+          points: { type: 'object', properties: { strengths: { type: 'array', items: { type: 'string' } }, weaknesses: { type: 'array', items: { type: 'string' } }, watchItems: { type: 'array', items: { type: 'string' } } }, description: 'Terbit: 1–5 poin per daftar, maks. 60 karakter' },
+          trend: { type: 'object', properties: { periods: { type: 'array', items: { type: 'object', properties: { label: { type: 'string', example: 'H1-2026' }, span: { type: 'string', example: '6 bulan' } } } }, revenue: { $ref: '#/components/schemas/AdminSeries' }, netIncome: { $ref: '#/components/schemas/AdminSeries' }, grossMarginPct: { $ref: '#/components/schemas/AdminSeries' } } },
+          revenueSources: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, pct: { type: 'number' }, source: { type: 'string' } } }, description: 'Terbit: total tepat 100% dan tiap segmen punya sumber' },
+          group: { type: 'object', properties: { name: { type: 'string' }, subsidiaries: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, business: { type: 'string' }, ownershipPct: { type: 'number' }, ticker: { type: 'string' }, show: { type: 'boolean' } } } } } },
+          shareholders: { type: 'object', properties: { items: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, pct: { type: 'number' } } } }, note: { type: 'string' } }, description: 'Free float dihitung otomatis (100% − total), tidak dikirim' },
+          management: { type: 'object', properties: { people: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, role: { type: 'string' } } } } } },
+          risks: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, description: { type: 'string' }, level: { type: 'string', enum: ['high', 'medium', 'low'] } } } },
+          news: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, source: { type: 'string' }, dateLabel: { type: 'string' } } } },
+          ipo: { type: 'object', nullable: true, properties: {
+            board: { type: 'string', enum: ['utama', 'pengembangan', 'akselerasi', 'baru'] },
+            schedule: { type: 'object', description: 'Tanggal ISO atau null; urutan tidak boleh mundur; `listing` wajib untuk terbit', properties: { bookbuildingStart: { type: 'string', nullable: true }, bookbuildingEnd: { type: 'string', nullable: true }, effective: { type: 'string', nullable: true }, offerStart: { type: 'string', nullable: true }, offerEnd: { type: 'string', nullable: true }, allotment: { type: 'string', nullable: true }, listing: { type: 'string', nullable: true } } },
+            priceLow: { type: 'number', nullable: true }, priceHigh: { type: 'number', nullable: true }, priceFinal: { type: 'number', nullable: true, description: 'Harus di dalam rentang bookbuilding' },
+            sharesOffered: { type: 'number', nullable: true }, publicPct: { type: 'number', nullable: true },
+            underwriters: { type: 'array', items: { type: 'string' } },
+            warrant: { type: 'object', properties: { enabled: { type: 'boolean' }, ratio: { type: 'string' }, price: { type: 'number', nullable: true } } },
+            useOfProceeds: { type: 'array', items: { type: 'object', properties: { label: { type: 'string' }, pct: { type: 'number' } } }, description: 'Terbit: total tepat 100%' },
+            showUpcoming: { type: 'boolean' }, autoConvert: { type: 'boolean' },
+          } },
+        },
+      },
+      AdminSeries: { type: 'object', properties: { values: { type: 'array', items: { type: 'number', nullable: true }, description: 'Sejajar dengan `periods`' }, note: { type: 'string' } } },
+      AdminCompanyEdit: {
+        type: 'object',
+        properties: {
+          company: { type: 'object', properties: { ticker: { type: 'string' }, status: { type: 'string', enum: ['listed', 'ipo', 'suspended'] }, logoUrl: { type: 'string', nullable: true } } },
+          publishStatus: { type: 'object', properties: { key: { type: 'string', enum: ['draft', 'review', 'published'] }, label: { type: 'string', example: 'Draf tersimpan' } } },
+          published: { type: 'boolean', description: 'false = belum pernah terbit, tidak terlihat customer' }, hasDraft: { type: 'boolean' },
+          form: { $ref: '#/components/schemas/AdminCompanyForm' },
+          sections: { type: 'array', items: { type: 'object', properties: { key: { type: 'string' }, label: { type: 'string' }, ok: { type: 'boolean' }, note: { type: 'string' } } } },
+          progress: { type: 'object', properties: { done: { type: 'integer' }, total: { type: 'integer' }, percent: { type: 'integer' } } },
+          canPublish: { type: 'boolean' },
+          themes: { type: 'array', description: 'Hanya baca; dikelola modul Tema', items: { type: 'object', properties: { slug: { type: 'string' }, name: { type: 'string' }, stageCount: { type: 'integer' } } } },
+          reports: { type: 'array', items: { type: 'object' }, description: 'Laporan pengguna; selalu kosong sampai modul Masukan ada' },
+          updatedAt: { type: 'string', format: 'date-time' }, updatedBy: { type: 'string' },
         },
       },
       Error: {

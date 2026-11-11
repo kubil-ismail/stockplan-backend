@@ -1,0 +1,168 @@
+{
+  "super": {
+    "name": "Super admin",
+    "perms": {
+      "dash": [
+        "view"
+      ],
+      "em": [
+        "view",
+        "edit",
+        "publish",
+        "delete"
+      ],
+      "tm": [
+        "view",
+        "edit",
+        "publish",
+        "delete"
+      ],
+      "usr": [
+        "view",
+        "edit",
+        "delete"
+      ],
+      "fb": [
+        "view",
+        "edit",
+        "delete"
+      ],
+      "log": [
+        "view",
+        "edit"
+      ],
+      "sync": [
+        "view",
+        "edit"
+      ],
+      "set": [
+        "view",
+        "edit",
+        "publish"
+      ],
+      "acc": [
+        "view",
+        "edit",
+        "delete"
+      ]
+    }
+  },
+  "data": {
+    "name": "Admin data",
+    "perms": {
+      "dash": [
+        "view"
+      ],
+      "em": [
+        "view",
+        "edit",
+        "publish",
+        "delete"
+      ],
+      "tm": [
+        "view",
+        "edit",
+        "publish"
+      ],
+      "usr": [
+        "view"
+      ],
+      "fb": [
+        "view",
+        "edit"
+      ],
+      "log": [
+        "view"
+      ],
+      "sync": [
+        "view",
+        "edit"
+      ],
+      "set": [
+        "view"
+      ],
+      "acc": []
+    }
+  },
+  "tema": {
+    "name": "Editor tema",
+    "perms": {
+      "dash": [
+        "view"
+      ],
+      "em": [
+        "view"
+      ],
+      "tm": [
+        "view",
+        "edit"
+      ],
+      "usr": [],
+      "fb": [],
+      "log": [
+        "view"
+      ],
+      "sync": [],
+      "set": [],
+      "acc": []
+    }
+  },
+  "support": {
+    "name": "Support",
+    "perms": {
+      "dash": [
+        "view"
+      ],
+      "em": [
+        "view"
+      ],
+      "tm": [],
+      "usr": [
+        "view",
+        "edit",
+        "delete"
+      ],
+      "fb": [
+        "view",
+        "edit",
+        "delete"
+      ],
+      "log": [
+        "view"
+      ],
+      "sync": [],
+      "set": [],
+      "acc": []
+    }
+  },
+  "view": {
+    "name": "Viewer",
+    "perms": {
+      "dash": [
+        "view"
+      ],
+      "em": [
+        "view"
+      ],
+      "tm": [
+        "view"
+      ],
+      "usr": [
+        "view"
+      ],
+      "fb": [
+        "view"
+      ],
+      "log": [
+        "view"
+      ],
+      "sync": [
+        "view"
+      ],
+      "set": [
+        "view"
+      ],
+      "acc": []
+    }
+  }
+}

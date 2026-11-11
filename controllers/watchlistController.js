@@ -1,6 +1,6 @@
 'use strict';
 
-const { UniqueConstraintError } = require('sequelize');
+const { Op, UniqueConstraintError } = require('sequelize');
 const { Company, Sector, Industry, Theme, ThemeStage, WatchlistItem } = require('../models');
 const companies = require('../lib/companies');
 const watchlist = require('../lib/watchlist');
@@ -56,7 +56,7 @@ exports.create = async (req, res, next) => {
   if (note.length > watchlist.NOTE_MAX) return fail(res, 422, 'VALIDATION', watchlist.MSG.noteLong, { note: watchlist.MSG.noteLong });
 
   try {
-    if (!(await Company.findByPk(ticker, { attributes: ['ticker'] }))) {
+    if (!(await Company.findOne({ where: { ticker, publishedAt: { [Op.ne]: null } }, attributes: ['ticker'] }))) {
       return fail(res, 422, 'VALIDATION', NOT_FOUND, { ticker: NOT_FOUND });
     }
     const [item, created] = await WatchlistItem.findOrCreate({

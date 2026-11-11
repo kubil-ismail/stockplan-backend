@@ -29,13 +29,16 @@ exports.index = async (req, res, next) => {
   try {
     const like = companies.escapeLike(q);
     const rows = await Company.findAll({
-      where: q ? {
-        [Op.or]: [
-          { ticker: { [Op.iLike]: `${like}%` } },
-          { name: { [Op.iLike]: `%${like}%` } },
-          { '$industry.name$': { [Op.iLike]: `%${like}%` } },
-        ],
-      } : { '$sector.slug$': sector },
+      where: {
+        publishedAt: { [Op.ne]: null },
+        ...(q ? {
+          [Op.or]: [
+            { ticker: { [Op.iLike]: `${like}%` } },
+            { name: { [Op.iLike]: `%${like}%` } },
+            { '$industry.name$': { [Op.iLike]: `%${like}%` } },
+          ],
+        } : { '$sector.slug$': sector }),
+      },
       include: refs,
       subQuery: false,
       limit: MAX_MATCHES,
@@ -65,7 +68,7 @@ async function findPeers(row, stages) {
   const first = [...stages].sort((a, b) => a.order - b.order)[0];
   if (first) {
     const others = [...new Set(first.tickers)].filter((t) => t !== row.ticker);
-    const list = others.length ? await Company.findAll({ where: { ticker: others }, attributes: peerAttrs }) : [];
+    const list = others.length ? await Company.findAll({ where: { ticker: others, publishedAt: { [Op.ne]: null } }, attributes: peerAttrs }) : [];
     list.sort(companies.byMarketCap);
     return {
       basis: 'stage',
@@ -76,7 +79,7 @@ async function findPeers(row, stages) {
     };
   }
   const list = row.industryId
-    ? await Company.findAll({ where: { industryId: row.industryId, ticker: { [Op.ne]: row.ticker } }, attributes: peerAttrs })
+    ? await Company.findAll({ where: { industryId: row.industryId, ticker: { [Op.ne]: row.ticker }, publishedAt: { [Op.ne]: null } }, attributes: peerAttrs })
     : [];
   list.sort(companies.byMarketCap);
   return { basis: list.length ? 'industry' : null, theme: null, stage: null, total: list.length, items: list.slice(0, PEERS).map(companies.peer) };
@@ -88,7 +91,7 @@ exports.show = async (req, res, next) => {
   if (!companies.isTicker(ticker)) return fail(res, 404, 'NOT_FOUND', NOT_FOUND);
 
   try {
-    const row = await Company.findByPk(ticker, { include: refs });
+    const row = await Company.findOne({ where: { ticker, publishedAt: { [Op.ne]: null } }, include: refs });
     if (!row) return fail(res, 404, 'NOT_FOUND', NOT_FOUND);
 
     const [stages, watch, alerts] = await Promise.all([
@@ -128,7 +131,7 @@ async function alertTarget(req, res) {
     fail(res, 404, 'NOT_FOUND', NOT_FOUND);
     return null;
   }
-  const row = await Company.findByPk(ticker, { attributes: ['ticker', 'status'] });
+  const row = await Company.findOne({ where: { ticker, publishedAt: { [Op.ne]: null } }, attributes: ['ticker', 'status'] });
   if (!row) {
     fail(res, 404, 'NOT_FOUND', NOT_FOUND);
     return null;

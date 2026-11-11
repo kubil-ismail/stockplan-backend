@@ -8,7 +8,7 @@ const { fail } = require('../lib/http');
 // shortcut: loads every company's light fields to count per sector/industry; fine for ~1k BEI listings.
 // IPO-stage companies aren't listed yet, so they don't count as "[n] emiten".
 const companyStats = () => Company.findAll({
-  where: { status: { [Op.ne]: 'ipo' } },
+  where: { status: { [Op.ne]: 'ipo' }, publishedAt: { [Op.ne]: null } },
   attributes: ['ticker', 'logoUrl', 'marketCap', 'sectorId', 'industryId'],
   raw: true,
 });

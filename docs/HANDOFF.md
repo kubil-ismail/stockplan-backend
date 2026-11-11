@@ -107,6 +107,20 @@ Semua butuh cookie `sid` kecuali yang ditandai *publik*. Detail skema ada di Swa
 | `POST /admin/api/auth/logout` | menu akun, "Ganti akun" | Idempoten, juga untuk sesi yang belum lewat 2FA |
 | `GET /admin/api/auth/me` | shell admin | `{ admin: { id, name, email, role } }` |
 
+**Admin: Data emiten** (`/admin/api/companies`, perlu sesi admin + izin modul `em` dari `lib/adminRoles.js`):
+
+| Endpoint | Izin | Halaman design | Catatan |
+| --- | --- | --- | --- |
+| `GET /admin/api/companies?q=&tab=&sector=&page=&pageSize=` | `em:view` | AdminEmiten | Tab: `all`/`review`/`incomplete`/`ready` (hitungan mengikuti q + sektor); kelengkapan 5 bagian; `reportCount` selalu 0 |
+| `GET /admin/api/companies/export.csv?tickers=` | `em:view` | AdminEmiten | Semua, atau hanya yang dipilih |
+| `POST /admin/api/companies/bulk-review` | `em:edit` | AdminEmiten | `{ tickers }` 1–200 → status "Perlu ditinjau" |
+| `POST /admin/api/companies` | `em:edit` | AdminEmitenIPO | Buat emiten IPO sebagai draf; wajib `ticker` + `name`; 409 `TICKER_TAKEN` |
+| `GET /admin/api/companies/:ticker` | `em:view` | AdminEmitenEdit, AdminEmitenIPO | `form` + `sections` (kelengkapan) + `canPublish` + `themes` (hanya baca) |
+| `PATCH /admin/api/companies/:ticker` | `em:edit` | keduanya | Simpan draf; hanya bagian yang dikirim diganti |
+| `POST /admin/api/companies/:ticker/publish` | `em:publish` | keduanya | Draf → data yang dilihat customer; 422 `INCOMPLETE` bila ada bagian belum lengkap |
+
+Alur draf/terbit: `market_companies.draft` (JSONB) menampung form yang belum terbit; `publishStatus` = `draft`/`review`/`published`; `publishedAt` NULL = belum pernah terbit dan **disembunyikan dari endpoint customer** (`GET /companies`, `/companies/:ticker`, peers, hitungan sektor, tambah watchlist). Data seed otomatis `published` lewat default DB. Form ↔ kolom dipetakan di `lib/adminCompanies.js` (`columnsToForm`/`formToColumns`); isi editorial tambahan disimpan di `profile` (`revenueSources`, `keyTips`, `trading`, `overviewSource`, `asOfSource`, `subsector`). Status "IPO baru" dihitung: `status=ipo` dan `publishStatus=draft`. Ticker tidak bisa diubah setelah dibuat (kunci utama dipakai watchlist/tema).
+
 Aturan: 5 kegagalan (password atau kode 2FA) per email dalam 15 menit → 429 `ACCOUNT_LOCKED` 15 menit (dihitung dari `admin_audit_logs`, jadi email tak dikenal berperilaku sama); sesi berakhir 30 menit tanpa aktivitas; perangkat tepercaya 7 hari; kode cadangan sekali pakai. Middleware: `requireAdmin` (sudah lewat 2FA) dan `requireAdmin.pending` (baru langkah 1). Seeder admin dev: `admin@stockplan.id` / `StockPlanDev2026`, TOTP secret dan kode cadangan dicetak seeder (`npx sequelize-cli db:seed --seed 20261111000001-admin-users.js`).
 
 Penyimpangan dari §9 handoff design (disengaja):
@@ -154,6 +168,11 @@ Catatan:
 | `controllers/companyController.js` | "Satu tahap" fallback ke industri yang sama kalau emiten belum masuk tema | Hapus fallback kalau semua emiten sudah dipetakan ke tema |
 | Login | Belum ada rate limit / lockout untuk customer | Sebelum go-live |
 | `admin_users.totpSecret` | TOTP secret disimpan polos | Enkripsi AES-GCM (kunci dari env) sebelum production |
+| `market_companies` (admin list) | Daftar admin memuat semua emiten + `profile` lalu menghitung kelengkapan/tab di JS | Kalau lambat: simpan kolom kelengkapan, filter di SQL |
+| Admin emiten: file | Logo, laporan keuangan (XBRL/PDF), dan prospektus IPO belum ada (belum ada penyimpanan file); bagiannya tidak ikut cek kelengkapan | Saat modul upload (bersama `reports[].url`, `ipo.documents[].url`) |
+| Admin emiten: `reportCount`/`reports` | Selalu 0/kosong, belum ada modul Masukan | Saat modul Masukan & laporan |
+| Admin emiten: `ipo.settings` | `showUpcoming`/`autoConvert` hanya disimpan, belum dibaca | Saat daftar IPO customer / otomatisasi pindah ke tercatat |
+| Admin emiten: sub-sektor | Teks bebas; terhubung ke `industryId` hanya bila namanya cocok dengan `theme_industries` (data hanya Energi), selain itu tersimpan di `profile.subsector` | Saat data IDX-IC 10 sektor lain masuk |
 | Admin: akun dikunci | "Super admin diberi tahu" hanya tercatat di audit log + `console.warn` | Saat ada notifikasi admin |
 | Admin: pembuatan akun & aktivasi 2FA | Belum ada endpoint; akun admin hanya dari seeder dev (alur aktivasi belum didesain, handoff design §12) | Modul Akses (undang anggota) |
 | `/docs` | Swagger terbuka untuk publik | Batasi/matikan di production |
@@ -178,7 +197,7 @@ Urutan yang disarankan, dimulai dari yang paling sedikit ketergantungannya.
 - **Bantuan & tiket**.
 - **Auth tambahan**: konfirmasi email daftar, kirim ulang, lupa/reset password, Google, upload foto profil.
 - **Ekspor CSV** (`GET /me/export.csv`) — design: tautan dikirim lewat email.
-- **Admin** (`/admin/api`, handoff design §8): ~~login + 2FA~~ selesai (§5); sisanya RBAC per endpoint, CRUD emiten & tema, sinkron BEI (mengisi `dataDelayed`), riwayat/audit log. Saat ini semua data referensi hanya dari seed.
+- **Admin** (`/admin/api`, handoff design §8): ~~login + 2FA~~ dan ~~Data emiten (daftar, edit, tambah IPO)~~ selesai (§5); sisanya RBAC kustom (peran sekarang statis), tema, sinkron BEI (mengisi `dataDelayed`), riwayat/audit log. Saat ini semua data referensi hanya dari seed.
 
 ### 8.3 Keputusan yang masih terbuka
 - Samakan aturan password daftar vs ganti password?
