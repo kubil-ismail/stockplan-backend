@@ -13,6 +13,7 @@ var meRouter = require("./routes/me");
 var sectorsRouter = require("./routes/sectors");
 var companiesRouter = require("./routes/companies");
 var watchlistRouter = require("./routes/watchlist");
+var themesRouter = require("./routes/themes");
 
 var app = express();
 
@@ -33,6 +34,7 @@ app.use("/me", meRouter);
 app.use("/sectors", sectorsRouter);
 app.use("/companies", companiesRouter);
 app.use("/watchlist", watchlistRouter);
+app.use("/themes", themesRouter);
 
 var swaggerUi = require("swagger-ui-express");
 var openapi = require("./docs/openapi");

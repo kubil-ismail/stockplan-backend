@@ -243,7 +243,7 @@ module.exports = {
       get: {
         tags: ['Emiten'],
         summary: 'Cari emiten',
-        description: 'Halaman EmitenSearch. Cocok kalau kode diawali `q`, nama mengandung `q`, atau nama industri mengandung `q`. Urutan: kode persis → awalan kode → awalan nama → lainnya, lalu market cap. `sectors` = chip filter dengan jumlah dari semua hasil; `total` juga dihitung sebelum filter sektor. `q` kosong → hasil kosong (EmitenKosong).',
+        description: 'Halaman EmitenSearch. Cocok kalau kode diawali `q`, nama mengandung `q`, atau nama industri mengandung `q`. Urutan: kode persis → awalan kode → awalan nama → lainnya, lalu market cap. `sectors` = chip filter dengan jumlah dari semua hasil; `total` juga dihitung sebelum filter sektor. Tanpa `q` tapi dengan `sector` → semua emiten sektor itu (Jelajahi berdasarkan sektor). Tanpa keduanya → hasil kosong (EmitenKosong). Tiap baris membawa `themes` (Tema terkait, hanya tema terbit) dan `inWatchlist`.',
         parameters: [
           { name: 'q', in: 'query', schema: { type: 'string', maxLength: 50, example: 'bu' } },
           { name: 'sector', in: 'query', schema: { type: 'string', example: 'energi' }, description: 'Slug sektor dari `sectors`' },
@@ -259,7 +259,7 @@ module.exports = {
                     query: { type: 'string' },
                     total: { type: 'integer', description: '"3 emiten cocok"' },
                     sectors: { type: 'array', items: { type: 'object', properties: { slug: { type: 'string' }, name: { type: 'string' }, count: { type: 'integer' } } } },
-                    companies: { type: 'array', items: { allOf: [{ $ref: '#/components/schemas/CompanyCard' }, { type: 'object', properties: { bestMatch: { type: 'boolean', description: '"Paling cocok"' } } }] } },
+                    companies: { type: 'array', items: { allOf: [{ $ref: '#/components/schemas/CompanyCard' }, { type: 'object', properties: { bestMatch: { type: 'boolean', description: '"Paling cocok"' }, themes: { type: 'array', items: { type: 'object', properties: { slug: { type: 'string' }, name: { type: 'string' } } } }, inWatchlist: { type: 'boolean' } } }] } },
                   },
                 },
               },
@@ -335,7 +335,88 @@ module.exports = {
         responses: { 204: { description: 'Nonaktif (juga kalau memang belum aktif)' }, 401: { $ref: '#/components/responses/Unauthenticated' }, 404: errorResponse('Emiten / jenis tidak dikenal', 'NOT_FOUND', 'Emiten tidak ditemukan.') },
       },
     },
+    '/themes/{slug}': {
+      get: {
+        tags: ['Tema bisnis'],
+        summary: 'Detail tema (rantai nilai)',
+        description: 'Halaman TemaDetail + TemaDetailTabel + panel emiten, satu panggilan. Hanya tema `published`. `companies` berurutan menurut kemunculan pertama di tahap; ticker tahap tanpa data emiten dibuang. `mcapAsOf` = tanggal harga terbaru di antara emiten yang punya market cap. `viewer.watchlist` = emiten tema ini di watchlist pengguna.',
+        parameters: [{ name: 'slug', in: 'path', required: true, schema: { type: 'string', example: 'batubara' } }],
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    theme: { type: 'object', properties: { slug: { type: 'string' }, name: { type: 'string' }, description: { type: 'string', nullable: true }, sector: { type: 'object', nullable: true, properties: { slug: { type: 'string' }, name: { type: 'string' } } } } },
+                    stages: { type: 'array', items: { type: 'object', properties: { order: { type: 'integer', example: 2 }, group: { type: 'string', enum: ['hulu', 'tengah', 'hilir'] }, name: { type: 'string' }, shortName: { type: 'string', nullable: true }, description: { type: 'string', nullable: true }, tickers: { type: 'array', items: { type: 'string' } } } } },
+                    companies: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          ticker: { type: 'string' }, name: { type: 'string' }, summary: { type: 'string', nullable: true }, logoUrl: { type: 'string', nullable: true },
+                          status: { type: 'string', enum: ['listed', 'ipo', 'suspended'] },
+                          tagline: { type: 'string', nullable: true, description: '"Pembeda utama"' },
+                          marketCap: { type: 'number', nullable: true, description: 'Rupiah' }, priceDate: { type: 'string', format: 'date', nullable: true },
+                          highlights: {
+                            type: 'object', nullable: true, description: 'Isi drawer emiten',
+                            properties: {
+                              stats: { type: 'array', items: { type: 'object', properties: { value: { type: 'string' }, label: { type: 'string' } } } },
+                              insight: { type: 'string' },
+                              revenueMix: { type: 'array', items: { type: 'object', properties: { label: { type: 'string' }, pct: { type: 'number' } } } },
+                              subsidiaries: { type: 'array', items: { type: 'string' } },
+                            },
+                          },
+                        },
+                      },
+                    },
+                    mcapAsOf: { type: 'string', format: 'date', nullable: true },
+                    viewer: { type: 'object', properties: { watchlist: { type: 'array', items: { type: 'string' } } } },
+                  },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/Unauthenticated' },
+          404: errorResponse('Tema tidak ada / belum terbit', 'NOT_FOUND', 'Tema tidak ditemukan.'),
+        },
+      },
+    },
     '/watchlist': {
+      get: {
+        tags: ['Watchlist'],
+        summary: 'Daftar watchlist',
+        description: 'Halaman Watchlist. Terbaru dulu; tahap (baru/pel/siap) dihitung dari checklist. `themes` = tema terbit tempat emiten muncul, dengan tahap utamanya.',
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    items: {
+                      type: 'array',
+                      items: {
+                        allOf: [{ $ref: '#/components/schemas/WatchItem' }, {
+                          type: 'object',
+                          properties: {
+                            company: { type: 'object', properties: { name: { type: 'string' }, logoUrl: { type: 'string', nullable: true }, tagline: { type: 'string', nullable: true }, summary: { type: 'string', nullable: true }, sector: { type: 'object', nullable: true }, industry: { type: 'object', nullable: true } } },
+                            themes: { type: 'array', items: { type: 'object', properties: { slug: { type: 'string' }, name: { type: 'string' }, groups: { type: 'array', items: { type: 'string', enum: ['hulu', 'tengah', 'hilir'] } } } } },
+                          },
+                        }],
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/Unauthenticated' },
+        },
+      },
       post: {
         tags: ['Watchlist'],
         summary: 'Tambah ke watchlist',
@@ -350,6 +431,19 @@ module.exports = {
       },
     },
     '/watchlist/{ticker}': {
+      patch: {
+        tags: ['Watchlist'],
+        summary: 'Ubah catatan / checklist',
+        description: '"Kenapa saya simpan" dan checklist riset 4 langkah (Bisnis dipahami · Laporan dibaca · Risiko dicatat · Alasan ditulis). Update parsial; setiap perubahan memperbarui `touchedAt`.',
+        parameters: [{ name: 'ticker', in: 'path', required: true, schema: { type: 'string', example: 'BUMI' } }],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { note: { type: 'string', maxLength: 2000 }, checklist: { type: 'array', minItems: 4, maxItems: 4, items: { type: 'boolean' } } } } } } },
+        responses: {
+          200: { description: 'Disimpan', content: { 'application/json': { schema: { type: 'object', properties: { item: { $ref: '#/components/schemas/WatchItem' } } } } } },
+          401: { $ref: '#/components/responses/Unauthenticated' },
+          404: errorResponse('Tidak ada di watchlist', 'NOT_FOUND', 'Emiten ini tidak ada di watchlist Anda.'),
+          422: errorResponse('Isian tidak valid / kosong', 'VALIDATION', 'Tidak ada yang diubah.', { body: 'Tidak ada yang diubah.' }),
+        },
+      },
       delete: {
         tags: ['Watchlist'],
         summary: 'Hapus dari watchlist',

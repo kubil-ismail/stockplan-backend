@@ -1,0 +1,176 @@
+# StockPlan Backend — Handoff
+
+Status per 10 Nov 2026. Dokumen ini untuk sesi Claude Code berikutnya (dan developer) yang melanjutkan backend. Baca dari atas sebelum menulis kode.
+
+Acuan produk dan design ada di `stockplan-app-handoff/HANDOFF.md` (disebut "handoff design" di bawah). Dokumen ini hanya mencatat **apa yang sudah dibangun, keputusan yang diambil, dan apa yang belum**.
+
+---
+
+## 1. Menjalankan
+
+```bash
+cp .env.example .env          # isi DB_*; APP_URL opsional (default http://localhost:3000, dipakai link email)
+npm install
+npm run migrate               # sequelize-cli db:migrate
+npx sequelize-cli db:seed:all # data dev; lihat §6 sebelum menjalankan ulang
+npm run dev                   # nodemon, port 3000 (PORT untuk mengganti)
+npm test                      # node --test, unit test di lib/*.test.js
+```
+
+- Swagger UI: `GET /docs`, spec mentah: `GET /docs.json`.
+- Semua respons JSON. Error selalu `{ error: { code, message, fields? } }`.
+- Login di Swagger ("Try it out" `POST /auth/login`) memasang cookie `sid`; endpoint lain lalu bisa dicoba di tab yang sama.
+- User baru `emailVerified=false` dan belum bisa login karena email konfirmasi belum terkirim (§7). Untuk dev, set manual:
+  `UPDATE auth_users SET "emailVerified" = true WHERE email = '…';`
+
+## 2. Stack dan struktur
+
+Express 4 (generator), Sequelize 6 + PostgreSQL, `sequelize-cli` untuk migrasi/seed, `swagger-ui-express`, test dengan `node:test` bawaan. Tidak ada dependency validasi atau auth tambahan — hash password memakai `crypto.scrypt`.
+
+> Handoff design menyarankan Prisma; repo ini sudah memakai Sequelize sejak awal dan tetap begitu.
+
+Pola MVC:
+
+```
+routes/        hanya memetakan URL → controller (+ requireAuth)
+controllers/   baca request, panggil model + lib, tulis respons
+models/        definisi Sequelize (tableName eksplisit, lihat §3)
+lib/           fungsi murni: validasi, kalkulasi, bentuk respons. Semua logika yang bisa dites ada di sini
+lib/*.test.js  unit test
+middleware/    requireAuth
+migrations/    skema (jangan edit migrasi yang sudah jalan; buat migrasi baru)
+seeders/       data dev + seeders/data/*
+docs/openapi.js  spec OpenAPI, ditulis manual
+public/logos/emiten/  logo emiten (disajikan statis)
+```
+
+`routes/index.js`, `routes/users.js`, dan `views/` (jade) adalah sisa generator Express dan tidak dipakai API. Aman dihapus bila ingin bersih.
+
+## 3. Konvensi (wajib diikuti)
+
+- **Nama tabel**: `<domain>_<jamak>` snake_case, set lewat `tableName` di model. Nama kolom tetap camelCase (default Sequelize). Domain yang sudah dipakai: `auth_`, `theme_`, `market_`, `watchlist_`. Rencana: `thesis_`, `portfolio_`, `notification_`, `support_` (tiket), `admin_`.
+- **Migrasi**: satu perubahan = satu file baru `YYYYMMDDHHMMSS-…js`. Enum Postgres ikut di-drop di `down`.
+- **Validasi** di `lib/<modul>.js`: fungsi `validateX(body)` → `{ values, errors }` (`errors` = `null` atau `{ field: pesan }`). Update parsial: hanya field yang dikirim yang divalidasi dan diubah.
+- **Error**: pakai `fail(res, status, code, message, fields)` dari `lib/http.js`. Kode yang dipakai: `VALIDATION` (422), `UNAUTHENTICATED` (401), `NOT_FOUND` (404), `EMAIL_TAKEN` (409), `BAD_CREDENTIALS` (401), `EMAIL_UNCONFIRMED` (403), `BAD_TOKEN` (400), `CURRENT_SESSION` (400), `NOT_IPO` (422), `BAD_REQUEST`/`SERVER_ERROR` (handler global di `app.js`).
+- **Copy**: pesan berbahasa Indonesia diambil persis dari `stockplan-app-handoff/design/screens/*.dc.html`. Pesan yang tidak ada di design ditandai `// COPY: perlu review`. Jangan mengarang copy tanpa tanda itu (`grep -rn "COPY: perlu review"` untuk daftar).
+- **Uang** dalam Rupiah utuh (number), rasio dalam angka (`roePct: 7`), tanggal ISO. Frontend yang memformat (`Rp44,9 T`, `1,5x`). Kolom `BIGINT` dikonversi `Number()` di `lib/` karena pg mengembalikan string.
+- **Status turunan dihitung, tidak disimpan**: status sektor/industri (Siap/Baru/Segera hadir), tahap watchlist (baru/pel/siap), state jadwal IPO, `failedDays`. Ikuti pola ini untuk `suggestVerdict`, `evalTier`, drift portofolio, dll.
+- **Tanggal bursa** dihitung di zona `Asia/Jakarta` (`jakartaDate()` di `lib/companies.js`).
+- **Data orang nyata** di seed diganti placeholder `[Nama …]` (handoff design §1.3).
+- **Larangan produk** (handoff design §1.1): tidak ada endpoint beli/jual/order, harga realtime, prediksi, atau rekomendasi.
+- Setiap endpoint baru: route + controller + fungsi `lib/` dengan test + entri di `docs/openapi.js`.
+- Shortcut yang disengaja diberi komentar `// shortcut: <batasan>, <kapan di-upgrade>`.
+
+## 4. Auth dan sesi
+
+- Cookie `sid` httpOnly, `SameSite=Lax`, `Secure` di production. Token acak 32 byte; yang disimpan hanya SHA-256-nya (`auth_sessions.tokenHash`).
+- Login: "Ingat saya" (`remember`, default `true`) → sesi 30 hari + cookie persisten; `false` → 24 jam + cookie sesi browser.
+- `middleware/requireAuth.js` mengisi `req.user` dan `req.session`, menolak sesi kedaluwarsa, dan memperbarui `updatedAt` sesi paling sering sekali per menit (dipakai sebagai "aktif terakhir").
+- Login gagal memakai hash dummy supaya waktu respons tidak membocorkan email terdaftar.
+- Ganti password → semua sesi lain dihapus, sesi saat ini tetap.
+- Aturan password: daftar = min 8 + huruf besar + angka; ganti password = min 8 + huruf + angka (mengikuti design apa adanya; **belum diputuskan** apakah disamakan).
+
+## 5. Endpoint yang sudah ada
+
+Semua butuh cookie `sid` kecuali yang ditandai *publik*. Detail skema ada di Swagger.
+
+| Endpoint | Halaman design | Catatan |
+| --- | --- | --- |
+| `POST /auth/register` *publik* | Register | Tidak membuat sesi; user harus konfirmasi email |
+| `POST /auth/login` *publik* | Login | |
+| `POST /auth/logout` | menu akun | |
+| `POST /auth/confirm-email-change` *publik* | link email | Token sekali pakai, 24 jam |
+| `GET /me` | semua | User + `prefs` lengkap (default diisi otomatis) |
+| `PATCH /me` | Profil | nama, pengalaman, jangka waktu, tema minat |
+| `DELETE /me` | Pengaturan | body `{ "confirm": "HAPUS" }` |
+| `PATCH /me/prefs` | Pengaturan | tampilan, biaya, jadwal evaluasi, notifikasi (§6.8 handoff design). Merge per jenis × kanal |
+| `POST /me/email` | Pengaturan | email lama berlaku sampai link diklik |
+| `POST /me/password` | Profil | |
+| `GET /me/sessions`, `DELETE /me/sessions/:id` | Profil | tidak bisa menghapus sesi saat ini (pakai logout) |
+| `GET /sectors` | Tema | + `industryNames` untuk kotak cari |
+| `GET /sectors/:slug` | TemaSektor | subsektor → industri, `notice` untuk banner "Data baru" |
+| `GET /companies?q=&sector=` | EmitenSearch | urutan "Paling cocok" sesuai design, chip sektor; tanpa `q` + `sector` = jelajah satu sektor; per baris `themes` (Tema terkait) + `inWatchlist` |
+| `GET /companies/:ticker` | Emiten, EmitenIPO, EmitenDataTertunda | + `themes` (badge tahap), `peers` ("Satu tahap"), `viewer` (status tombol) |
+| `PUT\|DELETE /companies/:ticker/alerts/:kind` | EmitenIPO, EmitenDataTertunda | `listing` (hanya status ipo), `data-update` |
+| `GET /themes/:slug` | TemaDetail, TemaDetailTabel, panel emiten | hanya tema `published`; isi drawer dari `profile.highlights`; `viewer.watchlist` |
+| `GET /watchlist` | Watchlist | + data emiten dan tema/tahap utama per item |
+| `POST /watchlist`, `DELETE /watchlist/:ticker` | tombol watchlist | idempoten |
+| `PATCH /watchlist/:ticker` | Watchlist | catatan dan/atau checklist; memperbarui `touchedAt` |
+
+Penyimpangan dari §9 handoff design (disengaja):
+- `GET /sectors/:slug` mengganti `GET /sectors/:id/themes` (satu panggilan berisi seluruh halaman).
+- Pencarian emiten di `GET /companies?q=`; `GET /search` (gabungan ⌘K) belum dibuat.
+- Pengingat emiten (`/companies/:ticker/alerts/:kind`) tidak ada di §9; ditambahkan untuk tombol di design.
+
+## 6. Data
+
+### 6.1 Tabel
+
+| Tabel | Isi |
+| --- | --- |
+| `auth_users` | akun + `prefs` (JSONB) + profil + `pendingEmail*` |
+| `auth_sessions` | sesi login |
+| `theme_sectors` → `theme_subsectors` → `theme_industries` | hierarki IDX-IC. Industri: `dataStatus` (`soon`/`ready`), `dataUpdatedAt`, `updateNote`, `themeSlug` |
+| `theme_themes`, `theme_stages` | tema rantai nilai; `theme_stages.tickers` = array JSONB berurutan (indeks GIN). Satu emiten boleh di beberapa tahap |
+| `market_companies` | emiten. Kolom untuk query/sort; isi editorial halaman di `profile` (JSONB) dan `ipo` (JSONB). `dataDelayed` JSONB → banner data tertunda |
+| `watchlist_items` | per user × ticker, `checklist` 4 boolean, `note` |
+| `market_company_alerts` | per user × ticker × `listing`/`data_update` |
+
+Semua tabel milik user `ON DELETE CASCADE` ke `auth_users`. **Tabel baru milik user (tesis, portofolio, dst.) wajib ikut cascade**, karena `DELETE /me` mengandalkannya.
+
+### 6.2 Seed (dev saja)
+
+Urutan file penting (`db:seed:all` berjalan sesuai nama file):
+
+1. `…01-theme-sectors.js` — 11 sektor dari board `Tema`; subsektor/industri **hanya Energi** dari board `TemaSektor`. Tanggal Batu Bara dibuat relatif (kemarin) supaya status "Baru" terlihat.
+2. `…02-market-companies.js` — 35 emiten dari array data board `EmitenSearch` (`seeders/data/companies-search.json`) + ABNU (contoh IPO fiktif). Detail halaman lengkap hanya **BUMI** dan **ABNU** (`seeders/data/companies-detail.js`). Market cap hanya untuk 5 emiten yang angkanya ada di design.
+3. `…03-theme-batubara.js` — tema Batubara dari `fixtures/theme-batubara.json` (5 tahap, 21 emiten) + 14 emiten tambahan dari fixture.
+4. `…04-theme-batubara-highlights.js` — isi editorial TemaDetail: `tagline` (Pembeda utama), market cap per 16 Okt 2026, dan `profile.highlights` (angka kunci, insight, komposisi pendapatan, anak usaha) untuk drawer. Hanya mengisi kolom yang kosong. Di DB yang sudah ter-seed: `npx sequelize-cli db:seed --seed 20261110000004-theme-batubara-highlights.js`.
+
+Catatan:
+- `sequelize-cli` tidak mencatat seed yang sudah jalan. Menjalankan ulang `db:seed:all` akan gagal karena slug/ticker unik. Untuk reset: `npx sequelize-cli db:seed:undo:all && npx sequelize-cli db:seed:all`.
+- Pembagian industri untuk emiten di luar design (kontraktor → Jasa & Peralatan, penambang → Batu Bara, TCPI/PSSI → Transportasi) adalah tebakan dev, **bukan IDX-IC resmi**.
+- Logo emiten bersumber dari TradingView (handoff design §0.5); ganti dengan aset berlisensi sebelum rilis publik.
+
+## 7. Shortcut yang diketahui
+
+| Lokasi | Batasan | Kapan di-upgrade |
+| --- | --- | --- |
+| `lib/mailer.js` | Email tidak terkirim; link hanya di-log ke console | Sebelum beta publik: pasang SMTP/Resend. Dipakai juga untuk konfirmasi daftar dan reset password |
+| `controllers/sectorController.js` | Memuat field ringan semua emiten untuk menghitung jumlah per sektor/industri | Kalau emiten > beberapa ribu: ganti ke `COUNT … GROUP BY` |
+| `controllers/companyController.js` | "Satu tahap" fallback ke industri yang sama kalau emiten belum masuk tema | Hapus fallback kalau semua emiten sudah dipetakan ke tema |
+| Login | Belum ada rate limit / lockout untuk customer | Sebelum go-live |
+| `/docs` | Swagger terbuka untuk publik | Batasi/matikan di production |
+| `market_companies.profile.reports[].url`, `ipo.documents[].url` | Selalu `null`; belum ada penyimpanan file | Saat modul upload/admin |
+| `theme_stages.groupKey` | Teks `hulu`/`tengah`/`hilir`; ikon & warna tahap utama (AdminTemaEdit) belum ada | Saat modul admin tema: tabel `theme_stage_groups` |
+
+## 8. Belum dibuat
+
+Urutan yang disarankan, dimulai dari yang paling sedikit ketergantungannya.
+
+### 8.1 Tema bisnis & emiten (melanjutkan yang ada)
+1. ~~`GET /themes/:slug`~~ dan ~~Tema terkait + `inWatchlist`~~ di `GET /companies` — selesai (§5).
+2. **`GET /search?q=`** gabungan emiten + tema untuk ⌘K (`LayoutCari`) + **riwayat pencarian** per user (tampil, hapus per item, "Hapus riwayat").
+3. **"Kabari saya"** untuk industri "Segera hadir" (`TemaSektor`).
+
+### 8.2 Modul lain (lihat handoff design §6 dan §9)
+- **Watchlist — sisa**: "Perubahan bisnis" per emiten (feed keterbukaan BEI) belum ada; client menampilkan kosong.
+- **Tesis**: daftar, wizard 5 langkah (draf), arsip/pulihkan, evaluasi + `suggestVerdict`/`evalTier` (rumus di handoff design §6.4). Membuka "Hubungkan ke tesis", "Buat tesis dari tema ini", label "Di tesis Anda".
+- **Portofolio**: holdings, transaksi, dana tunai, riwayat keputusan (berbasis modal, bukan nilai pasar). Membuka "Ada emiten Anda", "Di portofolio".
+- **Beranda**: `GET /dashboard` (perlu tindakan, drift ±5 poin, IPO 14 hari, dll.).
+- **Notifikasi**: tabel + endpoint §9, pengiriman sesuai `prefs.notifications`, dan pemicu dari `market_company_alerts`.
+- **Bantuan & tiket**.
+- **Auth tambahan**: konfirmasi email daftar, kirim ulang, lupa/reset password, Google, upload foto profil.
+- **Ekspor CSV** (`GET /me/export.csv`) — design: tautan dikirim lewat email.
+- **Admin** (`/admin/api`, handoff design §8): login + 2FA, RBAC per endpoint, CRUD emiten & tema, sinkron BEI (mengisi `dataDelayed`), riwayat/audit log. Saat ini semua data referensi hanya dari seed.
+
+### 8.3 Keputusan yang masih terbuka
+- Samakan aturan password daftar vs ganti password?
+- Data IDX-IC resmi untuk 10 sektor selain Energi (sumber dan cara impor).
+- Rentang biaya transaksi di Pengaturan dibatasi 0–10% — angka dari dev, belum dikonfirmasi.
+- Semua pesan bertanda `// COPY: perlu review`.
+
+## 9. Cara kerja yang terbukti di repo ini
+
+- Untuk setiap layar: buka `stockplan-app-handoff/design/screenshots/<Board>.jpg`, baca script `<script type="text/x-dc">` di `design/screens/<Board>.dc.html` untuk data contoh, copy, dan logika (mis. skor pencarian, aturan validasi), lalu bangun endpoint yang mengembalikan semua isi halaman dalam satu panggilan bila wajar.
+- Uji ujung-ke-ujung dengan server di port lain (`PORT=39xx node bin/www`), daftar user uji, set `emailVerified`, login dengan cookie jar `curl -c/-b`, lalu hapus user uji (data miliknya ikut terhapus lewat cascade). Jangan menyentuh akun lain di database dev.

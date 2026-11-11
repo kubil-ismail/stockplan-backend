@@ -3,6 +3,7 @@
 const { Op } = require('sequelize');
 const { Company, Sector, Industry, Theme, ThemeStage, WatchlistItem, CompanyAlert } = require('../models');
 const companies = require('../lib/companies');
+const themes = require('../lib/themes');
 const { fail } = require('../lib/http');
 
 const refs = [
@@ -17,27 +18,41 @@ const NOT_FOUND = 'Emiten tidak ditemukan.'; // COPY: perlu review
 // URL segment → stored kind.
 const ALERT_KINDS = { listing: 'listing', 'data-update': 'data_update' };
 
-// GET /companies?q=bu&sector=energi — design: EmitenSearch. Empty q → empty result (EmitenKosong).
+// GET /companies?q=bu&sector=energi — design: EmitenSearch. Without q, ?sector= browses one sector
+// ("Jelajahi berdasarkan sektor"); neither → empty result (EmitenKosong). Each row carries its published
+// themes ("Tema terkait") and inWatchlist (bookmark state).
 exports.index = async (req, res, next) => {
   const q = String(req.query.q || '').trim().toLowerCase().slice(0, 50);
-  const sector = typeof req.query.sector === 'string' ? req.query.sector : null;
-  if (!q) return res.json({ query: '', total: 0, sectors: [], companies: [] });
+  const sector = typeof req.query.sector === 'string' && req.query.sector ? req.query.sector : null;
+  if (!q && !sector) return res.json({ query: '', total: 0, sectors: [], companies: [] });
 
   try {
     const like = companies.escapeLike(q);
     const rows = await Company.findAll({
-      where: {
+      where: q ? {
         [Op.or]: [
           { ticker: { [Op.iLike]: `${like}%` } },
           { name: { [Op.iLike]: `%${like}%` } },
           { '$industry.name$': { [Op.iLike]: `%${like}%` } },
         ],
-      },
+      } : { '$sector.slug$': sector },
       include: refs,
       subQuery: false,
       limit: MAX_MATCHES,
     });
-    res.json({ query: q, ...companies.searchResult(rows, q, sector) });
+    const result = companies.searchResult(rows, q, sector);
+    const tickers = result.companies.map((c) => c.ticker);
+    const [stages, watch] = tickers.length ? await Promise.all([
+      ThemeStage.findAll({
+        where: themes.stagesWithAny(tickers),
+        include: [{ model: Theme, as: 'theme', where: { status: 'published' }, attributes: ['slug', 'name'] }],
+      }),
+      WatchlistItem.findAll({ where: { userId: req.user.id, ticker: tickers }, attributes: ['ticker'] }),
+    ]) : [[], []];
+    const related = themes.themesByTicker(stages, tickers);
+    const saved = new Set(watch.map((w) => w.ticker));
+    result.companies = result.companies.map((c) => ({ ...c, themes: related[c.ticker], inWatchlist: saved.has(c.ticker) }));
+    res.json({ query: q, ...result });
   } catch (err) {
     next(err);
   }
