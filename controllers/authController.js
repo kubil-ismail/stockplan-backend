@@ -42,8 +42,10 @@ exports.login = async (req, res, next) => {
     const user = await User.findOne({ where: { email: values.email } });
     const ok = await auth.verifyPassword(values.password, user ? user.passwordHash : await dummyHash);
     if (!user || !ok) return fail(res, 401, 'BAD_CREDENTIALS', auth.MSG.badCredentials);
+    if (user.suspendedAt) return fail(res, 403, 'ACCOUNT_SUSPENDED', auth.MSG.suspended);
     if (!user.emailVerified) return fail(res, 403, 'EMAIL_UNCONFIRMED', auth.MSG.unconfirmed);
 
+    await user.update({ lastActiveAt: new Date() });
     const token = auth.newSessionToken();
     const ttl = values.remember ? TTL.remember : TTL.short;
     await Session.create({
@@ -93,6 +95,26 @@ exports.confirmEmailChange = async (req, res, next) => {
     res.json({ user });
   } catch (err) {
     if (err instanceof UniqueConstraintError) return fail(res, 409, 'EMAIL_TAKEN', auth.MSG.emailTaken);
+    next(err);
+  }
+};
+
+// Public: the emailed token (from admin "Kirim tautan atur ulang password") is the credential. Signs out every device.
+exports.resetPassword = async (req, res, next) => {
+  const { values, errors } = auth.validateReset(req.body);
+  if (errors) return fail(res, 422, 'VALIDATION', 'Periksa lagi isian Anda.', errors); // COPY: perlu review
+  try {
+    const user = values.token && (await User.findOne({
+      where: { passwordResetTokenHash: auth.hashToken(values.token), passwordResetExpiresAt: { [Op.gt]: new Date() }, suspendedAt: null },
+    }));
+    if (!user) return fail(res, 400, 'BAD_TOKEN', auth.MSG.badResetToken);
+    await user.update({
+      passwordHash: await auth.hashPassword(values.password), passwordChangedAt: new Date(),
+      passwordResetTokenHash: null, passwordResetExpiresAt: null,
+    });
+    await Session.destroy({ where: { userId: user.id } });
+    res.status(204).end();
+  } catch (err) {
     next(err);
   }
 };

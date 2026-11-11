@@ -48,7 +48,7 @@ exports.index = async (req, res, next) => {
     const [stages, watch] = tickers.length ? await Promise.all([
       ThemeStage.findAll({
         where: themes.stagesWithAny(tickers),
-        include: [{ model: Theme, as: 'theme', where: { status: 'published' }, attributes: ['slug', 'name'] }],
+        include: [{ model: Theme, as: 'theme', where: { publishedAt: { [Op.ne]: null } }, attributes: ['slug', 'name'] }],
       }),
       WatchlistItem.findAll({ where: { userId: req.user.id, ticker: tickers }, attributes: ['ticker'] }),
     ]) : [[], []];
@@ -97,7 +97,7 @@ exports.show = async (req, res, next) => {
     const [stages, watch, alerts] = await Promise.all([
       ThemeStage.findAll({
         where: { tickers: { [Op.contains]: [ticker] } },
-        include: [{ model: Theme, as: 'theme', where: { status: 'published' }, attributes: ['id', 'slug', 'name'] }],
+        include: [{ model: Theme, as: 'theme', where: { publishedAt: { [Op.ne]: null } }, attributes: ['id', 'slug', 'name'] }],
       }),
       WatchlistItem.findOne({ where: { userId: req.user.id, ticker }, attributes: ['id'] }),
       CompanyAlert.findAll({ where: { userId: req.user.id, ticker }, attributes: ['kind'] }),

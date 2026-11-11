@@ -24,7 +24,7 @@ exports.index = async (req, res, next) => {
     const tickers = items.map((i) => i.ticker);
     const stages = tickers.length ? await ThemeStage.findAll({
       where: themes.stagesWithAny(tickers),
-      include: [{ model: Theme, as: 'theme', where: { status: 'published' }, attributes: ['slug', 'name'] }],
+      include: [{ model: Theme, as: 'theme', where: { publishedAt: { [Op.ne]: null } }, attributes: ['slug', 'name'] }],
     }) : [];
     res.json({ items: items.map((w) => watchlist.listItemView(w, stages)) });
   } catch (err) {

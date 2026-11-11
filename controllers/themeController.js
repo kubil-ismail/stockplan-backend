@@ -1,5 +1,6 @@
 'use strict';
 
+const { Op } = require('sequelize');
 const { Theme, ThemeStage, Sector, Company, WatchlistItem } = require('../models');
 const themes = require('../lib/themes');
 const { fail } = require('../lib/http');
@@ -10,7 +11,7 @@ const companyAttrs = ['ticker', 'name', 'summary', 'logoUrl', 'status', 'tagline
 exports.show = async (req, res, next) => {
   try {
     const theme = await Theme.findOne({
-      where: { slug: String(req.params.slug || ''), status: 'published' },
+      where: { slug: String(req.params.slug || ''), publishedAt: { [Op.ne]: null } },
       include: [{ model: Sector, as: 'sector', attributes: ['slug', 'name'] }, { model: ThemeStage, as: 'stages' }],
     });
     if (!theme) return fail(res, 404, 'NOT_FOUND', 'Tema tidak ditemukan.'); // COPY: perlu review

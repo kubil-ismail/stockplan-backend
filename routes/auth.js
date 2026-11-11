@@ -9,6 +9,7 @@ const router = express.Router();
 router.post('/register', authController.register);
 router.post('/login', authController.login);
 router.post('/confirm-email-change', authController.confirmEmailChange);
+router.post('/reset-password', authController.resetPassword);
 router.post('/logout', requireAuth, authController.logout);
 
 module.exports = router;

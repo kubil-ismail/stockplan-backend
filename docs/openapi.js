@@ -42,7 +42,7 @@ const errorResponse = (description, code, message, fields) => ({
 module.exports = {
   openapi: '3.0.3',
   info: { title: 'StockPlan API', version: '0.1.0', description: 'REST API StockPlan. Sesi memakai cookie httpOnly `sid`.' },
-  tags: [{ name: 'Auth' }, { name: 'Profil' }, { name: 'Pengaturan' }, { name: 'Tema bisnis' }, { name: 'Emiten' }, { name: 'Watchlist' }, { name: 'Admin: Auth' }, { name: 'Admin: Emiten' }],
+  tags: [{ name: 'Auth' }, { name: 'Profil' }, { name: 'Pengaturan' }, { name: 'Tema bisnis' }, { name: 'Emiten' }, { name: 'Watchlist' }, { name: 'Admin: Auth' }, { name: 'Admin: Emiten' }, { name: 'Admin: Pengguna' }, { name: 'Admin: Tema' }],
   security: [{ cookieAuth: [] }],
   paths: {
     '/auth/register': {
@@ -356,6 +356,231 @@ module.exports = {
           200: { description: 'Terbit', content: { 'application/json': { schema: { $ref: '#/components/schemas/AdminCompanyEdit' } } } },
           403: errorResponse('Tanpa izin terbit', 'FORBIDDEN', 'Peran Anda tidak punya izin untuk aksi ini.'),
           422: errorResponse('Belum lengkap', 'INCOMPLETE', 'Belum bisa terbit: Ringkasan bisnis, Sumber pendapatan', { summary: 'Perlu dicek', revenue: 'kurang 100%' }),
+        },
+      },
+    },
+    '/admin/api/users': {
+      get: {
+        tags: ['Admin: Pengguna'],
+        security: [{ adminCookie: [] }],
+        summary: 'Daftar pengguna + ringkasan (AdminPengguna)',
+        description: 'Izin `usr:view`. `tabs` mengikuti `q` + `plan`; `tab` hanya menyaring baris. Status dihitung: `sus` (ditangguhkan) > `new` (belum konfirmasi) > `idle` (tak ada aktivitas 30 hari) > `act`. `summary.thesisWriters` belum terisi (modul Tesis belum ada). Diurutkan dari yang terbaru bergabung.',
+        parameters: [
+          { name: 'q', in: 'query', schema: { type: 'string' }, description: 'Nama atau email' },
+          { name: 'tab', in: 'query', schema: { type: 'string', enum: ['all', 'act', 'new', 'idle', 'sus'], default: 'all' } },
+          { name: 'plan', in: 'query', schema: { type: 'string', enum: ['y', 'm', 'n'] }, description: 'Minat paket: y Tahunan, m Bulanan, n Belum memilih' },
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'pageSize', in: 'query', schema: { type: 'integer', default: 12, maximum: 100 } },
+        ],
+        responses: {
+          200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: {
+            summary: { type: 'object', properties: {
+              total: { type: 'integer' }, newThisWeek: { type: 'integer' },
+              active7Days: { type: 'object', properties: { count: { type: 'integer' }, percent: { type: 'integer' } } },
+              thesisWriters: { type: 'object', properties: { count: { type: 'integer' }, avgPerWriter: { type: 'number', nullable: true } } },
+              subscriptionInterest: { type: 'object', properties: { count: { type: 'integer' }, yearlyPercent: { type: 'integer' } } },
+            } },
+            tabs: { type: 'object', properties: { all: { type: 'integer' }, act: { type: 'integer' }, new: { type: 'integer' }, idle: { type: 'integer' }, sus: { type: 'integer' } } },
+            total: { type: 'integer' }, page: { type: 'integer' }, pageSize: { type: 'integer' },
+            items: { type: 'array', items: { $ref: '#/components/schemas/AdminUserRow' } },
+          } } } } },
+          401: errorResponse('Belum masuk', 'UNAUTHENTICATED', 'Sesi admin berakhir. Masuk lagi.'),
+          403: errorResponse('Tanpa izin', 'FORBIDDEN', 'Peran Anda tidak punya izin untuk aksi ini.'),
+        },
+      },
+    },
+    '/admin/api/users/export.csv': {
+      get: {
+        tags: ['Admin: Pengguna'],
+        security: [{ adminCookie: [] }],
+        summary: 'Ekspor CSV',
+        description: 'Izin `usr:view`. Mengikuti `q` dan `plan`. Isi tesis dan portofolio tidak ikut diekspor.',
+        parameters: [{ name: 'q', in: 'query', schema: { type: 'string' } }, { name: 'plan', in: 'query', schema: { type: 'string', enum: ['y', 'm', 'n'] } }],
+        responses: { 200: { description: 'CSV', content: { 'text/csv': { schema: { type: 'string' } } } } },
+      },
+    },
+    '/admin/api/users/invite': {
+      post: {
+        tags: ['Admin: Pengguna'],
+        security: [{ adminCookie: [] }],
+        summary: 'Undang pengguna beta',
+        description: 'Izin `usr:edit`. Saat ini hanya mengirim tautan daftar ke email itu (belum dilacak; pendaftaran masih terbuka).',
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['email'], properties: { email: { type: 'string', example: 'calon@contoh.com' } } } } } },
+        responses: {
+          204: { description: 'Undangan dikirim' },
+          409: errorResponse('Sudah terdaftar', 'EMAIL_TAKEN', 'Email ini sudah terdaftar.', { email: 'Email ini sudah terdaftar.' }),
+          422: errorResponse('Email tidak valid', 'VALIDATION', 'Email belum valid', { email: 'Email belum valid' }),
+        },
+      },
+    },
+    '/admin/api/users/{id}': {
+      parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+      get: {
+        tags: ['Admin: Pengguna'],
+        security: [{ adminCookie: [] }],
+        summary: 'Panel detail pengguna',
+        description: 'Izin `usr:view`. Admin hanya melihat jumlah pemakaian, tidak pernah isi tesis, portofolio, atau watchlist. `usage.themesOpened` null = belum dilacak. `actions` memberi tahu tombol mana yang tampil.',
+        responses: {
+          200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: { user: { $ref: '#/components/schemas/AdminUserDetail' } } } } } },
+          404: errorResponse('Tidak ada', 'NOT_FOUND', 'Pengguna tidak ditemukan.'),
+        },
+      },
+    },
+    '/admin/api/users/{id}/suspend': {
+      post: {
+        tags: ['Admin: Pengguna'],
+        security: [{ adminCookie: [] }],
+        summary: 'Tangguhkan akun',
+        description: 'Izin `usr:delete`. Alasan wajib. Mengeluarkan pengguna dari semua perangkat dan menolak login berikutnya (403 `ACCOUNT_SUSPENDED`). `note` hanya untuk internal.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['reason'], properties: { reason: { type: 'string', enum: ['Spam atau akun palsu', 'Menyalahgunakan form laporan', 'Permintaan pengguna sendiri', 'Lainnya'] }, note: { type: 'string', maxLength: 500, description: 'Opsional, tidak dikirim ke pengguna' } } } } } },
+        responses: {
+          200: { description: 'Ditangguhkan', content: { 'application/json': { schema: { type: 'object', properties: { user: { $ref: '#/components/schemas/AdminUserDetail' } } } } } },
+          409: errorResponse('Sudah ditangguhkan', 'ALREADY_SUSPENDED', 'Akun sudah ditangguhkan.'),
+          422: errorResponse('Alasan kosong', 'VALIDATION', 'Pilih alasan dulu', { reason: 'Pilih alasan dulu' }),
+        },
+      },
+    },
+    '/admin/api/users/{id}/restore': {
+      post: {
+        tags: ['Admin: Pengguna'],
+        security: [{ adminCookie: [] }],
+        summary: 'Pulihkan akun',
+        description: 'Izin `usr:delete`. Pengguna bisa masuk lagi (harus login ulang).',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: {
+          200: { description: 'Dipulihkan', content: { 'application/json': { schema: { type: 'object', properties: { user: { $ref: '#/components/schemas/AdminUserDetail' } } } } } },
+          409: errorResponse('Tidak ditangguhkan', 'NOT_SUSPENDED', 'Akun tidak sedang ditangguhkan.'),
+        },
+      },
+    },
+    '/admin/api/users/{id}/resend-confirmation': {
+      post: {
+        tags: ['Admin: Pengguna'],
+        security: [{ adminCookie: [] }],
+        summary: 'Kirim ulang email konfirmasi',
+        description: 'Izin `usr:edit`. Hanya untuk akun belum terkonfirmasi. Tautan berlaku 24 jam dan dikonfirmasi lewat `POST /auth/confirm-email-change`.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: { 204: { description: 'Terkirim' }, 409: errorResponse('Sudah terkonfirmasi', 'ALREADY_VERIFIED', 'Email sudah terkonfirmasi.') },
+      },
+    },
+    '/admin/api/users/{id}/password-reset': {
+      post: {
+        tags: ['Admin: Pengguna'],
+        security: [{ adminCookie: [] }],
+        summary: 'Kirim tautan atur ulang password',
+        description: 'Izin `usr:edit`. Hanya akun terkonfirmasi yang tidak ditangguhkan. Tautan berlaku 1 jam; pengguna memakainya lewat `POST /auth/reset-password`.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: { 204: { description: 'Terkirim' }, 409: errorResponse('Tidak bisa', 'CANNOT_RESET', 'Atur ulang password hanya untuk akun terkonfirmasi yang tidak ditangguhkan.') },
+      },
+    },
+    '/auth/reset-password': {
+      post: {
+        tags: ['Auth'],
+        security: [],
+        summary: 'Atur password baru dari tautan',
+        description: 'Token dari email "atur ulang password" (dikirim admin). Aturan password sama dengan daftar. Sekali pakai; semua sesi pengguna dikeluarkan.',
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['token', 'password'], properties: { token: { type: 'string' }, password: { type: 'string', format: 'password' } } } } } },
+        responses: {
+          204: { description: 'Password diganti' },
+          400: errorResponse('Token salah/kedaluwarsa', 'BAD_TOKEN', 'Link atur ulang password tidak valid atau sudah kedaluwarsa.'),
+          422: errorResponse('Password lemah', 'VALIDATION', 'Periksa lagi isian Anda.', { password: 'Password minimal 8 karakter, dengan huruf besar dan angka.' }),
+        },
+      },
+    },
+    '/admin/api/themes': {
+      get: {
+        tags: ['Admin: Tema'],
+        security: [{ adminCookie: [] }],
+        summary: 'Daftar tema + antrean emiten belum dipetakan (AdminTema)',
+        description: 'Izin `tm:view`. `status`: `open` (Terbuka), `draft`, `review`. `tabs` mengikuti `q` + `sector`. `readiness` = emiten "Siap terbit" di Data emiten / emiten di tema (form terbaru, termasuk draf). `summary.open` = tema yang terlihat pengguna. `unmapped` = emiten yang belum ada di tahap tema mana pun (terbit maupun draf), IPO dulu lalu market cap terbesar; usulan tema dari `theme_industries.themeSlug`, lalu sektor yang sama. `theses` selalu null sampai modul Tesis ada.',
+        parameters: [
+          { name: 'q', in: 'query', schema: { type: 'string' } },
+          { name: 'tab', in: 'query', schema: { type: 'string', enum: ['all', 'open', 'draft', 'review'], default: 'all' } },
+          { name: 'sector', in: 'query', schema: { type: 'string' } },
+          { name: 'queue', in: 'query', schema: { type: 'integer', default: 3, maximum: 20 }, description: 'Jumlah emiten di antrean' },
+        ],
+        responses: {
+          200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: {
+            summary: { type: 'object', properties: {
+              open: { type: 'integer' }, draft: { type: 'integer' },
+              mappedCompanies: { type: 'object', properties: { count: { type: 'integer' }, of: { type: 'integer' } } },
+              missingShares: { type: 'object', properties: { count: { type: 'integer' }, inOpenThemes: { type: 'integer' } } },
+            } },
+            tabs: { type: 'object', properties: { all: { type: 'integer' }, open: { type: 'integer' }, draft: { type: 'integer' }, review: { type: 'integer' } } },
+            total: { type: 'integer' },
+            items: { type: 'array', items: { $ref: '#/components/schemas/AdminThemeRow' } },
+            sectors: { type: 'array', items: { type: 'object', properties: { slug: { type: 'string' }, name: { type: 'string' } } } },
+            unmapped: { type: 'object', properties: { total: { type: 'integer' }, items: { type: 'array', items: { type: 'object', properties: {
+              ticker: { type: 'string' }, name: { type: 'string' }, logoUrl: { type: 'string', nullable: true }, status: { type: 'string' },
+              suggestion: { type: 'object', nullable: true, properties: { slug: { type: 'string' }, name: { type: 'string' } } }, note: { type: 'string' },
+            } } } } },
+          } } } } },
+        },
+      },
+      post: {
+        tags: ['Admin: Tema'],
+        security: [{ adminCookie: [] }],
+        summary: 'Tambah tema sebagai draf (AdminTema / AdminTemaBaru)',
+        description: 'Izin `tm:edit`. Wajib `name` (≥ 3 huruf, unik) dan `sectorSlug`; bagian lain opsional (AdminTemaBaru boleh mengirim semuanya). Tanpa `groups`, dipakai Hulu/Tengah/Hilir. Slug dibuat dari nama dan tidak berubah saat nama diganti. Tidak terlihat pengguna sampai diterbitkan.',
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/AdminThemeForm' }, example: { name: 'Energi terbarukan', sectorSlug: 'energi' } } } },
+        responses: {
+          201: { description: 'Dibuat', content: { 'application/json': { schema: { $ref: '#/components/schemas/AdminThemeEdit' } } } },
+          409: errorResponse('Nama sudah dipakai', 'THEME_TAKEN', 'Tema dengan nama itu sudah ada', { name: 'Tema dengan nama itu sudah ada' }),
+          422: errorResponse('Isian tidak valid', 'VALIDATION', 'Nama tema minimal 3 huruf', { name: 'Nama tema minimal 3 huruf' }),
+        },
+      },
+    },
+    '/admin/api/themes/{slug}': {
+      parameters: [{ name: 'slug', in: 'path', required: true, schema: { type: 'string', example: 'batubara' } }],
+      get: {
+        tags: ['Admin: Tema'],
+        security: [{ adminCookie: [] }],
+        summary: 'Isi halaman edit tema (AdminTemaEdit)',
+        description: 'Izin `tm:view`. `form` = draf bila ada, jika tidak versi terbit. `checks` = 5 syarat terbit; `companies`/`notReady` = profil emiten dari Data emiten; `multiStage` = total porsi emiten yang ada di lebih dari satu tahap; `history` = 5 perubahan terakhir.',
+        responses: {
+          200: { description: 'OK', content: { 'application/json': { schema: { $ref: '#/components/schemas/AdminThemeEdit' } } } },
+          404: errorResponse('Tidak ada', 'NOT_FOUND', 'Tema tidak ditemukan.'),
+        },
+      },
+      patch: {
+        tags: ['Admin: Tema'],
+        security: [{ adminCookie: [] }],
+        summary: 'Simpan draf',
+        description: 'Izin `tm:edit`. Tiap bagian yang dikirim diganti utuh (urutan `stages` = urutan tahap). Kode emiten harus ada di Data emiten. Peran tanpa `tm:publish` (Editor tema) menyimpan sebagai "Perlu ditinjau". Pengguna tetap melihat versi terbit.',
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/AdminThemeForm' } } } },
+        responses: {
+          200: { description: 'Draf tersimpan', content: { 'application/json': { schema: { $ref: '#/components/schemas/AdminThemeEdit' } } } },
+          409: errorResponse('Nama sudah dipakai', 'THEME_TAKEN', 'Tema dengan nama itu sudah ada'),
+          422: errorResponse('Isian tidak valid', 'VALIDATION', 'Kode emiten tidak dikenal: ZZZQ.', { stages: 'Kode emiten tidak dikenal: ZZZQ.' }),
+        },
+      },
+    },
+    '/admin/api/themes/{slug}/companies': {
+      post: {
+        tags: ['Admin: Tema'],
+        security: [{ adminCookie: [] }],
+        summary: 'Petakan emiten ke tema',
+        description: 'Izin `tm:edit`. Dari antrean "Emiten belum masuk tema mana pun". Menambahkan emiten ke tahap `stage` (1-based, default 1) di draf dengan porsi kosong. Idempoten.',
+        parameters: [{ name: 'slug', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['ticker'], properties: { ticker: { type: 'string', example: 'TLKM' }, stage: { type: 'integer', default: 1 } } } } } },
+        responses: {
+          204: { description: 'Masuk draf tema' },
+          422: errorResponse('Tema belum punya tahap / kode salah', 'VALIDATION', 'Tambahkan tahap dulu sebelum memetakan emiten.', { stage: 'Tambahkan tahap dulu sebelum memetakan emiten.' }),
+        },
+      },
+    },
+    '/admin/api/themes/{slug}/publish': {
+      post: {
+        tags: ['Admin: Tema'],
+        security: [{ adminCookie: [] }],
+        summary: 'Terbitkan tema',
+        description: 'Izin `tm:publish`. Kelima syarat harus terpenuhi. Menyalin draf ke tema + mengganti semua tahap (urutan, emiten, porsi, sumber).',
+        parameters: [{ name: 'slug', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          200: { description: 'Terbit', content: { 'application/json': { schema: { $ref: '#/components/schemas/AdminThemeEdit' } } } },
+          403: errorResponse('Tanpa izin terbit', 'FORBIDDEN', 'Peran Anda tidak punya izin untuk aksi ini.'),
+          422: errorResponse('Belum lengkap', 'INCOMPLETE', 'Belum bisa terbit: total porsi per emiten ≤ 100% (INDY)', { totals: 'INDY' }),
         },
       },
     },
@@ -907,6 +1132,76 @@ module.exports = {
           canPublish: { type: 'boolean' },
           themes: { type: 'array', description: 'Hanya baca; dikelola modul Tema', items: { type: 'object', properties: { slug: { type: 'string' }, name: { type: 'string' }, stageCount: { type: 'integer' } } } },
           reports: { type: 'array', items: { type: 'object' }, description: 'Laporan pengguna; selalu kosong sampai modul Masukan ada' },
+          updatedAt: { type: 'string', format: 'date-time' }, updatedBy: { type: 'string' },
+        },
+      },
+      AdminUserRow: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' }, name: { type: 'string' }, email: { type: 'string' },
+          status: { type: 'string', enum: ['act', 'new', 'idle', 'sus'] }, statusLabel: { type: 'string', example: 'Aktif' },
+          lastActiveAt: { type: 'string', format: 'date-time', nullable: true, description: 'null = "Belum pernah masuk"' },
+          theses: { type: 'integer', description: 'Selalu 0 sampai modul Tesis ada' },
+          plan: { type: 'object', properties: { key: { type: 'string', enum: ['y', 'm', 'n'] }, label: { type: 'string', example: 'Tahunan' } } },
+          joinedAt: { type: 'string', format: 'date-time' },
+        },
+      },
+      AdminUserDetail: {
+        allOf: [{ $ref: '#/components/schemas/AdminUserRow' }, {
+          type: 'object',
+          properties: {
+            account: { type: 'object', properties: { joinedAt: { type: 'string', format: 'date-time' }, loginMethod: { type: 'string', example: 'Email' }, emailVerified: { type: 'boolean' }, subscription: { type: 'string', example: 'Akses beta · gratis' }, planInterest: { type: 'string', example: 'Tahunan · Rp790.000/tahun · minta diingatkan' } } },
+            usage: { type: 'object', properties: { theses: { type: 'integer' }, evaluations: { type: 'integer' }, watchlist: { type: 'integer' }, themesOpened: { type: 'integer', nullable: true } } },
+            recentLogins: { type: 'array', description: 'Maks. 3, dari sesi yang masih ada', items: { type: 'object', properties: { device: { type: 'string', example: 'Chrome · Windows' }, at: { type: 'string', format: 'date-time' } } } },
+            feedback: { type: 'array', items: { type: 'object' }, description: 'Laporan & masukan; selalu kosong sampai modul Masukan ada' },
+            suspension: { type: 'object', nullable: true, properties: { at: { type: 'string', format: 'date-time' }, reason: { type: 'string' }, note: { type: 'string' }, by: { type: 'string', nullable: true } } },
+            actions: { type: 'object', properties: { resendConfirmation: { type: 'boolean' }, resetPassword: { type: 'boolean' }, suspend: { type: 'boolean' }, restore: { type: 'boolean' } } },
+          },
+        }],
+      },
+      AdminThemeRow: {
+        type: 'object',
+        properties: {
+          slug: { type: 'string' }, name: { type: 'string' },
+          sector: { type: 'object', nullable: true, properties: { slug: { type: 'string' }, name: { type: 'string' } } },
+          chain: { type: 'array', description: 'Satu titik per tahap, warna tahap utamanya', items: { type: 'object', properties: { group: { type: 'string', nullable: true }, color: { type: 'string' } } } },
+          stageCount: { type: 'integer' },
+          readiness: { type: 'object', properties: { ready: { type: 'integer' }, total: { type: 'integer' }, percent: { type: 'integer' } } },
+          status: { type: 'string', enum: ['open', 'draft', 'review'] }, statusLabel: { type: 'string' },
+          hasDraft: { type: 'boolean' }, published: { type: 'boolean' }, theses: { type: 'integer', nullable: true },
+          updatedAt: { type: 'string', format: 'date-time' }, updatedBy: { type: 'string' },
+        },
+      },
+      AdminThemeForm: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', description: 'Terbit: ≥ 3 huruf' }, sectorSlug: { type: 'string', example: 'energi' },
+          description: { type: 'string', description: 'Terbit: 1–160 karakter' },
+          drivers: { type: 'array', items: { type: 'string' }, description: 'Penggerak utama; terbit: ≥ 1' },
+          groups: { type: 'array', description: 'Tahap utama; terbit: judul ≤ 20, deskripsi 1–80', items: { type: 'object', properties: {
+            key: { type: 'string', example: 'hulu', description: '[a-z0-9-], unik; dirujuk stages[].groupKey' }, title: { type: 'string' }, description: { type: 'string' },
+            icon: { type: 'string', enum: ['mine', 'truck', 'bolt', 'factory', 'ship', 'leaf', 'drop', 'store', 'coin'] },
+            color: { type: 'string', enum: ['amber', 'blue', 'green', 'violet', 'rose', 'teal', 'stone'] },
+          } } },
+          stages: { type: 'array', description: 'Urutan = urutan tahap. Terbit: nama, deskripsi 1–90, tahap utama valid, ≥ 1 emiten', items: { type: 'object', properties: {
+            name: { type: 'string' }, groupKey: { type: 'string' }, description: { type: 'string' },
+            rows: { type: 'array', items: { type: 'object', properties: { ticker: { type: 'string', example: 'BUMI' }, pct: { type: 'number', nullable: true, description: 'Porsi pendapatan dari tahap ini' }, source: { type: 'string', example: 'LK 2025, Catatan 34' } } } },
+          } } },
+        },
+      },
+      AdminThemeEdit: {
+        type: 'object',
+        properties: {
+          theme: { type: 'object', properties: { slug: { type: 'string' }, status: { type: 'string', enum: ['draft', 'review', 'published'] }, statusLabel: { type: 'string' }, published: { type: 'boolean' }, hasDraft: { type: 'boolean' } } },
+          form: { $ref: '#/components/schemas/AdminThemeForm' },
+          stats: { type: 'object', properties: { stageCount: { type: 'integer' }, companyCount: { type: 'integer' }, theses: { type: 'integer', nullable: true } } },
+          companies: { type: 'array', items: { type: 'object', properties: { ticker: { type: 'string' }, name: { type: 'string' }, logoUrl: { type: 'string', nullable: true }, ready: { type: 'boolean' }, statusLabel: { type: 'string' }, reason: { type: 'string' } } } },
+          notReady: { type: 'array', items: { type: 'object' }, description: 'Subset `companies` yang belum siap' },
+          multiStage: { type: 'array', items: { type: 'object', properties: { ticker: { type: 'string' }, parts: { type: 'array', items: { type: 'object', properties: { stage: { type: 'integer' }, pct: { type: 'number', nullable: true } } } }, total: { type: 'number' }, ok: { type: 'boolean' }, note: { type: 'string', example: 'OK · sisanya di luar tema' } } } },
+          readiness: { type: 'object', properties: { ready: { type: 'integer' }, total: { type: 'integer' }, percent: { type: 'integer' } } },
+          checks: { type: 'array', items: { type: 'object', properties: { key: { type: 'string' }, label: { type: 'string' }, ok: { type: 'boolean' }, note: { type: 'string' } } } },
+          canPublish: { type: 'boolean' },
+          history: { type: 'array', items: { type: 'object', properties: { action: { type: 'string', example: 'theme_draft_saved' }, by: { type: 'string' }, at: { type: 'string', format: 'date-time' } } } },
           updatedAt: { type: 'string', format: 'date-time' }, updatedBy: { type: 'string' },
         },
       },

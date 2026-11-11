@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     shortName: DataTypes.STRING,
     description: DataTypes.TEXT,
     tickers: { type: DataTypes.JSONB, allowNull: false, defaultValue: [] }, // ordered; a ticker may sit in several stages
+    shares: { type: DataTypes.JSONB, allowNull: false, defaultValue: {} }, // { TICKER: { pct, source } } revenue share from this stage
   }, { tableName: 'theme_stages' });
 
   ThemeStage.associate = (models) => {

@@ -7,7 +7,13 @@ module.exports = (sequelize, DataTypes) => {
     name: { type: DataTypes.STRING, allowNull: false },
     sectorId: DataTypes.UUID,
     description: DataTypes.TEXT,
+    // Admin workflow label only. Customer visibility = publishedAt (NULL = never published).
     status: { type: DataTypes.ENUM('draft', 'review', 'published'), allowNull: false, defaultValue: 'draft' },
+    drivers: { type: DataTypes.JSONB, allowNull: false, defaultValue: [] },
+    groups: DataTypes.JSONB, // NULL = default hulu/tengah/hilir (lib/adminThemes.js DEFAULT_GROUPS)
+    draft: DataTypes.JSONB,
+    publishedAt: DataTypes.DATE, // no model default on purpose: the DB default only applies to seeds
+    updatedByName: DataTypes.STRING,
   }, { tableName: 'theme_themes' });
 
   Theme.associate = (models) => {

@@ -1,7 +1,7 @@
 'use strict';
 
 const { Op, UniqueConstraintError } = require('sequelize');
-const { Company, Sector, Industry, ThemeStage, Theme, AdminAuditLog } = require('../models');
+const { Company, Sector, Industry, ThemeStage, Theme } = require('../models');
 const co = require('../lib/adminCompanies');
 const companies = require('../lib/companies');
 const { fail } = require('../lib/http');
@@ -14,8 +14,7 @@ const refs = [
 const BULK_MAX = 200;
 const PAGE_MAX = 100;
 
-const audit = (req, action, target) =>
-  AdminAuditLog.create({ adminId: req.admin.id, email: req.admin.email, action, target, ip: req.ip, userAgent: (req.get('user-agent') || '').slice(0, 512) });
+const { audit } = require('../lib/audit');
 
 // Per ticker: first theme + how many of its stages hold the ticker ("Batubara · 2 tahap").
 async function themeMap(tickers) {

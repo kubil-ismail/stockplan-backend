@@ -17,6 +17,13 @@ module.exports = (sequelize, DataTypes) => {
     pendingEmail: DataTypes.STRING,
     pendingEmailTokenHash: DataTypes.STRING(64),
     pendingEmailExpiresAt: DataTypes.DATE,
+    lastActiveAt: DataTypes.DATE,
+    suspendedAt: DataTypes.DATE, // set by admin (Pengguna → Tangguhkan); blocks login
+    suspendReason: DataTypes.STRING(80),
+    suspendNote: DataTypes.TEXT,
+    suspendedBy: DataTypes.STRING,
+    passwordResetTokenHash: DataTypes.STRING(64),
+    passwordResetExpiresAt: DataTypes.DATE,
     prefs: { type: DataTypes.JSONB, allowNull: false, defaultValue: () => withDefaults(DEFAULT_PREFS) },
   }, { tableName: 'auth_users' });
 

@@ -121,6 +121,34 @@ Semua butuh cookie `sid` kecuali yang ditandai *publik*. Detail skema ada di Swa
 
 Alur draf/terbit: `market_companies.draft` (JSONB) menampung form yang belum terbit; `publishStatus` = `draft`/`review`/`published`; `publishedAt` NULL = belum pernah terbit dan **disembunyikan dari endpoint customer** (`GET /companies`, `/companies/:ticker`, peers, hitungan sektor, tambah watchlist). Data seed otomatis `published` lewat default DB. Form ↔ kolom dipetakan di `lib/adminCompanies.js` (`columnsToForm`/`formToColumns`); isi editorial tambahan disimpan di `profile` (`revenueSources`, `keyTips`, `trading`, `overviewSource`, `asOfSource`, `subsector`). Status "IPO baru" dihitung: `status=ipo` dan `publishStatus=draft`. Ticker tidak bisa diubah setelah dibuat (kunci utama dipakai watchlist/tema).
 
+**Admin: Pengguna** (`/admin/api/users`, izin modul `usr`):
+
+| Endpoint | Izin | Catatan |
+| --- | --- | --- |
+| `GET /admin/api/users?q=&tab=&plan=&page=&pageSize=` | `usr:view` | `summary` (4 kartu) + `tabs` + baris. Status dihitung (`lib/adminUsers.js` `statusOf`, dan `STATUS_SQL` untuk filter/hitungan di SQL; keduanya harus sama): `sus` > `new` > `idle` (30 hari tanpa aktivitas) > `act` |
+| `GET /admin/api/users/export.csv?q=&plan=` | `usr:view` | Tanpa isi tesis/portofolio |
+| `GET /admin/api/users/:id` | `usr:view` | Panel detail; hanya jumlah pemakaian, `actions` = tombol yang tampil |
+| `POST /admin/api/users/:id/suspend` | `usr:delete` | `{ reason, note? }`; alasan dari daftar design; menghapus semua sesi; login berikutnya 403 `ACCOUNT_SUSPENDED` |
+| `POST /admin/api/users/:id/restore` | `usr:delete` | |
+| `POST /admin/api/users/:id/resend-confirmation` | `usr:edit` | Memakai ulang token ganti email dengan `pendingEmail` = email sekarang; dikonfirmasi lewat `POST /auth/confirm-email-change` |
+| `POST /admin/api/users/:id/password-reset` | `usr:edit` | Tautan 1 jam; dipakai lewat `POST /auth/reset-password` *publik* (sekali pakai, mengeluarkan semua sesi) |
+| `POST /admin/api/users/invite` | `usr:edit` | Hanya mengirim tautan daftar (lihat §7) |
+
+Perubahan sisi customer dari modul ini: `auth_users.lastActiveAt` (diisi saat login dan tiap sentuhan sesi), `suspendedAt` memblokir login dan `requireAuth`, `POST /auth/reset-password`. Kolom suspend/reset tidak pernah ikut `User.toJSON()`.
+
+**Admin: Tema & rantai nilai** (`/admin/api/themes`, izin modul `tm`):
+
+| Endpoint | Izin | Halaman design | Catatan |
+| --- | --- | --- | --- |
+| `GET /admin/api/themes?q=&tab=&sector=&queue=` | `tm:view` | AdminTema | 4 kartu, tab `all`/`open`/`draft`/`review`, kesiapan emiten, antrean "Emiten belum masuk tema mana pun" + usulan tema |
+| `POST /admin/api/themes` | `tm:edit` | AdminTema, AdminTemaBaru | Draf baru; wajib nama (≥ 3, unik → 409 `THEME_TAKEN`) + sektor; slug dari nama, tetap walau nama diganti |
+| `GET /admin/api/themes/:slug` | `tm:view` | AdminTemaEdit | `form` + 5 `checks` + profil emiten + total porsi lintas tahap + riwayat |
+| `PATCH /admin/api/themes/:slug` | `tm:edit` | AdminTemaEdit, AdminTemaBaru | Simpan draf; peran tanpa `tm:publish` → status "Perlu ditinjau" |
+| `POST /admin/api/themes/:slug/companies` | `tm:edit` | AdminTema "Petakan" | `{ ticker, stage? }` ke draf, porsi kosong |
+| `POST /admin/api/themes/:slug/publish` | `tm:publish` | AdminTemaEdit | Draf → tema + **semua tahap diganti** dalam satu transaksi |
+
+Alur draf/terbit sama dengan emiten: `theme_themes.draft` (form), `status` hanya label admin, **`publishedAt` = terlihat pengguna** (endpoint customer sekarang menyaring `publishedAt`, bukan `status`). Tahap utama di `theme_themes.groups` (NULL = Hulu/Tengah/Hilir bawaan); porsi + sumber per emiten di `theme_stages.shares` (`tickers` tetap urutan & indeks GIN). `GET /themes/:slug` customer kini juga mengembalikan `groups`, `theme.drivers`, dan `stages[].shares`. Pemilihan emiten untuk tahap / pool drag & drop memakai `GET /admin/api/companies?q=&sector=`.
+
 Aturan: 5 kegagalan (password atau kode 2FA) per email dalam 15 menit → 429 `ACCOUNT_LOCKED` 15 menit (dihitung dari `admin_audit_logs`, jadi email tak dikenal berperilaku sama); sesi berakhir 30 menit tanpa aktivitas; perangkat tepercaya 7 hari; kode cadangan sekali pakai. Middleware: `requireAdmin` (sudah lewat 2FA) dan `requireAdmin.pending` (baru langkah 1). Seeder admin dev: `admin@stockplan.id` / `StockPlanDev2026`, TOTP secret dan kode cadangan dicetak seeder (`npx sequelize-cli db:seed --seed 20261111000001-admin-users.js`).
 
 Penyimpangan dari §9 handoff design (disengaja):
@@ -137,7 +165,7 @@ Penyimpangan dari §9 handoff design (disengaja):
 | `auth_users` | akun + `prefs` (JSONB) + profil + `pendingEmail*` |
 | `auth_sessions` | sesi login |
 | `theme_sectors` → `theme_subsectors` → `theme_industries` | hierarki IDX-IC. Industri: `dataStatus` (`soon`/`ready`), `dataUpdatedAt`, `updateNote`, `themeSlug` |
-| `theme_themes`, `theme_stages` | tema rantai nilai; `theme_stages.tickers` = array JSONB berurutan (indeks GIN). Satu emiten boleh di beberapa tahap |
+| `theme_themes`, `theme_stages` | tema rantai nilai; `theme_stages.tickers` = array JSONB berurutan (indeks GIN), `shares` = porsi + sumber per emiten. Satu emiten boleh di beberapa tahap. Tema: `groups` (tahap utama), `drivers`, `draft`, `publishedAt` |
 | `market_companies` | emiten. Kolom untuk query/sort; isi editorial halaman di `profile` (JSONB) dan `ipo` (JSONB). `dataDelayed` JSONB → banner data tertunda |
 | `admin_users`, `admin_sessions`, `admin_trusted_devices`, `admin_audit_logs` | akun admin (`role` = id peran: super/data/tema/support/view, TOTP + kode cadangan ter-hash), sesi (`verified` = lewat 2FA), perangkat tepercaya, log percobaan masuk (fondasi Riwayat perubahan; bukan milik user customer, tanpa cascade dari `auth_users`) |
 | `watchlist_items` | per user × ticker, `checklist` 4 boolean, `note` |
@@ -173,11 +201,17 @@ Catatan:
 | Admin emiten: `reportCount`/`reports` | Selalu 0/kosong, belum ada modul Masukan | Saat modul Masukan & laporan |
 | Admin emiten: `ipo.settings` | `showUpcoming`/`autoConvert` hanya disimpan, belum dibaca | Saat daftar IPO customer / otomatisasi pindah ke tercatat |
 | Admin emiten: sub-sektor | Teks bebas; terhubung ke `industryId` hanya bila namanya cocok dengan `theme_industries` (data hanya Energi), selain itu tersimpan di `profile.subsector` | Saat data IDX-IC 10 sektor lain masuk |
+| Admin pengguna | Kartu "Sudah menulis tesis", kolom Tesis, evaluasi, tema dibuka, dan Laporan & masukan selalu 0/kosong; "Masuk dengan" selalu Email; Login terakhir diambil dari sesi yang masih ada (hilang setelah logout) | Saat modul Tesis, Masukan, Google login, dan tabel riwayat login ada |
+| Admin pengguna: undangan | `POST /users/invite` hanya mengirim tautan daftar; tidak ada tabel undangan dan pendaftaran tetap terbuka | Saat beta ditutup: tabel undangan + pendaftaran bertoken |
+| Admin pengguna: "Tidak aktif" | Ambang 30 hari tanpa aktivitas dikarang dev (design tidak menyebut) | Konfirmasi ke produk |
+| Email (`lib/mailer.js`) | Konfirmasi daftar/atur ulang/undangan hanya di-log | Sebelum beta publik |
 | Admin: akun dikunci | "Super admin diberi tahu" hanya tercatat di audit log + `console.warn` | Saat ada notifikasi admin |
 | Admin: pembuatan akun & aktivasi 2FA | Belum ada endpoint; akun admin hanya dari seeder dev (alur aktivasi belum didesain, handoff design §12) | Modul Akses (undang anggota) |
 | `/docs` | Swagger terbuka untuk publik | Batasi/matikan di production |
 | `market_companies.profile.reports[].url`, `ipo.documents[].url` | Selalu `null`; belum ada penyimpanan file | Saat modul upload/admin |
-| `theme_stages.groupKey` | Teks `hulu`/`tengah`/`hilir`; ikon & warna tahap utama (AdminTemaEdit) belum ada | Saat modul admin tema: tabel `theme_stage_groups` |
+| Admin tema | Kolom/angka Tesis ("dipakai 412 tesis") selalu null; pemberitahuan ke pengguna yang tesisnya memakai tema belum ada | Saat modul Tesis & Notifikasi |
+| Admin tema: daftar | Memuat semua tema + semua emiten (field ringan) untuk kesiapan dan antrean | Kalau emiten/tema membesar: hitung di SQL |
+| Admin tema: usulan pemetaan | Hanya dari `theme_industries.themeSlug` lalu sektor yang sama; design juga menyebut anak usaha & prospektus | Saat data anak usaha/prospektus terstruktur |
 
 ## 8. Belum dibuat
 
@@ -195,9 +229,9 @@ Urutan yang disarankan, dimulai dari yang paling sedikit ketergantungannya.
 - **Beranda**: `GET /dashboard` (perlu tindakan, drift ±5 poin, IPO 14 hari, dll.).
 - **Notifikasi**: tabel + endpoint §9, pengiriman sesuai `prefs.notifications`, dan pemicu dari `market_company_alerts`.
 - **Bantuan & tiket**.
-- **Auth tambahan**: konfirmasi email daftar, kirim ulang, lupa/reset password, Google, upload foto profil.
+- **Auth tambahan**: konfirmasi email daftar (endpoint ada lewat `confirm-email-change`, tinggal dikirim saat daftar), lupa password mandiri (`reset-password` sudah ada, tinggal `POST /auth/forgot`), Google, upload foto profil.
 - **Ekspor CSV** (`GET /me/export.csv`) — design: tautan dikirim lewat email.
-- **Admin** (`/admin/api`, handoff design §8): ~~login + 2FA~~ dan ~~Data emiten (daftar, edit, tambah IPO)~~ selesai (§5); sisanya RBAC kustom (peran sekarang statis), tema, sinkron BEI (mengisi `dataDelayed`), riwayat/audit log. Saat ini semua data referensi hanya dari seed.
+- **Admin** (`/admin/api`, handoff design §8): ~~login + 2FA~~ dan ~~Data emiten (daftar, edit, tambah IPO)~~ selesai (§5); ~~Pengguna~~ dan ~~Tema~~ selesai (§5); sisanya RBAC kustom (peran sekarang statis), Dashboard, Masukan, sinkron BEI (mengisi `dataDelayed`), riwayat/audit log. Saat ini semua data referensi hanya dari seed.
 
 ### 8.3 Keputusan yang masih terbuka
 - Samakan aturan password daftar vs ganti password?
