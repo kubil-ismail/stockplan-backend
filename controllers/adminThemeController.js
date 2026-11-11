@@ -134,7 +134,7 @@ exports.show = async (req, res, next) => {
 };
 
 // Editors without `publish` hand their draft over for review ("Perubahan harus diterbitkan Admin data").
-const draftStatus = (req) => (can(req.admin.role, 'tm', 'publish') ? 'draft' : 'review');
+const draftStatus = (req) => (can(req.adminPerms, 'tm', 'publish') ? 'draft' : 'review');
 
 // POST /admin/api/themes — "Tambah tema" (AdminTema quick add or AdminTemaBaru). Saved as draft, hidden from customers.
 exports.create = async (req, res, next) => {

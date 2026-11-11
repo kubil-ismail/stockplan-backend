@@ -42,7 +42,7 @@ const errorResponse = (description, code, message, fields) => ({
 module.exports = {
   openapi: '3.0.3',
   info: { title: 'StockPlan API', version: '0.1.0', description: 'REST API StockPlan. Sesi memakai cookie httpOnly `sid`.' },
-  tags: [{ name: 'Auth' }, { name: 'Profil' }, { name: 'Pengaturan' }, { name: 'Tema bisnis' }, { name: 'Emiten' }, { name: 'Watchlist' }, { name: 'Admin: Auth' }, { name: 'Admin: Emiten' }, { name: 'Admin: Pengguna' }, { name: 'Admin: Tema' }],
+  tags: [{ name: 'Auth' }, { name: 'Profil' }, { name: 'Pengaturan' }, { name: 'Tema bisnis' }, { name: 'Emiten' }, { name: 'Watchlist' }, { name: 'Admin: Auth' }, { name: 'Admin: Emiten' }, { name: 'Admin: Pengguna' }, { name: 'Admin: Tema' }, { name: 'Admin: Akses' }],
   security: [{ cookieAuth: [] }],
   paths: {
     '/auth/register': {
@@ -256,7 +256,7 @@ module.exports = {
       get: {
         tags: ['Admin: Auth'],
         security: [{ adminCookie: [] }],
-        summary: 'Admin yang sedang masuk',
+        summary: 'Admin yang sedang masuk + izinnya',
         responses: { 200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: { admin: { $ref: '#/components/schemas/Admin' } } } } } }, 401: errorResponse('Belum masuk / sesi berakhir', 'UNAUTHENTICATED', 'Sesi admin berakhir. Masuk lagi.') },
       },
     },
@@ -582,6 +582,117 @@ module.exports = {
           403: errorResponse('Tanpa izin terbit', 'FORBIDDEN', 'Peran Anda tidak punya izin untuk aksi ini.'),
           422: errorResponse('Belum lengkap', 'INCOMPLETE', 'Belum bisa terbit: total porsi per emiten ≤ 100% (INDY)', { totals: 'INDY' }),
         },
+      },
+    },
+    '/admin/api/auth/accept-invite': {
+      post: {
+        tags: ['Admin: Auth'],
+        security: [],
+        summary: 'Terima undangan anggota',
+        description: 'Publik; token dari email undangan (72 jam, sekali pakai). Mengatur password (≥ 10 karakter) dan mengembalikan secret TOTP + 8 kode cadangan **sekali saja**. Setelah itu anggota masuk biasa (password + kode TOTP pertama); 2FA tercatat aktif pada verifikasi pertama. Layar aktivasi belum didesain.',
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['token', 'password'], properties: { token: { type: 'string' }, password: { type: 'string', format: 'password', minLength: 10 }, name: { type: 'string', description: 'Opsional; default dari email' } } } } } },
+        responses: {
+          200: { description: 'Diterima', content: { 'application/json': { schema: { type: 'object', properties: { email: { type: 'string' }, totp: { type: 'object', properties: { secret: { type: 'string' }, otpauthUri: { type: 'string' } } }, backupCodes: { type: 'array', items: { type: 'string', example: 'a1b2-c3d4' } } } } } } },
+          400: errorResponse('Token salah/kedaluwarsa', 'BAD_TOKEN', 'Tautan undangan tidak valid atau sudah kedaluwarsa.'),
+          422: errorResponse('Password pendek', 'VALIDATION', 'Password minimal 10 karakter.', { password: 'Password minimal 10 karakter.' }),
+        },
+      },
+    },
+    '/admin/api/access/members': {
+      get: {
+        tags: ['Admin: Akses'], security: [{ adminCookie: [] }],
+        summary: 'Anggota tim (AdminAkses)',
+        description: 'Izin `acc:view`. Per anggota: peran, kunci ubah peran (diri sendiri / super admin terakhir), status 2FA, masuk terakhir + perangkat, jumlah gagal masuk hari ini (WIB), status, dan `actions` (tombol yang tampil).',
+        responses: { 200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: {
+          members: { type: 'array', items: { $ref: '#/components/schemas/AdminMember' } },
+          counts: { type: 'object', properties: { members: { type: 'integer' }, roles: { type: 'integer' } } },
+          roleOptions: { type: 'array', items: { type: 'object', properties: { id: { type: 'string' }, name: { type: 'string' } } } },
+        } } } } }, 403: errorResponse('Tanpa izin', 'FORBIDDEN', 'Peran Anda tidak punya izin untuk aksi ini.') },
+      },
+    },
+    '/admin/api/access/members/invite': {
+      post: {
+        tags: ['Admin: Akses'], security: [{ adminCookie: [] }],
+        summary: 'Undang anggota',
+        description: 'Izin `acc:edit`. Email `@stockplan.id`. Hanya super admin yang bisa mengundang sebagai super admin. Tautan berlaku 72 jam (`POST /admin/api/auth/accept-invite`).',
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['email', 'role'], properties: { email: { type: 'string', example: 'kevin@stockplan.id' }, role: { type: 'string', example: 'tema' } } } } } },
+        responses: {
+          201: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: { member: { $ref: '#/components/schemas/AdminMember' } } } } } },
+          403: errorResponse('Bukan super admin', 'SUPER_ONLY', 'Hanya super admin yang bisa memberi atau mencabut peran super admin.'),
+          409: errorResponse('Sudah anggota', 'EMAIL_TAKEN', 'Email ini sudah terdaftar sebagai anggota.'),
+          422: errorResponse('Email bukan email kerja', 'VALIDATION', 'Gunakan email kerja @stockplan.id', { email: 'Gunakan email kerja @stockplan.id' }),
+        },
+      },
+    },
+    '/admin/api/access/members/{id}': {
+      patch: {
+        tags: ['Admin: Akses'], security: [{ adminCookie: [] }],
+        summary: 'Ubah peran anggota',
+        description: 'Izin `acc:edit`. Langsung berlaku di permintaan berikutnya anggota itu. Tidak bisa mengubah peran sendiri; hanya super admin yang bisa memberi/mencabut peran super admin; minimal 1 super admin aktif.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['role'], properties: { role: { type: 'string' } } } } } },
+        responses: {
+          200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: { member: { $ref: '#/components/schemas/AdminMember' } } } } } },
+          400: errorResponse('Diri sendiri', 'SELF_CHANGE', 'Tidak bisa mengubah peran sendiri'),
+          403: errorResponse('Bukan super admin', 'SUPER_ONLY', 'Hanya super admin yang bisa memberi atau mencabut peran super admin.'),
+          409: errorResponse('Super admin terakhir', 'LAST_SUPER', 'Harus ada minimal 1 super admin aktif'),
+        },
+      },
+    },
+    '/admin/api/access/members/{id}/deactivate': {
+      post: {
+        tags: ['Admin: Akses'], security: [{ adminCookie: [] }],
+        summary: 'Nonaktifkan anggota',
+        description: 'Izin `acc:delete`. Mengeluarkan dari semua sesi dan menghapus perangkat tepercaya. Bukan untuk diri sendiri atau super admin terakhir.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: { 200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: { member: { $ref: '#/components/schemas/AdminMember' } } } } } }, 400: errorResponse('Diri sendiri', 'SELF_CHANGE', 'Tidak bisa menonaktifkan akun sendiri.'), 409: errorResponse('Super admin terakhir', 'LAST_SUPER', 'Harus ada minimal 1 super admin aktif') },
+      },
+    },
+    '/admin/api/access/members/{id}/reactivate': {
+      post: {
+        tags: ['Admin: Akses'], security: [{ adminCookie: [] }],
+        summary: 'Aktifkan lagi',
+        description: 'Izin `acc:delete`. Anggota yang belum pernah menerima undangan kembali ke status Undangan.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: { 200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: { member: { $ref: '#/components/schemas/AdminMember' } } } } } }, 409: errorResponse('Tidak nonaktif', 'BAD_STATE', 'Anggota ini tidak sedang nonaktif.') },
+      },
+    },
+    '/admin/api/access/members/{id}/resend-invite': {
+      post: {
+        tags: ['Admin: Akses'], security: [{ adminCookie: [] }],
+        summary: 'Kirim ulang undangan',
+        description: 'Izin `acc:edit`. Tautan baru 72 jam; tautan lama tidak berlaku lagi.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: { 200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: { member: { $ref: '#/components/schemas/AdminMember' } } } } } }, 409: errorResponse('Bukan undangan', 'BAD_STATE', 'Anggota ini tidak sedang diundang.') },
+      },
+    },
+    '/admin/api/access/roles': {
+      get: {
+        tags: ['Admin: Akses'], security: [{ adminCookie: [] }],
+        summary: 'Peran & izin (AdminAksesPeran)',
+        description: 'Izin `acc:view`. `modules` = baris matriks (aksi yang tersedia per modul, `sensitive` = badge Sensitif). `roles[].perms` = izin efektif (super admin selalu semua). `memberCount` tidak menghitung anggota nonaktif.',
+        responses: { 200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: {
+          actions: { type: 'array', items: { type: 'string' }, example: ['view', 'edit', 'publish', 'delete'] },
+          modules: { type: 'array', items: { type: 'object', properties: { key: { type: 'string' }, name: { type: 'string' }, desc: { type: 'string' }, actions: { type: 'array', items: { type: 'string' } }, sensitive: { type: 'boolean' } } } },
+          roles: { type: 'array', items: { $ref: '#/components/schemas/AdminRole' } },
+        } } } } } },
+      },
+      post: {
+        tags: ['Admin: Akses'], security: [{ adminCookie: [] }],
+        summary: 'Buat peran baru',
+        description: 'Izin `acc:edit`. Aksi di luar yang tersedia untuk modul ditolak; aksi apa pun otomatis menambah Lihat.',
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/AdminRoleBody' }, example: { name: 'Analis riset', summary: 'Emiten saja', perms: { em: ['edit'] } } } } },
+        responses: { 201: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: { role: { $ref: '#/components/schemas/AdminRole' } } } } } }, 409: errorResponse('Nama dipakai', 'ROLE_TAKEN', 'Nama peran sudah dipakai.'), 422: errorResponse('Nama kosong', 'VALIDATION', 'Beri nama peran dulu', { name: 'Beri nama peran dulu' }) },
+      },
+    },
+    '/admin/api/access/roles/{id}': {
+      put: {
+        tags: ['Admin: Akses'], security: [{ adminCookie: [] }],
+        summary: 'Simpan izin / ubah peran',
+        description: 'Izin `acc:edit`. Bagian yang dikirim saja yang diganti; `perms` diganti utuh. Super admin tidak bisa diubah; anggota tidak bisa mengubah peran yang sedang ia pegang. Langsung berlaku.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', example: 'tema' } }],
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/AdminRoleBody' } } } },
+        responses: { 200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: { role: { $ref: '#/components/schemas/AdminRole' } } } } } }, 403: errorResponse('Super admin / peran sendiri', 'SUPER_LOCKED', 'Izin super admin tidak bisa diubah') },
       },
     },
     '/sectors': {
@@ -1203,6 +1314,37 @@ module.exports = {
           canPublish: { type: 'boolean' },
           history: { type: 'array', items: { type: 'object', properties: { action: { type: 'string', example: 'theme_draft_saved' }, by: { type: 'string' }, at: { type: 'string', format: 'date-time' } } } },
           updatedAt: { type: 'string', format: 'date-time' }, updatedBy: { type: 'string' },
+        },
+      },
+      AdminMember: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' }, name: { type: 'string' }, email: { type: 'string' }, me: { type: 'boolean', description: '"Anda"' },
+          role: { type: 'object', properties: { id: { type: 'string' }, name: { type: 'string' } } },
+          roleLocked: { type: 'boolean' }, roleLockReason: { type: 'string', nullable: true, example: 'Super admin terakhir' },
+          twoFactor: { type: 'string', enum: ['active', 'pending', 'off'], description: 'active = ✓ Aktif, pending = Belum diatur (undangan), off = ✕ Belum' },
+          lastLogin: { type: 'object', nullable: true, properties: { at: { type: 'string', format: 'date-time' }, device: { type: 'string', example: 'Chrome · Windows' } } },
+          failedToday: { type: 'integer', description: '"3 gagal masuk pagi ini"' },
+          status: { type: 'string', enum: ['active', 'invited', 'disabled'] }, statusLabel: { type: 'string' },
+          invite: { type: 'object', nullable: true, properties: { sentAt: { type: 'string', format: 'date-time' }, expiresAt: { type: 'string', format: 'date-time' }, expired: { type: 'boolean' }, by: { type: 'string', nullable: true } } },
+          disabledAt: { type: 'string', format: 'date-time', nullable: true },
+          actions: { type: 'object', properties: { deactivate: { type: 'boolean' }, resendInvite: { type: 'boolean' }, reactivate: { type: 'boolean' } } },
+        },
+      },
+      AdminRole: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', example: 'data' }, name: { type: 'string' }, summary: { type: 'string', nullable: true }, description: { type: 'string', nullable: true },
+          system: { type: 'boolean', description: 'Peran bawaan' }, locked: { type: 'boolean', description: 'true hanya untuk super' }, memberCount: { type: 'integer' },
+          perms: { type: 'object', additionalProperties: { type: 'array', items: { type: 'string', enum: ['view', 'edit', 'publish', 'delete'] } }, example: { em: ['view', 'edit'] } },
+          sensitive: { type: 'array', items: { type: 'string' }, description: 'Modul sensitif dengan izin selain Lihat' },
+        },
+      },
+      AdminRoleBody: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', maxLength: 60 }, summary: { type: 'string', maxLength: 120 }, description: { type: 'string', maxLength: 300 },
+          perms: { type: 'object', additionalProperties: { type: 'array', items: { type: 'string', enum: ['view', 'edit', 'publish', 'delete'] } } },
         },
       },
       Error: {

@@ -19,7 +19,7 @@ module.exports = {
     const now = new Date();
     const passwordHash = await hashPassword(DEV_PASSWORD);
     await queryInterface.bulkInsert('admin_users', ADMINS.map((a) => ({
-      id: crypto.randomUUID(), ...a, passwordHash, status: 'active', totpSecret: DEV_SECRET,
+      id: crypto.randomUUID(), ...a, passwordHash, status: 'active', totpSecret: DEV_SECRET, twoFactorEnabledAt: now,
       backupCodes: JSON.stringify(DEV_BACKUP.map(hashCode)), createdAt: now, updatedAt: now,
     })));
     console.log(`Admin dev: ${ADMINS[0].email} / ${DEV_PASSWORD}\nTOTP: ${otpauthUri(DEV_SECRET, ADMINS[0].email)}\nKode cadangan: ${DEV_BACKUP.join(', ')}`);

@@ -105,7 +105,8 @@ Semua butuh cookie `sid` kecuali yang ditandai *publik*. Detail skema ada di Swa
 | `POST /admin/api/auth/login` *publik* | AdminLogin | Email `@stockplan.id`. Berhasil → `{ step: 'two_factor' }` + cookie `asid` sementara 5 menit; perangkat tepercaya (`atd`) langsung dapat `{ admin }` |
 | `POST /admin/api/auth/verify` | AdminLogin2FA | `{ code, method: totp\|backup, trustDevice }`. Token sesi diganti setelah 2FA |
 | `POST /admin/api/auth/logout` | menu akun, "Ganti akun" | Idempoten, juga untuk sesi yang belum lewat 2FA |
-| `GET /admin/api/auth/me` | shell admin | `{ admin: { id, name, email, role } }` |
+| `GET /admin/api/auth/me` | shell admin | `{ admin: { id, name, email, role }, perms }` — `perms` untuk menyembunyikan/menonaktifkan aksi di UI |
+| `POST /admin/api/auth/accept-invite` *publik* | (belum didesain) | `{ token, password ≥ 10, name? }` → secret TOTP + kode cadangan (sekali tampil); lalu masuk biasa |
 
 **Admin: Data emiten** (`/admin/api/companies`, perlu sesi admin + izin modul `em` dari `lib/adminRoles.js`):
 
@@ -149,6 +150,20 @@ Perubahan sisi customer dari modul ini: `auth_users.lastActiveAt` (diisi saat lo
 
 Alur draf/terbit sama dengan emiten: `theme_themes.draft` (form), `status` hanya label admin, **`publishedAt` = terlihat pengguna** (endpoint customer sekarang menyaring `publishedAt`, bukan `status`). Tahap utama di `theme_themes.groups` (NULL = Hulu/Tengah/Hilir bawaan); porsi + sumber per emiten di `theme_stages.shares` (`tickers` tetap urutan & indeks GIN). `GET /themes/:slug` customer kini juga mengembalikan `groups`, `theme.drivers`, dan `stages[].shares`. Pemilihan emiten untuk tahap / pool drag & drop memakai `GET /admin/api/companies?q=&sector=`.
 
+**Admin: Akses & peran** (`/admin/api/access`, izin modul `acc`; bawaan hanya Super admin):
+
+| Endpoint | Izin | Catatan |
+| --- | --- | --- |
+| `GET /admin/api/access/members` | `acc:view` | AdminAkses: peran, kunci, 2FA, masuk terakhir + gagal hari ini (dari `admin_audit_logs`), status, `actions` |
+| `POST /admin/api/access/members/invite` | `acc:edit` | `{ email @stockplan.id, role }` → status Undangan, tautan 72 jam |
+| `PATCH /admin/api/access/members/:id` | `acc:edit` | `{ role }` |
+| `POST /admin/api/access/members/:id/resend-invite` | `acc:edit` | Tautan baru |
+| `POST /admin/api/access/members/:id/deactivate` / `reactivate` | `acc:delete` | Nonaktif = semua sesi + perangkat tepercaya dihapus |
+| `GET /admin/api/access/roles` | `acc:view` | AdminAksesPeran: `modules` (baris matriks) + `roles` dengan `perms` efektif |
+| `POST /admin/api/access/roles`, `PUT /admin/api/access/roles/:id` | `acc:edit` | Buat peran / simpan izin |
+
+Peran ada di tabel `admin_roles` (5 bawaan dibuat migrasi; `admin_users.role` FK ke sini) dan **dibaca tiap request** di `requireAdmin` → `req.adminPerms` (dipakai `requirePerm` dan `can(req.adminPerms, …)`), jadi perubahan peran/izin langsung berlaku. Modul & aksi di `lib/adminRoles.js` `MODULES`. Pengaman (`lib/adminAccess.js`): tidak bisa mengubah/menonaktifkan diri sendiri; hanya super admin yang memberi/mencabut peran super admin atau mengubah anggota super admin; minimal 1 super admin aktif; izin super admin tidak bisa diubah; anggota tidak bisa mengubah izin peran yang sedang ia pegang (mencegah eskalasi). Status anggota: `invited` → `active` → `disabled`.
+
 Aturan: 5 kegagalan (password atau kode 2FA) per email dalam 15 menit → 429 `ACCOUNT_LOCKED` 15 menit (dihitung dari `admin_audit_logs`, jadi email tak dikenal berperilaku sama); sesi berakhir 30 menit tanpa aktivitas; perangkat tepercaya 7 hari; kode cadangan sekali pakai. Middleware: `requireAdmin` (sudah lewat 2FA) dan `requireAdmin.pending` (baru langkah 1). Seeder admin dev: `admin@stockplan.id` / `StockPlanDev2026`, TOTP secret dan kode cadangan dicetak seeder (`npx sequelize-cli db:seed --seed 20261111000001-admin-users.js`).
 
 Penyimpangan dari §9 handoff design (disengaja):
@@ -167,7 +182,8 @@ Penyimpangan dari §9 handoff design (disengaja):
 | `theme_sectors` → `theme_subsectors` → `theme_industries` | hierarki IDX-IC. Industri: `dataStatus` (`soon`/`ready`), `dataUpdatedAt`, `updateNote`, `themeSlug` |
 | `theme_themes`, `theme_stages` | tema rantai nilai; `theme_stages.tickers` = array JSONB berurutan (indeks GIN), `shares` = porsi + sumber per emiten. Satu emiten boleh di beberapa tahap. Tema: `groups` (tahap utama), `drivers`, `draft`, `publishedAt` |
 | `market_companies` | emiten. Kolom untuk query/sort; isi editorial halaman di `profile` (JSONB) dan `ipo` (JSONB). `dataDelayed` JSONB → banner data tertunda |
-| `admin_users`, `admin_sessions`, `admin_trusted_devices`, `admin_audit_logs` | akun admin (`role` = id peran: super/data/tema/support/view, TOTP + kode cadangan ter-hash), sesi (`verified` = lewat 2FA), perangkat tepercaya, log percobaan masuk (fondasi Riwayat perubahan; bukan milik user customer, tanpa cascade dari `auth_users`) |
+| `admin_roles` | peran admin + `perms` JSONB `{ modul: [aksi] }`; `system` = peran bawaan |
+| `admin_users`, `admin_sessions`, `admin_trusted_devices`, `admin_audit_logs` | akun admin (`role` FK ke `admin_roles`, `status` invited/active/disabled, undangan + `twoFactorEnabledAt`, TOTP + kode cadangan ter-hash), sesi (`verified` = lewat 2FA), perangkat tepercaya, log percobaan masuk (fondasi Riwayat perubahan; bukan milik user customer, tanpa cascade dari `auth_users`) |
 | `watchlist_items` | per user × ticker, `checklist` 4 boolean, `note` |
 | `market_company_alerts` | per user × ticker × `listing`/`data_update` |
 
@@ -206,7 +222,9 @@ Catatan:
 | Admin pengguna: "Tidak aktif" | Ambang 30 hari tanpa aktivitas dikarang dev (design tidak menyebut) | Konfirmasi ke produk |
 | Email (`lib/mailer.js`) | Konfirmasi daftar/atur ulang/undangan hanya di-log | Sebelum beta publik |
 | Admin: akun dikunci | "Super admin diberi tahu" hanya tercatat di audit log + `console.warn` | Saat ada notifikasi admin |
-| Admin: pembuatan akun & aktivasi 2FA | Belum ada endpoint; akun admin hanya dari seeder dev (alur aktivasi belum didesain, handoff design §12) | Modul Akses (undang anggota) |
+| Admin: aktivasi undangan | `accept-invite` mengembalikan secret TOTP langsung; tidak ada konfirmasi kode sebelum aktif (2FA tercatat aktif saat login pertama). Layar belum didesain (handoff design §12) | Saat layar aktivasi didesain |
+| Admin akses | Tidak ada hapus peran/anggota (design tidak punya tombolnya); atur ulang password admin ("Minta super admin mengirim tautan") belum ada; lokasi ("Jakarta") di masuk terakhir tidak ada (tanpa GeoIP) | Saat dibutuhkan |
+| Admin akses: copy | Design menulis perubahan peran "Berlaku di sesi berikutnya", tapi server menerapkannya langsung (lebih aman untuk pencabutan) | Samakan copy di client |
 | `/docs` | Swagger terbuka untuk publik | Batasi/matikan di production |
 | `market_companies.profile.reports[].url`, `ipo.documents[].url` | Selalu `null`; belum ada penyimpanan file | Saat modul upload/admin |
 | Admin tema | Kolom/angka Tesis ("dipakai 412 tesis") selalu null; pemberitahuan ke pengguna yang tesisnya memakai tema belum ada | Saat modul Tesis & Notifikasi |
@@ -231,7 +249,7 @@ Urutan yang disarankan, dimulai dari yang paling sedikit ketergantungannya.
 - **Bantuan & tiket**.
 - **Auth tambahan**: konfirmasi email daftar (endpoint ada lewat `confirm-email-change`, tinggal dikirim saat daftar), lupa password mandiri (`reset-password` sudah ada, tinggal `POST /auth/forgot`), Google, upload foto profil.
 - **Ekspor CSV** (`GET /me/export.csv`) — design: tautan dikirim lewat email.
-- **Admin** (`/admin/api`, handoff design §8): ~~login + 2FA~~ dan ~~Data emiten (daftar, edit, tambah IPO)~~ selesai (§5); ~~Pengguna~~ dan ~~Tema~~ selesai (§5); sisanya RBAC kustom (peran sekarang statis), Dashboard, Masukan, sinkron BEI (mengisi `dataDelayed`), riwayat/audit log. Saat ini semua data referensi hanya dari seed.
+- **Admin** (`/admin/api`, handoff design §8): ~~login + 2FA~~ dan ~~Data emiten (daftar, edit, tambah IPO)~~ selesai (§5); ~~Pengguna~~ dan ~~Tema~~ selesai (§5); ~~Akses & peran (RBAC kustom)~~ selesai (§5); sisanya Dashboard, Masukan, sinkron BEI (mengisi `dataDelayed`), riwayat/audit log. Saat ini semua data referensi hanya dari seed.
 
 ### 8.3 Keputusan yang masih terbuka
 - Samakan aturan password daftar vs ganti password?

@@ -5,6 +5,7 @@ const { AdminUser, AdminSession, AdminTrustedDevice, AdminAuditLog } = require('
 const auth = require('../lib/auth');
 const a = require('../lib/adminAuth');
 const totp = require('../lib/totp');
+const access = require('../lib/adminAccess');
 const { fail } = require('../lib/http');
 
 const SESSION_COOKIE = 'asid';
@@ -107,6 +108,7 @@ exports.verify = async (req, res, next) => {
     await req.adminSession.destroy(); // new token after 2FA, the step-1 token is dropped
     await startSession(req, res, admin.id, true);
     await audit(req, admin.email, 'login_ok', admin.id);
+    if (!admin.twoFactorEnabledAt) await admin.update({ twoFactorEnabledAt: new Date() }); // "2FA ✓ Aktif" in Akses
 
     if (values.trustDevice) {
       const token = auth.newSessionToken();
@@ -135,4 +137,31 @@ exports.logout = async (req, res, next) => {
   }
 };
 
-exports.me = (req, res) => res.json({ admin: req.admin });
+// perms: what the UI may show/enable (server still checks every endpoint).
+exports.me = (req, res) => res.json({ admin: req.admin, perms: req.adminPerms });
+
+// Public: the emailed invite token is the credential. Sets the password and issues 2FA; the member then signs in
+// normally (password + first TOTP code). shortcut: activation screens are not designed (handoff design §12).
+exports.acceptInvite = async (req, res, next) => {
+  const { values, errors } = access.validateAccept(req.body);
+  if (errors) return fail(res, 422, 'VALIDATION', Object.values(errors)[0], errors);
+  try {
+    const admin = values.token && (await AdminUser.findOne({
+      where: { inviteTokenHash: auth.hashToken(values.token), inviteExpiresAt: { [Op.gt]: new Date() }, status: 'invited' },
+    }));
+    if (!admin) return fail(res, 400, 'BAD_TOKEN', access.MSG.badInvite);
+    const secret = totp.newSecret();
+    const backupCodes = a.newBackupCodes();
+    await admin.update({
+      ...(values.name && { name: values.name }),
+      passwordHash: await auth.hashPassword(values.password),
+      totpSecret: secret, backupCodes: backupCodes.map(a.hashCode), twoFactorEnabledAt: null,
+      status: 'active', inviteTokenHash: null, inviteExpiresAt: null,
+    });
+    await AdminAuditLog.create({ adminId: admin.id, email: admin.email, action: 'invite_accepted', target: `admin:${admin.id}`, ...meta(req) });
+    // Shown once: the client renders the QR from otpauthUri and asks the member to store the backup codes.
+    res.json({ email: admin.email, totp: { secret, otpauthUri: totp.otpauthUri(secret, admin.email) }, backupCodes });
+  } catch (err) {
+    next(err);
+  }
+};

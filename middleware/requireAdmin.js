@@ -1,7 +1,8 @@
 'use strict';
 
 const { Op } = require('sequelize');
-const { AdminSession, AdminUser } = require('../models');
+const { AdminSession, AdminUser, AdminRole } = require('../models');
+const { permsOf } = require('../lib/adminRoles');
 const { hashToken } = require('../lib/auth');
 const { IDLE_TTL, MSG } = require('../lib/adminAuth');
 const { fail } = require('../lib/http');
@@ -26,6 +27,8 @@ const load = (verified) => async (req, res, next) => {
     }
     req.adminSession = session;
     req.admin = session.AdminUser;
+    // Read on every request so role/permission changes apply immediately.
+    req.adminPerms = permsOf(await AdminRole.findByPk(req.admin.role));
     next();
   } catch (err) {
     next(err);

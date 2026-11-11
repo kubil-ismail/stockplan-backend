@@ -6,16 +6,19 @@ const c = require('../controllers/adminAuthController');
 const companiesRouter = require('./adminCompanies');
 const usersRouter = require('./adminUsers');
 const themesRouter = require('./adminThemes');
+const accessRouter = require('./adminAccess');
 
 const router = express.Router();
 
 router.post('/auth/login', c.login);
 router.post('/auth/verify', requireAdmin.pending, c.verify);
 router.post('/auth/logout', c.logout);
+router.post('/auth/accept-invite', c.acceptInvite);
 router.get('/auth/me', requireAdmin, c.me);
 
 router.use('/companies', companiesRouter);
 router.use('/users', usersRouter);
 router.use('/themes', themesRouter);
+router.use('/access', accessRouter);
 
 module.exports = router;
