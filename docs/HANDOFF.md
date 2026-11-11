@@ -48,7 +48,7 @@ public/logos/emiten/  logo emiten (disajikan statis)
 
 ## 3. Konvensi (wajib diikuti)
 
-- **Nama tabel**: `<domain>_<jamak>` snake_case, set lewat `tableName` di model. Nama kolom tetap camelCase (default Sequelize). Domain yang sudah dipakai: `auth_`, `theme_`, `market_`, `watchlist_`. Rencana: `thesis_`, `portfolio_`, `notification_`, `support_` (tiket), `admin_`.
+- **Nama tabel**: `<domain>_<jamak>` snake_case, set lewat `tableName` di model. Nama kolom tetap camelCase (default Sequelize). Domain yang sudah dipakai: `auth_`, `theme_`, `market_`, `watchlist_`, `admin_`. Rencana: `thesis_`, `portfolio_`, `notification_`, `support_` (tiket).
 - **Migrasi**: satu perubahan = satu file baru `YYYYMMDDHHMMSS-…js`. Enum Postgres ikut di-drop di `down`.
 - **Validasi** di `lib/<modul>.js`: fungsi `validateX(body)` → `{ values, errors }` (`errors` = `null` atau `{ field: pesan }`). Update parsial: hanya field yang dikirim yang divalidasi dan diubah.
 - **Error**: pakai `fail(res, status, code, message, fields)` dari `lib/http.js`. Kode yang dipakai: `VALIDATION` (422), `UNAUTHENTICATED` (401), `NOT_FOUND` (404), `EMAIL_TAKEN` (409), `BAD_CREDENTIALS` (401), `EMAIL_UNCONFIRMED` (403), `BAD_TOKEN` (400), `CURRENT_SESSION` (400), `NOT_IPO` (422), `BAD_REQUEST`/`SERVER_ERROR` (handler global di `app.js`).
@@ -66,6 +66,7 @@ public/logos/emiten/  logo emiten (disajikan statis)
 - Cookie `sid` httpOnly, `SameSite=Lax`, `Secure` di production. Token acak 32 byte; yang disimpan hanya SHA-256-nya (`auth_sessions.tokenHash`).
 - Login: "Ingat saya" (`remember`, default `true`) → sesi 30 hari + cookie persisten; `false` → 24 jam + cookie sesi browser.
 - `middleware/requireAuth.js` mengisi `req.user` dan `req.session`, menolak sesi kedaluwarsa, dan memperbarui `updatedAt` sesi paling sering sekali per menit (dipakai sebagai "aktif terakhir").
+- Admin memakai tabel, sesi, dan cookie sendiri; sesi customer tidak bisa masuk `/admin/api` dan sebaliknya.
 - Login gagal memakai hash dummy supaya waktu respons tidak membocorkan email terdaftar.
 - Ganti password → semua sesi lain dihapus, sesi saat ini tetap.
 - Aturan password: daftar = min 8 + huruf besar + angka; ganti password = min 8 + huruf + angka (mengikuti design apa adanya; **belum diputuskan** apakah disamakan).
@@ -97,6 +98,17 @@ Semua butuh cookie `sid` kecuali yang ditandai *publik*. Detail skema ada di Swa
 | `POST /watchlist`, `DELETE /watchlist/:ticker` | tombol watchlist | idempoten |
 | `PATCH /watchlist/:ticker` | Watchlist | catatan dan/atau checklist; memperbarui `touchedAt` |
 
+**Admin** (`/admin/api`, cookie terpisah `asid` path `/admin/api`; detail di Swagger tag *Admin: Auth*):
+
+| Endpoint | Halaman design | Catatan |
+| --- | --- | --- |
+| `POST /admin/api/auth/login` *publik* | AdminLogin | Email `@stockplan.id`. Berhasil → `{ step: 'two_factor' }` + cookie `asid` sementara 5 menit; perangkat tepercaya (`atd`) langsung dapat `{ admin }` |
+| `POST /admin/api/auth/verify` | AdminLogin2FA | `{ code, method: totp\|backup, trustDevice }`. Token sesi diganti setelah 2FA |
+| `POST /admin/api/auth/logout` | menu akun, "Ganti akun" | Idempoten, juga untuk sesi yang belum lewat 2FA |
+| `GET /admin/api/auth/me` | shell admin | `{ admin: { id, name, email, role } }` |
+
+Aturan: 5 kegagalan (password atau kode 2FA) per email dalam 15 menit → 429 `ACCOUNT_LOCKED` 15 menit (dihitung dari `admin_audit_logs`, jadi email tak dikenal berperilaku sama); sesi berakhir 30 menit tanpa aktivitas; perangkat tepercaya 7 hari; kode cadangan sekali pakai. Middleware: `requireAdmin` (sudah lewat 2FA) dan `requireAdmin.pending` (baru langkah 1). Seeder admin dev: `admin@stockplan.id` / `StockPlanDev2026`, TOTP secret dan kode cadangan dicetak seeder (`npx sequelize-cli db:seed --seed 20261111000001-admin-users.js`).
+
 Penyimpangan dari §9 handoff design (disengaja):
 - `GET /sectors/:slug` mengganti `GET /sectors/:id/themes` (satu panggilan berisi seluruh halaman).
 - Pencarian emiten di `GET /companies?q=`; `GET /search` (gabungan ⌘K) belum dibuat.
@@ -113,6 +125,7 @@ Penyimpangan dari §9 handoff design (disengaja):
 | `theme_sectors` → `theme_subsectors` → `theme_industries` | hierarki IDX-IC. Industri: `dataStatus` (`soon`/`ready`), `dataUpdatedAt`, `updateNote`, `themeSlug` |
 | `theme_themes`, `theme_stages` | tema rantai nilai; `theme_stages.tickers` = array JSONB berurutan (indeks GIN). Satu emiten boleh di beberapa tahap |
 | `market_companies` | emiten. Kolom untuk query/sort; isi editorial halaman di `profile` (JSONB) dan `ipo` (JSONB). `dataDelayed` JSONB → banner data tertunda |
+| `admin_users`, `admin_sessions`, `admin_trusted_devices`, `admin_audit_logs` | akun admin (`role` = id peran: super/data/tema/support/view, TOTP + kode cadangan ter-hash), sesi (`verified` = lewat 2FA), perangkat tepercaya, log percobaan masuk (fondasi Riwayat perubahan; bukan milik user customer, tanpa cascade dari `auth_users`) |
 | `watchlist_items` | per user × ticker, `checklist` 4 boolean, `note` |
 | `market_company_alerts` | per user × ticker × `listing`/`data_update` |
 
@@ -140,6 +153,9 @@ Catatan:
 | `controllers/sectorController.js` | Memuat field ringan semua emiten untuk menghitung jumlah per sektor/industri | Kalau emiten > beberapa ribu: ganti ke `COUNT … GROUP BY` |
 | `controllers/companyController.js` | "Satu tahap" fallback ke industri yang sama kalau emiten belum masuk tema | Hapus fallback kalau semua emiten sudah dipetakan ke tema |
 | Login | Belum ada rate limit / lockout untuk customer | Sebelum go-live |
+| `admin_users.totpSecret` | TOTP secret disimpan polos | Enkripsi AES-GCM (kunci dari env) sebelum production |
+| Admin: akun dikunci | "Super admin diberi tahu" hanya tercatat di audit log + `console.warn` | Saat ada notifikasi admin |
+| Admin: pembuatan akun & aktivasi 2FA | Belum ada endpoint; akun admin hanya dari seeder dev (alur aktivasi belum didesain, handoff design §12) | Modul Akses (undang anggota) |
 | `/docs` | Swagger terbuka untuk publik | Batasi/matikan di production |
 | `market_companies.profile.reports[].url`, `ipo.documents[].url` | Selalu `null`; belum ada penyimpanan file | Saat modul upload/admin |
 | `theme_stages.groupKey` | Teks `hulu`/`tengah`/`hilir`; ikon & warna tahap utama (AdminTemaEdit) belum ada | Saat modul admin tema: tabel `theme_stage_groups` |
@@ -162,7 +178,7 @@ Urutan yang disarankan, dimulai dari yang paling sedikit ketergantungannya.
 - **Bantuan & tiket**.
 - **Auth tambahan**: konfirmasi email daftar, kirim ulang, lupa/reset password, Google, upload foto profil.
 - **Ekspor CSV** (`GET /me/export.csv`) — design: tautan dikirim lewat email.
-- **Admin** (`/admin/api`, handoff design §8): login + 2FA, RBAC per endpoint, CRUD emiten & tema, sinkron BEI (mengisi `dataDelayed`), riwayat/audit log. Saat ini semua data referensi hanya dari seed.
+- **Admin** (`/admin/api`, handoff design §8): ~~login + 2FA~~ selesai (§5); sisanya RBAC per endpoint, CRUD emiten & tema, sinkron BEI (mengisi `dataDelayed`), riwayat/audit log. Saat ini semua data referensi hanya dari seed.
 
 ### 8.3 Keputusan yang masih terbuka
 - Samakan aturan password daftar vs ganti password?

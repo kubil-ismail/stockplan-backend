@@ -42,7 +42,7 @@ const errorResponse = (description, code, message, fields) => ({
 module.exports = {
   openapi: '3.0.3',
   info: { title: 'StockPlan API', version: '0.1.0', description: 'REST API StockPlan. Sesi memakai cookie httpOnly `sid`.' },
-  tags: [{ name: 'Auth' }, { name: 'Profil' }, { name: 'Pengaturan' }, { name: 'Tema bisnis' }, { name: 'Emiten' }, { name: 'Watchlist' }],
+  tags: [{ name: 'Auth' }, { name: 'Profil' }, { name: 'Pengaturan' }, { name: 'Tema bisnis' }, { name: 'Emiten' }, { name: 'Watchlist' }, { name: 'Admin: Auth' }],
   security: [{ cookieAuth: [] }],
   paths: {
     '/auth/register': {
@@ -210,6 +210,54 @@ module.exports = {
           401: { $ref: '#/components/responses/Unauthenticated' },
           404: errorResponse('Sesi tidak ditemukan (atau milik orang lain)', 'NOT_FOUND', 'Sesi tidak ditemukan.'),
         },
+      },
+    },
+    '/admin/api/auth/login': {
+      post: {
+        tags: ['Admin: Auth'],
+        security: [],
+        servers: [{ url: '/' }],
+        summary: 'Masuk admin, langkah 1 (email + password)',
+        description: 'Email wajib `@stockplan.id`. Salah 5 kali (login atau kode 2FA, dalam 15 menit) → 429 `ACCOUNT_LOCKED` selama 15 menit. Dari perangkat tepercaya langsung masuk (`admin`); selain itu mengembalikan `step: two_factor` dan cookie `asid` sementara (5 menit).',
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['email', 'password'], properties: { email: { type: 'string', example: 'admin@stockplan.id' }, password: { type: 'string', format: 'password' } } } } } },
+        responses: {
+          200: { description: 'Lanjut ke 2FA, atau sudah masuk (perangkat tepercaya)', content: { 'application/json': { schema: { oneOf: [{ type: 'object', properties: { step: { type: 'string', enum: ['two_factor'] }, email: { type: 'string' } } }, { type: 'object', properties: { admin: { $ref: '#/components/schemas/Admin' } } }] } } } },
+          401: errorResponse('Email/password salah', 'BAD_CREDENTIALS', 'Email atau password salah. Sisa 4 percobaan sebelum akun dikunci.'),
+          422: errorResponse('Isian tidak valid', 'VALIDATION', 'Periksa lagi isian Anda.', { email: 'Gunakan email kerja @stockplan.id.' }),
+          429: errorResponse('Akun dikunci', 'ACCOUNT_LOCKED', 'Terlalu banyak percobaan. Akun dikunci 15 menit dan super admin sudah diberi tahu.'),
+        },
+      },
+    },
+    '/admin/api/auth/verify': {
+      post: {
+        tags: ['Admin: Auth'],
+        security: [{ adminCookie: [] }],
+        summary: 'Masuk admin, langkah 2 (TOTP / kode cadangan)',
+        description: 'Butuh cookie `asid` dari langkah 1. `method: backup` memakai kode `xxxx-xxxx` sekali pakai. `trustDevice` memasang cookie `atd` 7 hari yang melewati langkah ini. Berhasil → cookie `asid` baru; sesi berakhir setelah 30 menit tanpa aktivitas.',
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['code'], properties: { code: { type: 'string', example: '123456' }, method: { type: 'string', enum: ['totp', 'backup'], default: 'totp' }, trustDevice: { type: 'boolean', default: false } } } } } },
+        responses: {
+          200: { description: 'Masuk', content: { 'application/json': { schema: { type: 'object', properties: { admin: { $ref: '#/components/schemas/Admin' } } } } } },
+          401: errorResponse('Kode salah, atau sesi langkah 1 hilang/berakhir', 'BAD_CODE', 'Kode salah atau sudah kedaluwarsa. Coba kode terbaru.'),
+          422: errorResponse('Format kode salah', 'VALIDATION', 'Kode harus 6 digit angka.', { code: 'Kode harus 6 digit angka.' }),
+          429: errorResponse('Akun dikunci', 'ACCOUNT_LOCKED', 'Terlalu banyak percobaan. Akun dikunci 15 menit dan super admin sudah diberi tahu.'),
+        },
+      },
+    },
+    '/admin/api/auth/logout': {
+      post: {
+        tags: ['Admin: Auth'],
+        security: [],
+        summary: 'Keluar admin / "Ganti akun"',
+        description: 'Mengakhiri sesi (juga yang belum lewat 2FA). Idempoten. Cookie perangkat tepercaya tidak dihapus.',
+        responses: { 204: { description: 'Selesai' } },
+      },
+    },
+    '/admin/api/auth/me': {
+      get: {
+        tags: ['Admin: Auth'],
+        security: [{ adminCookie: [] }],
+        summary: 'Admin yang sedang masuk',
+        responses: { 200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: { admin: { $ref: '#/components/schemas/Admin' } } } } } }, 401: errorResponse('Belum masuk / sesi berakhir', 'UNAUTHENTICATED', 'Sesi admin berakhir. Masuk lagi.') },
       },
     },
     '/sectors': {
@@ -453,7 +501,7 @@ module.exports = {
     },
   },
   components: {
-    securitySchemes: { cookieAuth: { type: 'apiKey', in: 'cookie', name: 'sid' } },
+    securitySchemes: { cookieAuth: { type: 'apiKey', in: 'cookie', name: 'sid' }, adminCookie: { type: 'apiKey', in: 'cookie', name: 'asid' } },
     responses: { Unauthenticated: errorResponse('Belum masuk / sesi berakhir', 'UNAUTHENTICATED', 'Sesi tidak valid atau sudah berakhir.') },
     schemas: {
       WatchItem: {
@@ -695,6 +743,15 @@ module.exports = {
           email: { type: 'string', format: 'email', example: 'bil@contoh.com' },
           password: { type: 'string', format: 'password', example: 'Rahasia123' },
           remember: { type: 'boolean', default: true, description: '"Ingat saya di perangkat ini"' },
+        },
+      },
+      Admin: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          name: { type: 'string' },
+          email: { type: 'string', example: 'admin@stockplan.id' },
+          role: { type: 'string', enum: ['super', 'data', 'tema', 'support', 'view'] },
         },
       },
       Error: {
