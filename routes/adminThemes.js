@@ -15,5 +15,6 @@ router.get('/:slug', requirePerm('tm', 'view'), c.show);
 router.patch('/:slug', requirePerm('tm', 'edit'), c.saveDraft);
 router.post('/:slug/companies', requirePerm('tm', 'edit'), c.mapCompany);
 router.post('/:slug/publish', requirePerm('tm', 'publish'), c.publish);
+router.delete('/:slug', requirePerm('tm', 'delete'), c.destroy);
 
 module.exports = router;

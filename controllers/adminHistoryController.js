@@ -2,7 +2,8 @@
 
 const { isDeepStrictEqual } = require('util');
 const { Op, Sequelize, fn, col } = require('sequelize');
-const { sequelize, AdminAuditLog, AdminUser, AdminRole, Company, Sector, Industry, Theme, ThemeStage, User } = require('../models');
+const { sequelize, AdminAuditLog, AdminUser, AdminRole, Company, Sector, Subsector, Industry, ThemeStage, User } = require('../models');
+const { withSector } = require('../lib/themes');
 const hist = require('../lib/adminHistory');
 const co = require('../lib/adminCompanies');
 const th = require('../lib/adminThemes');
@@ -127,9 +128,9 @@ const REVERTERS = {
   },
 
   async theme_sections(req, rev) {
-    const theme = await Theme.findOne({ where: { slug: rev.ref }, include: [{ model: Sector, as: 'sector', attributes: ['slug', 'name'] }, { model: ThemeStage, as: 'stages' }] });
+    const theme = withSector(await Industry.findOne({ where: { slug: rev.ref }, include: [{ model: Subsector, as: 'subsector', attributes: ['sectorId'], include: [{ model: Sector, as: 'sector', attributes: ['slug', 'name'] }] }, { model: ThemeStage, as: 'stages' }] }));
     if (!theme) throw gone();
-    const current = theme.draft || th.columnsToForm(theme, theme.stages);
+    const current = th.formOf(theme);
     if (!unchanged(current, rev.after)) throw conflict();
     await theme.update({ draft: { ...current, ...rev.before }, status: can(req.adminPerms, 'tm', 'publish') ? 'draft' : 'review', updatedByName: req.admin.name });
     return { target: current.name };

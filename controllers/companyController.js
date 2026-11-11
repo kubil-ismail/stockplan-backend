@@ -1,7 +1,7 @@
 'use strict';
 
 const { Op } = require('sequelize');
-const { Company, Sector, Industry, Theme, ThemeStage, WatchlistItem, CompanyAlert } = require('../models');
+const { Company, Sector, Industry, ThemeStage, WatchlistItem, CompanyAlert } = require('../models');
 const companies = require('../lib/companies');
 const themes = require('../lib/themes');
 const { fail } = require('../lib/http');
@@ -48,7 +48,7 @@ exports.index = async (req, res, next) => {
     const [stages, watch] = tickers.length ? await Promise.all([
       ThemeStage.findAll({
         where: themes.stagesWithAny(tickers),
-        include: [{ model: Theme, as: 'theme', where: { publishedAt: { [Op.ne]: null } }, attributes: ['slug', 'name'] }],
+        include: [{ model: Industry, as: 'theme', where: themes.clientVisible({ publishedAt: { [Op.ne]: null } }), attributes: ['slug', 'name'] }],
       }),
       WatchlistItem.findAll({ where: { userId: req.user.id, ticker: tickers }, attributes: ['ticker'] }),
     ]) : [[], []];
@@ -97,17 +97,17 @@ exports.show = async (req, res, next) => {
     const [stages, watch, alerts] = await Promise.all([
       ThemeStage.findAll({
         where: { tickers: { [Op.contains]: [ticker] } },
-        include: [{ model: Theme, as: 'theme', where: { publishedAt: { [Op.ne]: null } }, attributes: ['id', 'slug', 'name'] }],
+        include: [{ model: Industry, as: 'theme', where: themes.clientVisible({ publishedAt: { [Op.ne]: null } }), attributes: ['id', 'slug', 'name'] }],
       }),
       WatchlistItem.findOne({ where: { userId: req.user.id, ticker }, attributes: ['id'] }),
       CompanyAlert.findAll({ where: { userId: req.user.id, ticker }, attributes: ['kind'] }),
     ]);
 
-    const themeIds = [...new Set(stages.map((s) => s.themeId))];
+    const themeIds = [...new Set(stages.map((s) => s.industryId))];
     const counts = themeIds.length
-      ? await ThemeStage.count({ where: { themeId: themeIds }, group: ['themeId'] })
+      ? await ThemeStage.count({ where: { industryId: themeIds }, group: ['industryId'] })
       : [];
-    const stageCounts = Object.fromEntries(counts.map((c) => [c.themeId, Number(c.count)]));
+    const stageCounts = Object.fromEntries(counts.map((c) => [c.industryId, Number(c.count)]));
     const kinds = alerts.map((a) => a.kind);
 
     res.json({

@@ -1,7 +1,7 @@
 'use strict';
 
 const { Op } = require('sequelize');
-const { Theme, ThemeStage, Sector, Company, WatchlistItem } = require('../models');
+const { Industry, Subsector, ThemeStage, Sector, Company, WatchlistItem } = require('../models');
 const themes = require('../lib/themes');
 const { fail } = require('../lib/http');
 
@@ -10,10 +10,13 @@ const companyAttrs = ['ticker', 'name', 'summary', 'logoUrl', 'status', 'tagline
 // GET /themes/:slug — design: TemaDetail + TemaDetailTabel + drawer. Only published themes are visible.
 exports.show = async (req, res, next) => {
   try {
-    const theme = await Theme.findOne({
-      where: { slug: String(req.params.slug || ''), publishedAt: { [Op.ne]: null } },
-      include: [{ model: Sector, as: 'sector', attributes: ['slug', 'name'] }, { model: ThemeStage, as: 'stages' }],
-    });
+    const theme = themes.withSector(await Industry.findOne({
+      where: themes.clientVisible({ slug: String(req.params.slug || ''), publishedAt: { [Op.ne]: null } }),
+      include: [
+        { model: Subsector, as: 'subsector', attributes: ['sectorId'], include: [{ model: Sector, as: 'sector', attributes: ['slug', 'name'] }] },
+        { model: ThemeStage, as: 'stages' },
+      ],
+    }));
     if (!theme) return fail(res, 404, 'NOT_FOUND', 'Tema tidak ditemukan.'); // COPY: perlu review
 
     const tickers = themes.companyOrder(theme.stages);

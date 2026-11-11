@@ -49,6 +49,7 @@ module.exports = {
       items.forEach((it, i) => industries.push({
         id: randomUUID(), subsectorId: id, position: i, icon: null, dataStatus: 'soon',
         dataUpdatedAt: null, updateNote: null, themeSlug: null, ...it, ...ts,
+        status: 'published', listedAt: now, // on the sector page; value chain only where a later seeder adds one
       }));
     });
     await queryInterface.bulkInsert('theme_subsectors', subsectors);

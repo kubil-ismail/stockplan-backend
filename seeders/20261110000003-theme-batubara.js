@@ -44,19 +44,24 @@ module.exports = {
     }));
     await queryInterface.bulkInsert('market_companies', extra, { ignoreDuplicates: true });
 
-    const themeId = randomUUID();
-    await queryInterface.bulkInsert('theme_themes', [{
-      id: themeId, slug: fixture.slug, name: fixture.name, sectorId: sectorId.energi || null,
-      description: fixture.description, status: 'published', ...ts,
-    }]);
+    // The value chain belongs to the Batu Bara industry (theme_themes was merged into theme_industries).
+    // Its slug becomes the fixture's so /tema/batubara keeps working.
+    const themeId = industryId['batu-bara'];
+    await queryInterface.bulkUpdate('theme_industries', {
+      slug: fixture.slug, name: fixture.name, description: fixture.description, status: 'published', publishedAt: now, updatedAt: now,
+    }, { id: themeId });
     await queryInterface.bulkInsert('theme_stages', fixture.stages.map((s) => ({
-      id: randomUUID(), themeId, order: s.n, groupKey: s.g.toLowerCase(), name: s.name, shortName: s.short,
+      id: randomUUID(), industryId: themeId, order: s.n, groupKey: s.g.toLowerCase(), name: s.name, shortName: s.short,
       description: s.desc, tickers: JSON.stringify(s.tks), ...ts,
     })));
   },
 
   async down(queryInterface) {
-    await queryInterface.bulkDelete('theme_themes', { slug: fixture.slug }); // cascades to stages
+    const [ind] = await queryInterface.sequelize.query('SELECT id FROM theme_industries WHERE slug = ?', { replacements: [fixture.slug], type: 'SELECT' });
+    if (ind) {
+      await queryInterface.bulkDelete('theme_stages', { industryId: ind.id });
+      await queryInterface.bulkUpdate('theme_industries', { slug: 'batu-bara', name: 'Batu Bara', description: null, publishedAt: null }, { id: ind.id });
+    }
     await queryInterface.bulkDelete('market_companies', { ticker: Object.keys(EXTRA) });
   },
 };

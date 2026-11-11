@@ -1,7 +1,7 @@
 'use strict';
 
 const { Op, UniqueConstraintError } = require('sequelize');
-const { Company, Sector, Industry, ThemeStage, Theme } = require('../models');
+const { Company, Sector, Industry, ThemeStage } = require('../models');
 const co = require('../lib/adminCompanies');
 const companies = require('../lib/companies');
 const { fail } = require('../lib/http');
@@ -19,17 +19,17 @@ const hist = require('../lib/adminHistory');
 
 // Per ticker: first theme + how many of its stages hold the ticker ("Batubara · 2 tahap").
 async function themeMap(tickers) {
-  const stages = await ThemeStage.findAll({ include: [{ model: Theme, as: 'theme', attributes: ['slug', 'name'] }], order: [['order', 'ASC']] });
+  const stages = await ThemeStage.findAll({ include: [{ model: Industry, as: 'theme', attributes: ['slug', 'name'] }], order: [['order', 'ASC']] });
   const want = tickers ? new Set(tickers) : null;
   const byTicker = {};
   for (const st of stages) {
     for (const t of new Set(st.tickers)) {
       if (want && !want.has(t)) continue;
       const list = (byTicker[t] = byTicker[t] || new Map());
-      const e = list.get(st.themeId) || { slug: st.theme.slug, name: st.theme.name, stageCount: 0, stages: [] };
+      const e = list.get(st.industryId) || { slug: st.theme.slug, name: st.theme.name, stageCount: 0, stages: [] };
       e.stageCount += 1;
       e.stages.push({ order: st.order, name: st.name });
-      list.set(st.themeId, e);
+      list.set(st.industryId, e);
     }
   }
   return Object.fromEntries(Object.entries(byTicker).map(([t, m]) => [t, [...m.values()]]));

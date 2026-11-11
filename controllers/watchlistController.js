@@ -1,7 +1,7 @@
 'use strict';
 
 const { Op, UniqueConstraintError } = require('sequelize');
-const { Company, Sector, Industry, Theme, ThemeStage, WatchlistItem } = require('../models');
+const { Company, Sector, Industry, ThemeStage, WatchlistItem } = require('../models');
 const companies = require('../lib/companies');
 const watchlist = require('../lib/watchlist');
 const themes = require('../lib/themes');
@@ -24,7 +24,7 @@ exports.index = async (req, res, next) => {
     const tickers = items.map((i) => i.ticker);
     const stages = tickers.length ? await ThemeStage.findAll({
       where: themes.stagesWithAny(tickers),
-      include: [{ model: Theme, as: 'theme', where: { publishedAt: { [Op.ne]: null } }, attributes: ['slug', 'name'] }],
+      include: [{ model: Industry, as: 'theme', where: themes.clientVisible({ publishedAt: { [Op.ne]: null } }), attributes: ['slug', 'name'] }],
     }) : [];
     res.json({ items: items.map((w) => watchlist.listItemView(w, stages)) });
   } catch (err) {
