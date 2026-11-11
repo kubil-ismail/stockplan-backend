@@ -7,6 +7,7 @@ const companiesRouter = require('./adminCompanies');
 const usersRouter = require('./adminUsers');
 const themesRouter = require('./adminThemes');
 const accessRouter = require('./adminAccess');
+const historyRouter = require('./adminHistory');
 
 const router = express.Router();
 
@@ -20,5 +21,6 @@ router.use('/companies', companiesRouter);
 router.use('/users', usersRouter);
 router.use('/themes', themesRouter);
 router.use('/access', accessRouter);
+router.use('/history', historyRouter);
 
 module.exports = router;

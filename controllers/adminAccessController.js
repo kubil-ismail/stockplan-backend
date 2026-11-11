@@ -7,6 +7,7 @@ const ro = require('../lib/adminRoles');
 const auth = require('../lib/auth');
 const mailer = require('../lib/mailer');
 const { audit } = require('../lib/audit');
+const hist = require('../lib/adminHistory');
 const { fail } = require('../lib/http');
 
 // Built-in roles in design order, custom roles after them by creation time.
@@ -18,13 +19,7 @@ const isUuid = (s) => /^[0-9a-f-]{36}$/i.test(String(s));
 const activeSupers = () => AdminUser.count({ where: { role: ro.SUPER, status: 'active' } });
 const notFound = (res) => fail(res, 404, 'NOT_FOUND', ac.MSG.notFound);
 
-// Guard message -> HTTP status + code.
-const GUARD = {
-  [ac.MSG.self]: [400, 'SELF_CHANGE'], [ac.MSG.selfStatus]: [400, 'SELF_CHANGE'],
-  [ac.MSG.superOnly]: [403, 'SUPER_ONLY'], [ac.MSG.lastSuper]: [409, 'LAST_SUPER'],
-  [ac.MSG.notActive]: [409, 'BAD_STATE'],
-};
-const guardFail = (res, msg) => fail(res, ...(GUARD[msg] || [409, 'BAD_STATE']), msg);
+const guardFail = (res, msg) => fail(res, ...ac.guardStatus(msg), msg);
 
 // shortcut: per-member last login / failures come from scanning admin_audit_logs; fine for a small team,
 // upgrade: denormalise lastLoginAt onto admin_users if the log grows large.
@@ -88,7 +83,8 @@ exports.invite = async (req, res, next) => {
       invitedAt: new Date(), invitedBy: req.admin.name,
     });
     await mailer.sendAdminInvite(member.email, token);
-    await audit(req, 'member_invited', `admin:${member.id}`);
+    const roleRow = await AdminRole.findByPk(values.role, { attributes: ['name'] });
+    await audit(req, 'member_invited', `admin:${member.id}`, { summary: { verb: 'mengundang anggota', target: member.email, rest: `sebagai ${roleRow.name}` } });
     res.status(201).json({ member: await oneMember(member, req.admin) });
   } catch (err) {
     next(err);
@@ -111,8 +107,14 @@ exports.changeRole = async (req, res, next) => {
     const err = ac.roleChangeError(req.admin, m, role, await activeSupers());
     if (err) return guardFail(res, err);
     if (m.role !== role) {
+      const was = m.role;
       await m.update({ role });
-      await audit(req, 'member_role_changed', `admin:${m.id}`);
+      const names = Object.fromEntries((await AdminRole.findAll({ where: { id: [was, role] }, attributes: ['id', 'name'], raw: true })).map((r) => [r.id, r.name]));
+      await audit(req, 'member_role_changed', `admin:${m.id}`, {
+        summary: { verb: 'mengubah peran', target: m.email, rest: `dari ${names[was] || was} menjadi ${names[role] || role}` },
+        changes: [{ field: 'role', label: 'Peran', before: names[was] || was, after: names[role] || role }],
+        revert: { type: 'member_role', ref: m.id, before: was, after: role },
+      });
     }
     res.json({ member: await oneMember(m, req.admin) });
   } catch (err) {
@@ -132,7 +134,11 @@ exports.deactivate = async (req, res, next) => {
       await AdminSession.destroy({ where: { adminId: m.id }, transaction });
       await AdminTrustedDevice.destroy({ where: { adminId: m.id }, transaction });
     });
-    await audit(req, 'member_deactivated', `admin:${m.id}`);
+    await audit(req, 'member_deactivated', `admin:${m.id}`, {
+      summary: { verb: 'menonaktifkan anggota', target: m.email, rest: '' },
+      changes: [{ field: 'status', label: 'Status', before: 'Aktif', after: 'Nonaktif' }],
+      revert: { type: 'member_status', ref: m.id, before: 'active', after: 'disabled' },
+    });
     res.json({ member: await oneMember(m, req.admin) });
   } catch (err) {
     next(err);
@@ -147,7 +153,10 @@ exports.reactivate = async (req, res, next) => {
     if (m.status !== 'disabled') return fail(res, 409, 'BAD_STATE', ac.MSG.notDisabled);
     if (m.role === ro.SUPER && req.admin.role !== ro.SUPER) return guardFail(res, ac.MSG.superOnly);
     await m.update({ status: m.passwordHash ? 'active' : 'invited', disabledAt: null });
-    await audit(req, 'member_reactivated', `admin:${m.id}`);
+    await audit(req, 'member_reactivated', `admin:${m.id}`, {
+      summary: { verb: 'mengaktifkan kembali anggota', target: m.email, rest: '' },
+      changes: [{ field: 'status', label: 'Status', before: 'Nonaktif', after: m.status === 'active' ? 'Aktif' : 'Undangan' }],
+    });
     res.json({ member: await oneMember(m, req.admin) });
   } catch (err) {
     next(err);
@@ -163,7 +172,7 @@ exports.resendInvite = async (req, res, next) => {
     const token = auth.newSessionToken();
     await m.update({ inviteTokenHash: auth.hashToken(token), inviteExpiresAt: new Date(Date.now() + ac.INVITE_TTL), invitedAt: new Date(), invitedBy: req.admin.name });
     await mailer.sendAdminInvite(m.email, token);
-    await audit(req, 'member_invite_resent', `admin:${m.id}`);
+    await audit(req, 'member_invite_resent', `admin:${m.id}`, { summary: { verb: 'mengirim ulang undangan ke', target: m.email, rest: '' } });
     res.json({ member: await oneMember(m, req.admin) });
   } catch (err) {
     next(err);
@@ -206,7 +215,7 @@ exports.createRole = async (req, res, next) => {
     let id = base;
     for (let i = 2; await AdminRole.findByPk(id, { attributes: ['id'] }); i += 1) id = `${base}-${i}`;
     const role = await AdminRole.create({ id, ...values, system: false });
-    await audit(req, 'role_created', `role:${id}`);
+    await audit(req, 'role_created', `role:${id}`, { summary: { verb: 'membuat peran', target: role.name, rest: '' } });
     res.status(201).json({ role: (await roleViews([role]))[0] });
   } catch (err) {
     next(err);
@@ -224,8 +233,15 @@ exports.updateRole = async (req, res, next) => {
     // Stops a non-super member with acc:edit from widening their own role.
     if (role.id === req.admin.role) return fail(res, 403, 'OWN_ROLE', ro.MSG.ownRole);
     if (values.name && (await nameTaken(values.name, role.id))) return fail(res, 409, 'ROLE_TAKEN', ro.MSG.nameTaken, { name: ro.MSG.nameTaken });
+    const snap = (r) => ({ name: r.name, description: r.description || '', perms: r.perms });
+    const before = snap(role);
     await role.update(values);
-    await audit(req, 'role_updated', `role:${role.id}`);
+    const after = snap(role);
+    const ch = hist.sectionChange(before, after);
+    await audit(req, 'role_updated', `role:${role.id}`, {
+      summary: { verb: 'mengubah izin peran', target: role.name, rest: '' }, changes: ch.changes,
+      revert: ch.keys.length ? { type: 'role_perms', ref: role.id, before: ch.beforePart, after: ch.afterPart } : null,
+    });
     res.json({ role: (await roleViews([role]))[0] });
   } catch (err) {
     next(err);

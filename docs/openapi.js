@@ -42,7 +42,7 @@ const errorResponse = (description, code, message, fields) => ({
 module.exports = {
   openapi: '3.0.3',
   info: { title: 'StockPlan API', version: '0.1.0', description: 'REST API StockPlan. Sesi memakai cookie httpOnly `sid`.' },
-  tags: [{ name: 'Auth' }, { name: 'Profil' }, { name: 'Pengaturan' }, { name: 'Tema bisnis' }, { name: 'Emiten' }, { name: 'Watchlist' }, { name: 'Admin: Auth' }, { name: 'Admin: Emiten' }, { name: 'Admin: Pengguna' }, { name: 'Admin: Tema' }, { name: 'Admin: Akses' }],
+  tags: [{ name: 'Auth' }, { name: 'Profil' }, { name: 'Pengaturan' }, { name: 'Tema bisnis' }, { name: 'Emiten' }, { name: 'Watchlist' }, { name: 'Admin: Auth' }, { name: 'Admin: Emiten' }, { name: 'Admin: Pengguna' }, { name: 'Admin: Tema' }, { name: 'Admin: Akses' }, { name: 'Admin: Riwayat' }],
   security: [{ cookieAuth: [] }],
   paths: {
     '/auth/register': {
@@ -695,6 +695,62 @@ module.exports = {
         responses: { 200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: { role: { $ref: '#/components/schemas/AdminRole' } } } } } }, 403: errorResponse('Super admin / peran sendiri', 'SUPER_LOCKED', 'Izin super admin tidak bisa diubah') },
       },
     },
+    '/admin/api/history': {
+      get: {
+        tags: ['Admin: Riwayat'], security: [{ adminCookie: [] }],
+        summary: 'Riwayat perubahan (AdminRiwayat)',
+        description: 'Izin `log:view`. Semua yang dilakukan admin dan sistem: perubahan data, terbit, akses, dan percobaan masuk. Hanya baca: tidak ada endpoint ubah/hapus. `tabs` mengikuti `q`, `module`, `who`, `range` (bukan `tab`). Dikelompokkan per hari kalender Asia/Jakarta, terbaru dulu. IP disamarkan (mis. 182.253.x.x). `canRevert` = tombol "Kembalikan" boleh tampil untuk admin yang melihat. Yang tidak ditampilkan: `login_password_ok` dan `logout`. Tiap gagal masuk tercatat sendiri-sendiri (tidak digabung).',
+        parameters: [
+          { name: 'q', in: 'query', schema: { type: 'string' }, description: 'Cari emiten, tema, email, atau isi perubahan' },
+          { name: 'module', in: 'query', schema: { type: 'string', enum: ['em', 'tm', 'usr', 'fb', 'sync', 'set', 'acc', 'security'] } },
+          { name: 'who', in: 'query', schema: { type: 'string' }, description: 'UUID admin, atau `system` untuk Sistem' },
+          { name: 'range', in: 'query', schema: { type: 'integer', default: 7, minimum: 1, maximum: 730 }, description: 'Hari terakhir (design: 1, 7, 30). Riwayat disimpan 2 tahun.' },
+          { name: 'tab', in: 'query', schema: { type: 'string', enum: ['all', 'data', 'pub', 'sec'], default: 'all' }, description: 'data = Perubahan data, pub = Terbit, sec = Akses & keamanan' },
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'pageSize', in: 'query', schema: { type: 'integer', default: 50, maximum: 200 } },
+        ],
+        responses: {
+          200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: {
+            tabs: { type: 'object', properties: { all: { type: 'integer' }, data: { type: 'integer' }, pub: { type: 'integer' }, sec: { type: 'integer' } } },
+            total: { type: 'integer', description: 'Jumlah untuk `tab` yang dipilih' }, page: { type: 'integer' }, pageSize: { type: 'integer' },
+            days: { type: 'array', items: { type: 'object', properties: { date: { type: 'string', format: 'date', example: '2026-11-06' }, items: { type: 'array', items: { $ref: '#/components/schemas/AdminHistoryEntry' } } } } },
+            modules: { type: 'array', items: { type: 'object', properties: { key: { type: 'string' }, name: { type: 'string' } } } },
+            actors: { type: 'array', description: 'Pilihan "Semua pelaku"', items: { type: 'object', properties: { id: { type: 'string' }, name: { type: 'string' } } } },
+            retentionDays: { type: 'integer', example: 730 },
+          } } } } },
+          403: errorResponse('Tanpa izin', 'FORBIDDEN', 'Peran Anda tidak punya izin untuk aksi ini.'),
+        },
+      },
+    },
+    '/admin/api/history/export.csv': {
+      get: {
+        tags: ['Admin: Riwayat'], security: [{ adminCookie: [] }],
+        summary: 'Ekspor CSV',
+        description: 'Izin `log:view`. Filter sama dengan daftar; maksimal 5.000 baris. Sel diawali `= + - @` diberi awalan `\'`.',
+        parameters: [
+          { name: 'q', in: 'query', schema: { type: 'string' }, description: 'Cari emiten, tema, email, atau isi perubahan' },
+          { name: 'module', in: 'query', schema: { type: 'string', enum: ['em', 'tm', 'usr', 'fb', 'sync', 'set', 'acc', 'security'] } },
+          { name: 'who', in: 'query', schema: { type: 'string' }, description: 'UUID admin, atau `system` untuk Sistem' },
+          { name: 'range', in: 'query', schema: { type: 'integer', default: 7, minimum: 1, maximum: 730 }, description: 'Hari terakhir (design: 1, 7, 30). Riwayat disimpan 2 tahun.' },
+          { name: 'tab', in: 'query', schema: { type: 'string', enum: ['all', 'data', 'pub', 'sec'], default: 'all' }, description: 'data = Perubahan data, pub = Terbit, sec = Akses & keamanan' },
+        ],
+        responses: { 200: { description: 'CSV', content: { 'text/csv': { schema: { type: 'string' } } } } },
+      },
+    },
+    '/admin/api/history/{id}/revert': {
+      post: {
+        tags: ['Admin: Riwayat'], security: [{ adminCookie: [] }],
+        summary: 'Kembalikan',
+        description: 'Izin `log:edit` **plus** izin modul yang diubah (`em:edit`, `tm:edit`, `acc:edit`, `acc:delete`, `usr:delete`), supaya Riwayat tidak jadi jalan memutar. Menerapkan nilai sebelumnya sebagai perubahan **baru** yang tercatat sendiri; entri asli tetap ada dan ditandai `reverted`. Bisa untuk: perubahan draf emiten dan tema (termasuk "Petakan"), peran anggota, nonaktifkan anggota, tangguhkan pengguna, izin peran. Tidak bisa untuk terbit, undangan, dan kejadian keamanan. 409 `CONFLICT` bila datanya sudah berubah lagi sesudah entri itu.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: {
+          200: { description: 'Dikembalikan', content: { 'application/json': { schema: { type: 'object', properties: { message: { type: 'string', example: 'Dikembalikan ke nilai sebelumnya. Tercatat sebagai perubahan baru.' }, entry: { $ref: '#/components/schemas/AdminHistoryEntry' } } } } } },
+          403: errorResponse('Tanpa izin', 'FORBIDDEN', 'Peran Anda tidak punya izin untuk aksi ini.'),
+          404: errorResponse('Tidak ada', 'NOT_FOUND', 'Entri tidak ditemukan.'),
+          409: errorResponse('Tidak bisa dikembalikan', 'CONFLICT', 'Datanya sudah berubah lagi setelah perubahan ini, jadi tidak bisa dikembalikan otomatis.'),
+        },
+      },
+    },
     '/sectors': {
       get: {
         tags: ['Tema bisnis'],
@@ -1345,6 +1401,21 @@ module.exports = {
         properties: {
           name: { type: 'string', maxLength: 60 }, summary: { type: 'string', maxLength: 120 }, description: { type: 'string', maxLength: 300 },
           perms: { type: 'object', additionalProperties: { type: 'array', items: { type: 'string', enum: ['view', 'edit', 'publish', 'delete'] } } },
+        },
+      },
+      AdminHistoryEntry: {
+        type: 'object',
+        description: 'Kalimat di design: `{actor.name} {verb} {target} {rest}`.',
+        properties: {
+          id: { type: 'string', format: 'uuid' }, at: { type: 'string', format: 'date-time' },
+          actor: { type: 'object', properties: { kind: { type: 'string', enum: ['admin', 'system'] }, id: { type: 'string', nullable: true }, name: { type: 'string', example: 'Sistem' }, email: { type: 'string', nullable: true } } },
+          kind: { type: 'string', enum: ['data', 'pub', 'sec'] },
+          module: { type: 'object', properties: { key: { type: 'string', example: 'em' }, name: { type: 'string', example: 'Data emiten' } } },
+          verb: { type: 'string', example: 'memperbarui tren keuangan' }, target: { type: 'string', example: 'BUMI' }, rest: { type: 'string', example: '(draf)' },
+          meta: { type: 'string', example: 'IP 182.253.x.x · Firefox · Linux', description: 'Perangkat (+ IP disamarkan untuk kejadian masuk). Kota tidak ada (tanpa GeoIP).' },
+          changes: { type: 'array', description: 'Tabel Bagian / Sebelum / Sesudah', items: { type: 'object', properties: { field: { type: 'string', example: 'keyNumbers.pbv' }, label: { type: 'string', example: 'Angka utama › pbv' }, before: { description: 'string/angka, "—" bila kosong' }, after: {} } } },
+          revertable: { type: 'boolean' }, reverted: { type: 'boolean' }, revertedAt: { type: 'string', format: 'date-time', nullable: true },
+          canRevert: { type: 'boolean', description: 'revertable dan admin ini punya izin yang diperlukan' },
         },
       },
       Error: {

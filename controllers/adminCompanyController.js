@@ -15,6 +15,7 @@ const BULK_MAX = 200;
 const PAGE_MAX = 100;
 
 const { audit } = require('../lib/audit');
+const hist = require('../lib/adminHistory');
 
 // Per ticker: first theme + how many of its stages hold the ticker ("Batubara · 2 tahap").
 async function themeMap(tickers) {
@@ -127,7 +128,7 @@ exports.bulkReview = async (req, res, next) => {
       { publishStatus: 'review', updatedByName: req.admin.name },
       { where: { ticker: tickers, publishStatus: { [Op.ne]: 'review' } } },
     );
-    await audit(req, 'company_bulk_review', tickers.join(',').slice(0, 80));
+    await audit(req, 'company_bulk_review', tickers.join(',').slice(0, 80), { summary: { verb: 'menandai perlu ditinjau', target: `${updated} emiten`, rest: tickers.length <= 6 ? `(${tickers.join(', ')})` : '' } });
     res.json({ updated });
   } catch (err) {
     next(err);
@@ -159,7 +160,7 @@ exports.create = async (req, res, next) => {
     await Company.create({
       ticker, name: form.name, status: 'ipo', publishStatus: 'draft', publishedAt: null, draft: form, updatedByName: req.admin.name, profile: {},
     });
-    await audit(req, 'company_created', ticker);
+    await audit(req, 'company_created', ticker, { summary: { verb: 'menambahkan emiten IPO', target: ticker, rest: `· ${form.name} (draf)` } });
     res.status(201).json(await editView(await loadRow(ticker)));
   } catch (err) {
     if (err instanceof UniqueConstraintError) return fail(res, 409, 'TICKER_TAKEN', co.MSG.tickerTaken(ticker), { ticker: co.MSG.tickerTaken(ticker) });
@@ -176,13 +177,18 @@ exports.saveDraft = async (req, res, next) => {
   try {
     const row = await loadRow(ticker);
     if (!row) return fail(res, 404, 'NOT_FOUND', NOT_FOUND);
-    const form = { ...(row.draft || co.columnsToForm(row)), ...values };
+    const before = row.draft || co.columnsToForm(row);
+    const form = { ...before, ...values };
     if (row.status !== 'ipo') form.ipo = null;
     if (row.status === 'ipo' && !form.ipo) form.ipo = co.emptyForm(true).ipo;
     if (!form.name.trim()) return fail(res, 422, 'VALIDATION', co.MSG.nameRequired, { name: co.MSG.nameRequired });
     if (!(await resolveRefs(form))) return fail(res, 422, 'VALIDATION', co.MSG.unknownSector, { sectorSlug: co.MSG.unknownSector });
     await row.update({ draft: form, publishStatus: 'draft', updatedByName: req.admin.name });
-    await audit(req, 'company_draft_saved', ticker);
+    const ch = hist.sectionChange(before, Object.fromEntries(Object.keys(values).map((k) => [k, form[k]])));
+    await audit(req, 'company_draft_saved', ticker, {
+      summary: { verb: hist.sectionVerb(ch.keys), target: ticker, rest: '(draf)' }, changes: ch.changes,
+      revert: ch.keys.length ? { type: 'company_sections', ref: ticker, before: ch.beforePart, after: ch.afterPart } : null,
+    });
     res.json(await editView(row));
   } catch (err) {
     next(err);
@@ -196,7 +202,8 @@ exports.publish = async (req, res, next) => {
   try {
     const row = await loadRow(ticker);
     if (!row) return fail(res, 404, 'NOT_FOUND', NOT_FOUND);
-    const form = row.draft || co.columnsToForm(row);
+    const live = co.columnsToForm(row);
+    const form = row.draft || live;
     const missing = co.sections(form, row.status === 'ipo').filter((s) => !s.ok);
     if (missing.length) {
       return fail(res, 422, 'INCOMPLETE', co.MSG.incomplete(missing.map((s) => s.label)), Object.fromEntries(missing.map((s) => [s.key, s.note])));
@@ -207,7 +214,10 @@ exports.publish = async (req, res, next) => {
       ...co.formToColumns(form, row), ...ids,
       draft: null, publishStatus: 'published', publishedAt: row.publishedAt || new Date(), updatedByName: req.admin.name,
     });
-    await audit(req, 'company_published', ticker);
+    await audit(req, 'company_published', ticker, {
+      summary: { verb: 'menerbitkan profil', target: ticker, rest: '' },
+      changes: hist.diffSections(live, form, Object.keys(form).filter((k) => hist.SECTION_LABELS[k])),
+    });
     res.json(await editView(await loadRow(ticker)));
   } catch (err) {
     next(err);

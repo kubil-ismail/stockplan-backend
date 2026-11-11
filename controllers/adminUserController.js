@@ -114,7 +114,11 @@ exports.suspend = async (req, res, next) => {
       await user.update({ suspendedAt: new Date(), suspendReason: values.reason, suspendNote: values.note || null, suspendedBy: req.admin.name }, { transaction });
       await Session.destroy({ where: { userId: user.id }, transaction });
     });
-    await audit(req, 'user_suspended', user.id);
+    await audit(req, 'user_suspended', user.id, {
+      summary: { verb: 'menangguhkan akun', target: user.name, rest: `(${user.email}) · alasan: ${values.reason}` }, // email in the sentence so Riwayat search finds it
+      changes: [{ field: 'status', label: 'Status akun', before: 'Aktif', after: 'Ditangguhkan' }],
+      revert: { type: 'user_suspension', ref: user.id, before: null, after: { reason: values.reason } },
+    });
     res.json(await detail(user));
   } catch (err) {
     next(err);
@@ -128,7 +132,10 @@ exports.restore = async (req, res, next) => {
     if (!user) return notFound(res);
     if (!user.suspendedAt) return fail(res, 409, 'NOT_SUSPENDED', au.MSG.notSuspended);
     await user.update({ suspendedAt: null, suspendReason: null, suspendNote: null, suspendedBy: null });
-    await audit(req, 'user_restored', user.id);
+    await audit(req, 'user_restored', user.id, {
+      summary: { verb: 'memulihkan akun', target: user.name, rest: `(${user.email})` },
+      changes: [{ field: 'status', label: 'Status akun', before: 'Ditangguhkan', after: 'Aktif' }],
+    });
     res.json(await detail(user));
   } catch (err) {
     next(err);
@@ -145,7 +152,7 @@ exports.resendConfirmation = async (req, res, next) => {
     const token = auth.newSessionToken();
     await user.update({ pendingEmail: user.email, pendingEmailTokenHash: auth.hashToken(token), pendingEmailExpiresAt: new Date(Date.now() + CONFIRM_TTL) });
     await mailer.sendEmailChange(user.email, token);
-    await audit(req, 'user_confirmation_resent', user.id);
+    await audit(req, 'user_confirmation_resent', user.id, { summary: { verb: 'mengirim ulang email konfirmasi ke', target: user.email, rest: '' } });
     res.status(204).end();
   } catch (err) {
     next(err);
@@ -161,7 +168,7 @@ exports.passwordReset = async (req, res, next) => {
     const token = auth.newSessionToken();
     await user.update({ passwordResetTokenHash: auth.hashToken(token), passwordResetExpiresAt: new Date(Date.now() + RESET_TTL) });
     await mailer.sendPasswordReset(user.email, token);
-    await audit(req, 'user_password_reset_sent', user.id);
+    await audit(req, 'user_password_reset_sent', user.id, { summary: { verb: 'mengirim tautan atur ulang password ke', target: user.email, rest: '' } });
     res.status(204).end();
   } catch (err) {
     next(err);
@@ -178,7 +185,7 @@ exports.invite = async (req, res, next) => {
       return fail(res, 409, 'EMAIL_TAKEN', auth.MSG.emailTaken, { email: auth.MSG.emailTaken });
     }
     await mailer.sendBetaInvite(values.email);
-    await audit(req, 'user_invited', values.email);
+    await audit(req, 'user_invited', values.email, { summary: { verb: 'mengundang pengguna beta', target: values.email, rest: '' } });
     res.status(204).end();
   } catch (err) {
     next(err);

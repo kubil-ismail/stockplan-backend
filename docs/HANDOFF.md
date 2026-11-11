@@ -164,6 +164,16 @@ Alur draf/terbit sama dengan emiten: `theme_themes.draft` (form), `status` hanya
 
 Peran ada di tabel `admin_roles` (5 bawaan dibuat migrasi; `admin_users.role` FK ke sini) dan **dibaca tiap request** di `requireAdmin` → `req.adminPerms` (dipakai `requirePerm` dan `can(req.adminPerms, …)`), jadi perubahan peran/izin langsung berlaku. Modul & aksi di `lib/adminRoles.js` `MODULES`. Pengaman (`lib/adminAccess.js`): tidak bisa mengubah/menonaktifkan diri sendiri; hanya super admin yang memberi/mencabut peran super admin atau mengubah anggota super admin; minimal 1 super admin aktif; izin super admin tidak bisa diubah; anggota tidak bisa mengubah izin peran yang sedang ia pegang (mencegah eskalasi). Status anggota: `invited` → `active` → `disabled`.
 
+**Admin: Riwayat perubahan** (`/admin/api/history`, izin modul `log`):
+
+| Endpoint | Izin | Catatan |
+| --- | --- | --- |
+| `GET /admin/api/history?q=&module=&who=&range=&tab=&page=&pageSize=` | `log:view` | Dikelompokkan per hari (Asia/Jakarta); `tabs` mengikuti filter; tiap entri: pelaku, kalimat (`verb`/`target`/`rest`), `changes` (sebelum/sesudah), `canRevert` |
+| `GET /admin/api/history/export.csv` | `log:view` | Filter sama, maks. 5.000 baris |
+| `POST /admin/api/history/:id/revert` | `log:edit` + izin modul terkait | Perubahan baru yang tercatat sendiri; asli ditandai `reverted`; 409 `CONFLICT` bila datanya sudah berubah lagi |
+
+`admin_audit_logs` sekarang satu-satunya jejak audit, ditulis **hanya lewat `lib/audit.js` (`record()`/`audit()`)**: kolom `module`/`kind` diisi dari `lib/adminHistory.js` `ACTIONS` (peta aksi → modul/jenis/kalimat; aksi baru wajib ditambah di sana dan di backfill migrasi bila perlu), `summary` (kalimat), `changes`, `revert` (`{ type, ref, before, after }`, tidak pernah dikirim ke client). **Endpoint admin baru yang mengubah data wajib memanggil `audit(req, action, target, { summary, changes, revert? })`** — memakai `hist.sectionChange`/`diffSections` untuk form berbagian. Tipe revert: `company_sections`, `theme_sections`, `member_role`, `member_status`, `user_suspension`, `role_perms` (reverter di `controllers/adminHistoryController.js` `REVERTERS`, izin di `REVERT_PERMS`). Hanya bagian yang benar-benar berubah yang disimpan; revert ditolak bila nilai sekarang tidak sama dengan nilai yang ditulis entri itu. Tidak ada route ubah/hapus riwayat.
+
 Aturan: 5 kegagalan (password atau kode 2FA) per email dalam 15 menit → 429 `ACCOUNT_LOCKED` 15 menit (dihitung dari `admin_audit_logs`, jadi email tak dikenal berperilaku sama); sesi berakhir 30 menit tanpa aktivitas; perangkat tepercaya 7 hari; kode cadangan sekali pakai. Middleware: `requireAdmin` (sudah lewat 2FA) dan `requireAdmin.pending` (baru langkah 1). Seeder admin dev: `admin@stockplan.id` / `StockPlanDev2026`, TOTP secret dan kode cadangan dicetak seeder (`npx sequelize-cli db:seed --seed 20261111000001-admin-users.js`).
 
 Penyimpangan dari §9 handoff design (disengaja):
@@ -183,7 +193,7 @@ Penyimpangan dari §9 handoff design (disengaja):
 | `theme_themes`, `theme_stages` | tema rantai nilai; `theme_stages.tickers` = array JSONB berurutan (indeks GIN), `shares` = porsi + sumber per emiten. Satu emiten boleh di beberapa tahap. Tema: `groups` (tahap utama), `drivers`, `draft`, `publishedAt` |
 | `market_companies` | emiten. Kolom untuk query/sort; isi editorial halaman di `profile` (JSONB) dan `ipo` (JSONB). `dataDelayed` JSONB → banner data tertunda |
 | `admin_roles` | peran admin + `perms` JSONB `{ modul: [aksi] }`; `system` = peran bawaan |
-| `admin_users`, `admin_sessions`, `admin_trusted_devices`, `admin_audit_logs` | akun admin (`role` FK ke `admin_roles`, `status` invited/active/disabled, undangan + `twoFactorEnabledAt`, TOTP + kode cadangan ter-hash), sesi (`verified` = lewat 2FA), perangkat tepercaya, log percobaan masuk (fondasi Riwayat perubahan; bukan milik user customer, tanpa cascade dari `auth_users`) |
+| `admin_users`, `admin_sessions`, `admin_trusted_devices`, `admin_audit_logs` (jejak audit append-only: `module`, `kind`, `summary`, `changes`, `revert`, `revertedAt`) | akun admin (`role` FK ke `admin_roles`, `status` invited/active/disabled, undangan + `twoFactorEnabledAt`, TOTP + kode cadangan ter-hash), sesi (`verified` = lewat 2FA), perangkat tepercaya, log percobaan masuk (fondasi Riwayat perubahan; bukan milik user customer, tanpa cascade dari `auth_users`) |
 | `watchlist_items` | per user × ticker, `checklist` 4 boolean, `note` |
 | `market_company_alerts` | per user × ticker × `listing`/`data_update` |
 
@@ -221,6 +231,7 @@ Catatan:
 | Admin pengguna: undangan | `POST /users/invite` hanya mengirim tautan daftar; tidak ada tabel undangan dan pendaftaran tetap terbuka | Saat beta ditutup: tabel undangan + pendaftaran bertoken |
 | Admin pengguna: "Tidak aktif" | Ambang 30 hari tanpa aktivitas dikarang dev (design tidak menyebut) | Konfirmasi ke produk |
 | Email (`lib/mailer.js`) | Konfirmasi daftar/atur ulang/undangan hanya di-log | Sebelum beta publik |
+| Admin riwayat | Append-only hanya di level aplikasi (tidak ada route ubah/hapus), belum dipaksa di DB (trigger / peran DB terpisah); retensi 2 tahun hanya di copy, belum ada job pembersih; tiap gagal masuk jadi satu entri (design menggabung "3 kali gagal"); kota ("Jakarta") tidak ada (tanpa GeoIP); filter pelaku hanya admin + Sistem; modul Masukan/Sinkron BEI/Pengaturan belum menulis riwayat (filternya sudah ada); aksi yang tak punya `summary` (data lama) memakai kalimat bawaan dari peta aksi | Sebelum production: trigger DB + job retensi; saat modul lain dibuat: panggil `audit()` |
 | Admin: akun dikunci | "Super admin diberi tahu" hanya tercatat di audit log + `console.warn` | Saat ada notifikasi admin |
 | Admin: aktivasi undangan | `accept-invite` mengembalikan secret TOTP langsung; tidak ada konfirmasi kode sebelum aktif (2FA tercatat aktif saat login pertama). Layar belum didesain (handoff design §12) | Saat layar aktivasi didesain |
 | Admin akses | Tidak ada hapus peran/anggota (design tidak punya tombolnya); atur ulang password admin ("Minta super admin mengirim tautan") belum ada; lokasi ("Jakarta") di masuk terakhir tidak ada (tanpa GeoIP) | Saat dibutuhkan |
@@ -249,7 +260,7 @@ Urutan yang disarankan, dimulai dari yang paling sedikit ketergantungannya.
 - **Bantuan & tiket**.
 - **Auth tambahan**: konfirmasi email daftar (endpoint ada lewat `confirm-email-change`, tinggal dikirim saat daftar), lupa password mandiri (`reset-password` sudah ada, tinggal `POST /auth/forgot`), Google, upload foto profil.
 - **Ekspor CSV** (`GET /me/export.csv`) — design: tautan dikirim lewat email.
-- **Admin** (`/admin/api`, handoff design §8): ~~login + 2FA~~ dan ~~Data emiten (daftar, edit, tambah IPO)~~ selesai (§5); ~~Pengguna~~ dan ~~Tema~~ selesai (§5); ~~Akses & peran (RBAC kustom)~~ selesai (§5); sisanya Dashboard, Masukan, sinkron BEI (mengisi `dataDelayed`), riwayat/audit log. Saat ini semua data referensi hanya dari seed.
+- **Admin** (`/admin/api`, handoff design §8): ~~login + 2FA~~ dan ~~Data emiten (daftar, edit, tambah IPO)~~ selesai (§5); ~~Pengguna~~ dan ~~Tema~~ selesai (§5); ~~Akses & peran (RBAC kustom)~~ selesai (§5); ~~Riwayat perubahan~~ selesai (§5); sisanya Dashboard, Masukan, sinkron BEI (mengisi `dataDelayed`), riwayat/audit log. Saat ini semua data referensi hanya dari seed.
 
 ### 8.3 Keputusan yang masih terbuka
 - Samakan aturan password daftar vs ganti password?

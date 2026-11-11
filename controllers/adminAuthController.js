@@ -2,6 +2,7 @@
 
 const { Op } = require('sequelize');
 const { AdminUser, AdminSession, AdminTrustedDevice, AdminAuditLog } = require('../models');
+const { record } = require('../lib/audit');
 const auth = require('../lib/auth');
 const a = require('../lib/adminAuth');
 const totp = require('../lib/totp');
@@ -21,7 +22,7 @@ const cookieOpts = (maxAge) => ({
 const dummyHash = auth.hashPassword('dummy-password-for-timing');
 
 const meta = (req) => ({ ip: req.ip, userAgent: (req.get('user-agent') || '').slice(0, 512) });
-const audit = (req, email, action, adminId = null) => AdminAuditLog.create({ adminId, email, action, ...meta(req) });
+const audit = (req, email, action, adminId = null) => record({ adminId, email, action, ip: req.ip, userAgent: req.get('user-agent') });
 
 async function lockFor(email) {
   const lastOk = await AdminAuditLog.findOne({ where: { email, action: 'login_ok' }, order: [['createdAt', 'DESC']] });
@@ -158,7 +159,7 @@ exports.acceptInvite = async (req, res, next) => {
       totpSecret: secret, backupCodes: backupCodes.map(a.hashCode), twoFactorEnabledAt: null,
       status: 'active', inviteTokenHash: null, inviteExpiresAt: null,
     });
-    await AdminAuditLog.create({ adminId: admin.id, email: admin.email, action: 'invite_accepted', target: `admin:${admin.id}`, ...meta(req) });
+    await audit(req, admin.email, 'invite_accepted', admin.id);
     // Shown once: the client renders the QR from otpauthUri and asks the member to store the backup codes.
     res.json({ email: admin.email, totp: { secret, otpauthUri: totp.otpauthUri(secret, admin.email) }, backupCodes });
   } catch (err) {

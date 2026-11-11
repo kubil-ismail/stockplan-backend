@@ -6,6 +6,7 @@ const th = require('../lib/adminThemes');
 const co = require('../lib/adminCompanies');
 const { can } = require('../lib/adminRoles');
 const { audit } = require('../lib/audit');
+const hist = require('../lib/adminHistory');
 const { fail } = require('../lib/http');
 
 const withRefs = { include: [{ model: Sector, as: 'sector', attributes: ['id', 'slug', 'name'] }, { model: ThemeStage, as: 'stages' }] };
@@ -150,7 +151,7 @@ exports.create = async (req, res, next) => {
       slug, name: form.name, sectorId: refs.sectorId, description: form.description || null,
       status: draftStatus(req), publishedAt: null, draft: form, updatedByName: req.admin.name,
     });
-    await audit(req, 'theme_created', target(slug));
+    await audit(req, 'theme_created', target(slug), { summary: { verb: 'membuat tema', target: form.name, rest: '(draf)' } });
     res.status(201).json(await editView(await loadTheme(slug)));
   } catch (err) {
     next(err);
@@ -164,11 +165,16 @@ exports.saveDraft = async (req, res, next) => {
   try {
     const theme = await loadTheme(req.params.slug);
     if (!theme) return notFound(res);
-    const form = { ...formOf(theme), ...values };
+    const before = formOf(theme);
+    const form = { ...before, ...values };
     if (form.name.length < 3) return invalid(res, 'name', th.MSG.nameShort);
     if (!(await checkRefs(res, form, theme.id))) return undefined;
     await theme.update({ draft: form, status: draftStatus(req), updatedByName: req.admin.name });
-    await audit(req, 'theme_draft_saved', target(theme.slug));
+    const ch = hist.sectionChange(before, Object.fromEntries(Object.keys(values).map((k) => [k, form[k]])));
+    await audit(req, 'theme_draft_saved', target(theme.slug), {
+      summary: { verb: hist.sectionVerb(ch.keys), target: before.name, rest: '(draf)' }, changes: ch.changes,
+      revert: ch.keys.length ? { type: 'theme_sections', ref: theme.slug, before: ch.beforePart, after: ch.afterPart } : null,
+    });
     res.json(await editView(theme));
   } catch (err) {
     next(err);
@@ -186,13 +192,19 @@ exports.mapCompany = async (req, res, next) => {
     if (!theme) return notFound(res);
     if (!company) return invalid(res, 'ticker', th.MSG.unknownTickers([ticker]));
     // Copy: mutating theme.draft in place would make Sequelize see no change and skip the UPDATE.
-    const form = structuredClone(formOf(theme));
+    const before = structuredClone(formOf(theme));
+    const form = structuredClone(before);
     if (!form.stages.length) return invalid(res, 'stage', th.MSG.noStage);
     const st = form.stages[stage - 1];
     if (!st) return invalid(res, 'stage', 'Tahap tidak ditemukan.'); // COPY: perlu review
-    if (!st.rows.some((r) => r.ticker === ticker)) st.rows.push({ ticker, pct: null, source: '' });
+    const already = st.rows.some((r) => r.ticker === ticker);
+    if (!already) st.rows.push({ ticker, pct: null, source: '' });
     await theme.update({ draft: form, status: draftStatus(req), updatedByName: req.admin.name });
-    await audit(req, 'theme_company_mapped', target(theme.slug));
+    const ch = hist.sectionChange(before, { stages: form.stages });
+    await audit(req, 'theme_company_mapped', target(theme.slug), {
+      summary: { verb: `menambahkan ${ticker} ke tahap`, target: st.name, rest: `· ${form.name} (draf)` }, changes: ch.changes,
+      revert: ch.keys.length ? { type: 'theme_sections', ref: theme.slug, before: ch.beforePart, after: ch.afterPart } : null,
+    });
     res.status(204).end();
   } catch (err) {
     next(err);
@@ -204,6 +216,7 @@ exports.publish = async (req, res, next) => {
   try {
     const theme = await loadTheme(req.params.slug);
     if (!theme) return notFound(res);
+    const live = th.columnsToForm(theme, theme.stages);
     const form = formOf(theme);
     const checks = th.checks(form, await readyMapFor(th.formTickers(form)));
     const failed = checks.filter((c) => !c.ok);
@@ -221,7 +234,10 @@ exports.publish = async (req, res, next) => {
       await ThemeStage.destroy({ where: { themeId: theme.id }, transaction });
       await ThemeStage.bulkCreate(cols.stages.map((s) => ({ ...s, themeId: theme.id })), { transaction });
     });
-    await audit(req, 'theme_published', target(theme.slug));
+    await audit(req, 'theme_published', target(theme.slug), {
+      summary: { verb: 'menerbitkan tema', target: form.name, rest: '' },
+      changes: hist.diffSections(live, form, Object.keys(form).filter((k) => hist.SECTION_LABELS[k])),
+    });
     res.json(await editView(await loadTheme(theme.slug)));
   } catch (err) {
     next(err);
