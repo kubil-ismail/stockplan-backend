@@ -1,7 +1,7 @@
 'use strict';
 
 const { Op, UniqueConstraintError } = require('sequelize');
-const { Company, Sector, Industry, ThemeStage } = require('../models');
+const { Company, Sector, Industry, Subsector, ThemeStage } = require('../models');
 const co = require('../lib/adminCompanies');
 const companies = require('../lib/companies');
 const { fail } = require('../lib/http');
@@ -9,7 +9,7 @@ const { fail } = require('../lib/http');
 const NOT_FOUND = 'Emiten tidak ditemukan.'; // COPY: perlu review
 const refs = [
   { model: Sector, as: 'sector', attributes: ['id', 'slug', 'name'] },
-  { model: Industry, as: 'industry', attributes: ['id', 'name'] },
+  { model: Industry, as: 'industry', attributes: ['id', 'name'], include: [{ model: Subsector, as: 'subsector', attributes: ['name'] }] },
 ];
 const BULK_MAX = 200;
 const PAGE_MAX = 100;
@@ -66,17 +66,19 @@ async function editView(row) {
   };
 }
 
-// Resolves sector/subsector text to FK ids. Unknown subsector text is kept in profile.subsector only.
+// Resolves sector/subsector text to FK ids. The subsector (IDX sub-sektor, picked from the sectors list) is kept in
+// profile.subsector. industryId only follows the text when it names an industry (legacy: typed industry name);
+// any other text leaves the company's current industry link alone, empty text/sector clears it.
 async function resolveRefs(form) {
   const out = { sectorId: null, industryId: null };
   if (!form.sectorSlug) return out;
   const sector = await Sector.findOne({ where: { slug: form.sectorSlug }, attributes: ['id'] });
   if (!sector) return null;
   out.sectorId = sector.id;
-  if (form.subsector) {
-    const ind = await Industry.findOne({ where: { name: { [Op.iLike]: companies.escapeLike(form.subsector) } }, attributes: ['id'] });
-    out.industryId = ind ? ind.id : null;
-  }
+  if (!form.subsector) return out;
+  const ind = await Industry.findOne({ where: { name: { [Op.iLike]: companies.escapeLike(form.subsector) } }, attributes: ['id'] });
+  if (ind) out.industryId = ind.id;
+  else delete out.industryId;
   return out;
 }
 
@@ -88,11 +90,14 @@ exports.index = async (req, res, next) => {
   const pageSize = Math.min(PAGE_MAX, Math.max(1, parseInt(req.query.pageSize, 10) || 14));
   const page = Math.max(1, parseInt(req.query.page, 10) || 1);
   try {
-    const [items, sectors] = await Promise.all([allItems(), Sector.findAll({ attributes: ['slug', 'name'], order: [['position', 'ASC']] })]);
+    const [items, sectors] = await Promise.all([allItems(), Sector.findAll({
+      attributes: ['slug', 'name'], include: [{ model: Subsector, as: 'subsectors', attributes: ['id', 'name'] }],
+      order: [['position', 'ASC'], [{ model: Subsector, as: 'subsectors' }, 'position', 'ASC']],
+    })]);
     const { tabs, rows } = co.filterList(items, { q, sector, tab });
     res.json({
       total: rows.length, page, pageSize, tabs,
-      sectors: sectors.map((s) => ({ slug: s.slug, name: s.name })),
+      sectors: sectors.map((s) => ({ slug: s.slug, name: s.name, subsectors: s.subsectors.map((x) => ({ id: x.id, name: x.name })) })),
       items: rows.slice((page - 1) * pageSize, page * pageSize),
     });
   } catch (err) {
@@ -224,3 +229,20 @@ exports.publish = async (req, res, next) => {
   }
 };
 
+
+// DELETE /admin/api/companies/:ticker — "Hapus emiten". Needs em:delete. Watchlist items and alerts go with it (FK cascade).
+// Refused while a theme stage still lists the ticker, so no theme is left pointing at a company that does not exist.
+exports.destroy = async (req, res, next) => {
+  try {
+    const row = await loadRow(tickerParam(req));
+    if (!row) return fail(res, 404, 'NOT_FOUND', NOT_FOUND);
+    const themes = ((await themeMap([row.ticker]))[row.ticker]) || [];
+    if (themes.length) return fail(res, 409, 'IN_THEME', co.MSG.inTheme(themes.map((t) => t.name).join(', ')));
+    const wasLive = !!row.publishedAt;
+    await row.destroy();
+    await audit(req, 'company_deleted', row.ticker, { summary: { verb: 'menghapus emiten', target: row.ticker, rest: wasLive ? '(sudah terbit)' : '(draf)' } });
+    res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
+};

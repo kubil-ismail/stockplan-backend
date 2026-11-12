@@ -65,6 +65,7 @@ Jalan keluarnya perlu perubahan di admin (mis. `assetPrefix`), dan itu belum dik
 | --- | --- | --- |
 | `APP_URL` | origin client, mis. `https://stockplan.id` | Tautan email ke pengguna client (§5) |
 | `ADMIN_URL` | origin admin, mis. `https://admin.stockplan.id` | Tautan undangan admin (`/admin/undangan`) |
+| `SYNC_TOKEN` | acak ≥ 32 karakter (`openssl rand -hex 32`), sama dengan di crawler | Crawler BEI → `/admin/api/sync/agent/*`. Kosong = endpoint crawler menolak (503) |
 
 **`ADMIN_URL` default-nya `APP_URL`.** Kalau admin di subdomain dan `ADMIN_URL` lupa diisi, tautan undangan admin akan membuka domain client.
 
@@ -104,7 +105,8 @@ Cara memanggil API di tiap halaman ada di FRONTEND_HANDOFF §3.1. Di dev, email 
 
 Supaya client tidak mengira data ini sudah ada:
 
-- **Dashboard, Masukan & laporan, Sinkron data BEI, Pengaturan aplikasi** masih memakai data contoh dari design (ditandai `shortcut:` di `components/admin/dashboard-view.tsx`, `lib/masukan.ts`, `lib/sinkron.ts`, `lib/pengaturan.ts`). Endpoint backend-nya juga belum ada. Pengaturan aplikasi yang diubah di admin **tidak** sampai ke client.
+- **Dashboard, Masukan & laporan, Pengaturan aplikasi** masih memakai data contoh dari design (ditandai `shortcut:` di `components/admin/dashboard-view.tsx`, `lib/masukan.ts`, `lib/pengaturan.ts`). Endpoint backend-nya juga belum ada.
+- **Sinkron data BEI**: endpoint backend sudah ada (`/admin/api/sync`, lihat FRONTEND_HANDOFF §4.4), tetapi admin masih memakai `lib/sinkron.ts`. Crawler juga belum diarahkan ke backend ini, jadi data sinkron masih kosong. Pengaturan aplikasi yang diubah di admin **tidak** sampai ke client.
 - **Halaman `/admin/undangan`** (aktivasi undangan admin) belum dibuat.
 - **`perms` dari `GET /admin/api/auth/me`** belum dipakai untuk menyembunyikan menu/tombol. Server tetap menolak dengan 403, jadi aman, tetapi admin dengan peran terbatas masih melihat tombol yang akan gagal.
 - **Logo emiten**: admin hanya meneruskan `/admin/api/*` ke backend. `logoUrl` (`/logos/emiten/…`) dibaca dari `public/logos/` milik admin, yang baru berisi sebagian logo. Logo lain tampil sebagai inisial. Perbaikan: tambah rewrite `/logos/:path*` ke backend di `next.config.ts`.

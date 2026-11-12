@@ -42,7 +42,7 @@ const errorResponse = (description, code, message, fields) => ({
 module.exports = {
   openapi: '3.0.3',
   info: { title: 'StockPlan API', version: '0.1.0', description: 'REST API StockPlan. Sesi memakai cookie httpOnly `sid`.' },
-  tags: [{ name: 'Auth' }, { name: 'Profil' }, { name: 'Pengaturan' }, { name: 'Tema bisnis' }, { name: 'Emiten' }, { name: 'Watchlist' }, { name: 'Admin: Auth' }, { name: 'Admin: Emiten' }, { name: 'Admin: Pengguna' }, { name: 'Admin: Tema' }, { name: 'Admin: Akses' }, { name: 'Admin: Riwayat' }],
+  tags: [{ name: 'Auth' }, { name: 'Profil' }, { name: 'Pengaturan' }, { name: 'Tema bisnis' }, { name: 'Emiten' }, { name: 'Watchlist' }, { name: 'Admin: Auth' }, { name: 'Admin: Emiten' }, { name: 'Admin: Pengguna' }, { name: 'Admin: Tema' }, { name: 'Admin: Akses' }, { name: 'Admin: Riwayat' }, { name: 'Admin: Sinkron' }],
   security: [{ cookieAuth: [] }],
   paths: {
     '/auth/register': {
@@ -277,7 +277,7 @@ module.exports = {
           200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: {
             total: { type: 'integer' }, page: { type: 'integer' }, pageSize: { type: 'integer' },
             tabs: { type: 'object', properties: { all: { type: 'integer' }, review: { type: 'integer' }, incomplete: { type: 'integer' }, ready: { type: 'integer' } } },
-            sectors: { type: 'array', items: { type: 'object', properties: { slug: { type: 'string' }, name: { type: 'string' } } } },
+            sectors: { type: 'array', description: 'Pilihan sektor + sub-sektornya (dropdown Sektor dan Subsektor di form emiten; nilai Subsektor = `name`)', items: { type: 'object', properties: { slug: { type: 'string' }, name: { type: 'string' }, subsectors: { type: 'array', items: { type: 'object', properties: { id: { type: 'string', format: 'uuid' }, name: { type: 'string' } } } } } } },
             items: { type: 'array', items: { $ref: '#/components/schemas/AdminCompanyRow' } },
           } } } } },
           401: errorResponse('Belum masuk', 'UNAUTHENTICATED', 'Sesi admin berakhir. Masuk lagi.'),
@@ -342,6 +342,18 @@ module.exports = {
           200: { description: 'Draf tersimpan', content: { 'application/json': { schema: { $ref: '#/components/schemas/AdminCompanyEdit' } } } },
           404: errorResponse('Tidak ada', 'NOT_FOUND', 'Emiten tidak ditemukan.'),
           422: errorResponse('Isian tidak valid', 'VALIDATION', 'Periksa lagi isian Anda.', { 'risks[0].level': 'Isian tidak valid.' }),
+        },
+      },
+      delete: {
+        tags: ['Admin: Emiten'],
+        security: [{ adminCookie: [] }],
+        summary: 'Hapus emiten',
+        description: 'Izin `em:delete`. Menghapus emiten beserta watchlist dan pengingat pengguna yang terkait. Ditolak `409 IN_THEME` selama emiten masih ada di tahap tema mana pun. Tidak bisa dikembalikan dari Riwayat (tercatat sebagai "menghapus emiten").',
+        responses: {
+          204: { description: 'Terhapus' },
+          403: errorResponse('Peran tanpa izin hapus', 'FORBIDDEN', 'Peran Anda tidak punya izin untuk aksi ini.'),
+          404: errorResponse('Tidak ada', 'NOT_FOUND', 'Emiten tidak ditemukan.'),
+          409: errorResponse('Masih dipakai tema', 'IN_THEME', 'Emiten ini masih dipakai di tema: Batu bara. Keluarkan dulu dari tema itu.'),
         },
       },
     },
@@ -762,6 +774,117 @@ module.exports = {
         },
       },
     },
+    '/admin/api/sync': {
+      get: {
+        tags: ['Admin: Sinkron'], security: [{ adminCookie: [] }],
+        summary: 'Status sinkron BEI (AdminSinkron)',
+        description: 'Izin `sync:view`. Data diisi crawler lewat `/admin/api/sync/agent/*`. `jobs[].status`: `running` (diambil crawler, < 2 jam), `queued` (menunggu crawler), `failed` (ada kegagalan terbuka), `ok`, `never` (belum pernah lapor). `summary` sudah jadi teks ("958 emiten · 1 mnt 12 dtk"). `note` = "N perubahan perlu ditinjau" bila ada konflik terbuka. `failures` = kegagalan terbuka dari run terakhir; `retrying` = sedang/menunggu dicoba ulang. `conflicts[].changes` = baris "Di StockPlan" (`before`) vs "Dari BEI" (`after`), dihitung dari draf/terbit saat ini. `history` = 14 hari (Asia/Jakarta), `failed` = jumlah emiten gagal per hari.',
+        responses: {
+          200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: {
+            stats: { type: 'object', properties: { companies: { type: 'integer', example: 958, description: 'Emiten tercakup (selain IPO)' }, lastFullSyncAt: { type: 'string', format: 'date-time', nullable: true } } },
+            jobs: { type: 'array', items: { type: 'object', properties: {
+              key: { type: 'string', enum: ['prof', 'px', 'sub', 'mgmt', 'idx', 'kip', 'lk', 'ipo'] }, name: { type: 'string', example: 'Manajemen' }, description: { type: 'string' },
+              schedule: { type: 'string', example: 'Harian 06.00' }, nextRunAt: { type: 'string', format: 'date-time', nullable: true },
+              lastStartedAt: { type: 'string', format: 'date-time', nullable: true }, lastFinishedAt: { type: 'string', format: 'date-time', nullable: true },
+              summary: { type: 'string', example: '955 dari 958 · 41 dtk' }, note: { type: 'string', example: '1 perubahan perlu ditinjau' },
+              status: { type: 'string', enum: ['running', 'queued', 'failed', 'ok', 'never'] }, failed: { type: 'integer', example: 3 },
+            } } },
+            failures: { type: 'array', items: { type: 'object', properties: {
+              id: { type: 'string', format: 'uuid' }, jobKey: { type: 'string' }, jobName: { type: 'string' }, ticker: { type: 'string', nullable: true, example: 'BUMI', description: 'null = seluruh job gagal' },
+              message: { type: 'string', example: 'Halaman profil BEI tidak bisa dibaca' }, log: { type: 'string', example: 'GET /profil-perusahaan-tercatat/BUMI → 503 (3x)' },
+              at: { type: 'string', format: 'date-time' }, retrying: { type: 'boolean' },
+            } } },
+            conflicts: { type: 'array', items: { type: 'object', properties: {
+              id: { type: 'string', format: 'uuid' }, jobKey: { type: 'string' }, ticker: { type: 'string', example: 'ADMR' }, section: { type: 'string', enum: ['group', 'shareholders', 'management'] },
+              field: { type: 'string', example: 'Anak usaha baru' }, reason: { type: 'string' }, at: { type: 'string', format: 'date-time' },
+              changes: { type: 'array', items: { type: 'object', properties: { field: { type: 'string' }, label: { type: 'string' }, before: {}, after: {} } } },
+            } } },
+            history: { type: 'array', items: { type: 'object', properties: { date: { type: 'string', format: 'date', example: '2026-11-06' }, failed: { type: 'integer' } } } },
+          } } } } },
+          403: errorResponse('Tanpa izin', 'FORBIDDEN', 'Peran Anda tidak punya izin untuk aksi ini.'),
+        },
+      },
+    },
+    '/admin/api/sync/run': {
+      post: {
+        tags: ['Admin: Sinkron'], security: [{ adminCookie: [] }],
+        summary: 'Jalankan sekarang / Sinkron semua sekarang',
+        description: 'Izin `sync:edit`. Hanya memasukkan ke antrean; crawler mengambilnya lewat `agent/queue`, lalu status job jadi `running`. Tanpa `key` = semua job. Tercatat di Riwayat (modul Sinkron BEI).',
+        requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { key: { type: 'string', example: 'mgmt' } } } } } },
+        responses: {
+          200: { description: 'Masuk antrean', content: { 'application/json': { schema: { type: 'object', properties: { message: { type: 'string', example: 'Manajemen masuk antrean sinkron.' } } } } } },
+          404: errorResponse('Job tidak ada', 'NOT_FOUND', 'Jadwal sinkron tidak ditemukan.'),
+        },
+      },
+    },
+    '/admin/api/sync/failures/{id}/retry': {
+      post: {
+        tags: ['Admin: Sinkron'], security: [{ adminCookie: [] }],
+        summary: 'Coba lagi (satu emiten gagal)',
+        description: 'Izin `sync:edit`. Memasukkan job ke antrean hanya untuk ticker ini (digabung dengan percobaan ulang lain; kalau sudah ada run penuh di antrean, tetap run penuh). Kegagalan hilang setelah crawler melapor berhasil.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: {
+          200: { description: 'Masuk antrean', content: { 'application/json': { schema: { type: 'object', properties: { message: { type: 'string', example: 'BUMI masuk antrean sinkron ulang.' } } } } } },
+          404: errorResponse('Sudah tidak ada', 'NOT_FOUND', 'Kegagalan ini sudah tidak ada.'),
+        },
+      },
+    },
+    '/admin/api/sync/conflicts/{id}/resolve': {
+      post: {
+        tags: ['Admin: Sinkron'], security: [{ adminCookie: [] }],
+        summary: 'Pakai data BEI / Pertahankan isian tim',
+        description: 'Izin `sync:edit`; `use: bei` juga butuh `em:edit`. `bei` menulis nilai BEI ke **draf** emiten (status jadi Draf, tetap perlu "Terbitkan") dan tercatat di Riwayat dengan sebelum/sesudah, bisa "Kembalikan". `team` hanya menutup konflik; nilai BEI yang sama tidak akan dimunculkan lagi oleh run berikutnya.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['use'], properties: { use: { type: 'string', enum: ['bei', 'team'] } } } } } },
+        responses: {
+          200: { description: 'Selesai', content: { 'application/json': { schema: { type: 'object', properties: { message: { type: 'string', example: 'BUMI: data BEI dipakai dan tercatat di Riwayat perubahan' } } } } } },
+          403: errorResponse('Tanpa izin', 'FORBIDDEN', 'Peran Anda tidak punya izin untuk aksi ini.'),
+          404: errorResponse('Tidak ada', 'NOT_FOUND', 'Perubahan ini tidak ditemukan.'),
+          409: errorResponse('Sudah ditinjau admin lain', 'ALREADY_RESOLVED', 'Perubahan ini sudah ditinjau.'),
+          422: errorResponse('Pilihan salah', 'VALIDATION', 'Pilih data BEI atau isian tim.', { use: 'Pilih data BEI atau isian tim.' }),
+        },
+      },
+    },
+    '/admin/api/sync/agent/queue': {
+      get: {
+        tags: ['Admin: Sinkron'], security: [{ syncToken: [] }],
+        summary: 'Crawler: ambil antrean',
+        description: 'Untuk crawler, bukan UI. Mengambil (claim) semua job yang diminta admin; job yang sedang jalan < 2 jam tidak diambil lagi. `tickers: null` = run penuh, daftar = hanya ticker itu. Setelah selesai, crawler wajib memanggil `report`. 503 `SYNC_DISABLED` bila `SYNC_TOKEN` belum diisi.',
+        responses: {
+          200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: { jobs: { type: 'array', items: { type: 'object', properties: { key: { type: 'string' }, tickers: { type: 'array', nullable: true, items: { type: 'string' } } } } } } }, example: { jobs: [{ key: 'mgmt', tickers: ['BUMI'] }] } } } },
+          401: errorResponse('Token salah', 'UNAUTHENTICATED', 'Token sinkron salah.'),
+        },
+      },
+    },
+    '/admin/api/sync/agent/jobs/{key}/report': {
+      post: {
+        tags: ['Admin: Sinkron'], security: [{ syncToken: [] }],
+        summary: 'Crawler: laporkan hasil run',
+        description: 'Untuk crawler. Dipanggil setelah setiap run (terjadwal atau dari antrean). Kegagalan terbuka job ini diganti dengan `failures` (run penuh: semua; `tickers` diisi: hanya ticker itu). Hanya run penuh yang memperbarui kolom "Terakhir". `conflicts`: nilai BEI untuk satu bagian form emiten (`group`, `shareholders`, `management`), divalidasi seperti `PATCH /admin/api/companies/:ticker`; hanya kunci yang dikirim yang dipakai (mis. `group: { subsidiaries }` tidak mengosongkan `group.name`). Kirim daftar lengkap, bukan selisih: `management.people` dari BEI menggantikan seluruh daftar. Konflik dilewati bila nilainya sudah sama dengan isian tim, atau tim sudah memilih "Pertahankan" untuk nilai yang sama. Ticker yang tidak ada di `market_companies` dikembalikan di `skipped`. Body maks. 2 MB.',
+        parameters: [{ name: 'key', in: 'path', required: true, schema: { type: 'string', example: 'mgmt' } }],
+        requestBody: { required: true, content: { 'application/json': {
+          schema: { type: 'object', required: ['startedAt', 'finishedAt'], properties: {
+            startedAt: { type: 'string', format: 'date-time' }, finishedAt: { type: 'string', format: 'date-time' }, nextRunAt: { type: 'string', format: 'date-time', nullable: true },
+            ok: { type: 'integer', nullable: true }, total: { type: 'integer', nullable: true }, detail: { type: 'string', maxLength: 120, description: 'Ganti teks "N emiten · durasi", mis. "14 dokumen baru"' },
+            note: { type: 'string', maxLength: 120, description: 'Catatan oranye, mis. "23 laporan belum diproses tim"' },
+            tickers: { type: 'array', nullable: true, items: { type: 'string' }, description: 'Isi hanya untuk run sebagian (dari antrean `tickers`)' },
+            failures: { type: 'array', maxItems: 2000, items: { type: 'object', required: ['message'], properties: { ticker: { type: 'string', nullable: true }, message: { type: 'string', maxLength: 200 }, log: { type: 'string', maxLength: 500 } } } },
+            conflicts: { type: 'array', maxItems: 500, items: { type: 'object', required: ['ticker', 'section', 'field', 'value'], properties: { ticker: { type: 'string' }, section: { type: 'string', enum: ['group', 'shareholders', 'management'] }, field: { type: 'string', maxLength: 100 }, reason: { type: 'string', maxLength: 300 }, value: { type: 'object' } } } },
+          } },
+          example: {
+            startedAt: '2026-11-06T06:00:00+07:00', finishedAt: '2026-11-06T06:00:41+07:00', nextRunAt: '2026-11-07T06:00:00+07:00', ok: 955, total: 958,
+            failures: [{ ticker: 'PTRO', message: 'Format tabel manajemen berubah', log: 'Parser: kolom "Jabatan" tidak ditemukan' }],
+            conflicts: [{ ticker: 'ADMR', section: 'group', field: 'Anak usaha baru', reason: 'BEI menambahkan anak usaha. Bagian ini sudah pernah diatur tim, jadi tidak ditimpa otomatis.', value: { subsidiaries: [{ name: 'PT Kalimantan Aluminium Industry', ownershipPct: 65 }] } }],
+          },
+        } } },
+        responses: {
+          200: { description: 'Diterima', content: { 'application/json': { schema: { type: 'object', properties: { failures: { type: 'integer' }, conflicts: { type: 'integer', description: 'Konflik terbuka yang dibuat/diperbarui' }, skipped: { type: 'array', items: { type: 'string' } } } } } } },
+          401: errorResponse('Token salah', 'UNAUTHENTICATED', 'Token sinkron salah.'),
+          404: errorResponse('Job tidak ada', 'NOT_FOUND', 'Jadwal sinkron tidak ditemukan.'),
+          422: errorResponse('Laporan tidak valid', 'VALIDATION', 'Laporan sinkron tidak valid.', { 'conflicts[0].value.people[0].role': 'Isian tidak valid.' }),
+        },
+      },
+    },
     '/sectors': {
       get: {
         tags: ['Tema bisnis'],
@@ -1003,7 +1126,7 @@ module.exports = {
     },
   },
   components: {
-    securitySchemes: { cookieAuth: { type: 'apiKey', in: 'cookie', name: 'sid' }, adminCookie: { type: 'apiKey', in: 'cookie', name: 'asid' } },
+    securitySchemes: { cookieAuth: { type: 'apiKey', in: 'cookie', name: 'sid' }, adminCookie: { type: 'apiKey', in: 'cookie', name: 'asid' }, syncToken: { type: 'http', scheme: 'bearer', description: 'Env `SYNC_TOKEN` (≥ 32 karakter) untuk crawler' } },
     responses: { Unauthenticated: errorResponse('Belum masuk / sesi berakhir', 'UNAUTHENTICATED', 'Sesi tidak valid atau sudah berakhir.') },
     schemas: {
       WatchItem: {

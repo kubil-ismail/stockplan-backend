@@ -64,7 +64,7 @@ Setiap error memakai bentuk yang sama:
 | 403 | `OWN_ROLE`, `SUPER_LOCKED` | (admin) Pengaman di Akses & peran |
 | 404 | `NOT_FOUND` | Data tidak ada (atau belum terbit untuk client) |
 | 409 | `EMAIL_TAKEN`, `TICKER_TAKEN`, `THEME_TAKEN`, `ROLE_TAKEN` | Nilai unik sudah dipakai |
-| 409 | `ALREADY_*`, `NOT_SUSPENDED`, `BAD_STATE`, `CANNOT_RESET`, `NOT_REVERTABLE`, `CONFLICT` | Aksi tidak cocok dengan status data sekarang. Muat ulang data |
+| 409 | `ALREADY_*`, `NOT_SUSPENDED`, `BAD_STATE`, `CANNOT_RESET`, `NOT_REVERTABLE`, `CONFLICT`, `IN_THEME` | Aksi tidak cocok dengan status data sekarang. Muat ulang data |
 | 400 | `BAD_TOKEN` | Token di tautan email tidak valid/kedaluwarsa |
 | 400 | `CURRENT_SESSION` | Tidak bisa menghapus sesi perangkat ini dari daftar sesi (pakai logout) |
 | 422 | `VALIDATION` | Tampilkan `fields` per input |
@@ -207,10 +207,12 @@ Perubahan peran berlaku **langsung** di request berikutnya (bukan "di sesi berik
 | --- | --- | --- | --- |
 | Shell | `GET /admin/api/auth/me` | — | |
 | AdminEmiten | `GET /admin/api/companies?q=&tab=&sector=&page=&pageSize=` | `em:view` | Tab: `all`, `review`, `incomplete`, `ready`. Kelengkapan 5 bagian per baris |
+| | (respons daftar) `sectors[].subsectors` | `em:view` | `[{ id, name }]` untuk dropdown Sektor → Subsektor di form emiten. Nilai Subsektor yang dikirim ke `PATCH` = `name`. Industri tidak lagi diganti oleh isian ini kecuali namanya sama dengan nama industri |
 | | `GET /admin/api/companies/export.csv?tickers=` | `em:view` | Tanpa `tickers` = semua; `tickers=BUMI,PTBA` = yang dipilih |
 | | `POST /admin/api/companies/bulk-review { tickers }` | `em:edit` | 1–200 ticker → "Perlu ditinjau" |
 | AdminEmitenEdit, AdminEmitenIPO | `GET /admin/api/companies/:ticker` | `em:view` | `themes` hanya baca (dikelola di modul Tema) |
 | | `PATCH /admin/api/companies/:ticker` | `em:edit` | Simpan draf |
+| | `DELETE /admin/api/companies/:ticker` | `em:delete` | `204`. Menghapus emiten + watchlist/pengingat pengguna terkait. `409 IN_THEME` bila masih ada di tahap tema (keluarkan dulu dari tema). Tidak bisa dikembalikan dari Riwayat |
 | | `POST /admin/api/companies/:ticker/publish` | `em:publish` | |
 | AdminEmitenIPO (baru) | `POST /admin/api/companies { ticker, name, ... }` | `em:edit` | Dibuat sebagai draf. Ticker tidak bisa diubah setelah dibuat |
 | AdminPengguna | `GET /admin/api/users?q=&tab=&plan=&page=&pageSize=` | `usr:view` | `summary` (4 kartu) + `tabs` + baris. Status: `act`, `new`, `idle`, `sus` |
@@ -236,12 +238,17 @@ Perubahan peran berlaku **langsung** di request berikutnya (bukan "di sesi berik
 | AdminRiwayat | `GET /admin/api/history?q=&module=&who=&range=&tab=&page=&pageSize=` | `log:view` | Dikelompokkan per hari. Tiap entri: pelaku, kalimat (`verb`/`target`/`rest`), `changes` (sebelum/sesudah), `canRevert` |
 | | `GET /admin/api/history/export.csv` | `log:view` | Filter sama, maks. 5.000 baris |
 | | `POST /admin/api/history/:id/revert` | `log:edit` + izin modul terkait | `409 CONFLICT` bila data sudah berubah lagi sejak entri itu |
+| AdminSinkron | `GET /admin/api/sync` | `sync:view` | `stats`, `jobs` (status `running`/`queued`/`failed`/`ok`/`never`, `summary` sudah jadi teks), `failures`, `conflicts` (`changes` = Di StockPlan vs Dari BEI), `history` 14 hari. Poll selama ada job `running`/`queued` |
+| | `POST /admin/api/sync/run { key? }` | `sync:edit` | Masuk antrean crawler, bukan langsung selesai. Tanpa `key` = semua |
+| | `POST /admin/api/sync/failures/:id/retry` | `sync:edit` | "Coba lagi". Baris tetap ada (`retrying: true`) sampai crawler melapor berhasil |
+| | `POST /admin/api/sync/conflicts/:id/resolve { use: 'bei' \| 'team' }` | `sync:edit` (+ `em:edit` untuk `bei`) | `bei` menulis ke **draf** emiten (perlu Terbitkan), bisa Kembalikan dari Riwayat. `409 ALREADY_RESOLVED` |
 
 Pengaman di Akses & peran yang perlu tercermin di UI (server menolaknya dengan 403/409): tidak bisa mengubah atau menonaktifkan diri sendiri; hanya super admin yang bisa memberi/mencabut peran super admin; minimal satu super admin aktif; izin super admin tidak bisa diubah; tidak bisa mengubah izin peran yang sedang dipegang sendiri.
 
 ### 4.5 Belum tersedia di API (admin)
 
-- Modul Dashboard, Masukan & laporan, Sinkron data BEI, Pengaturan aplikasi (modulnya sudah ada di matriks izin, endpoint-nya belum).
+- Modul Dashboard, Masukan & laporan, Pengaturan aplikasi (modulnya sudah ada di matriks izin, endpoint-nya belum).
+- Sinkron data BEI: endpoint ada, tetapi datanya kosong sampai `stock-plan-crawler` diarahkan ke `/admin/api/sync/agent/*` (lihat Swagger, tag Admin: Sinkron). Sebelum itu semua job berstatus `never`.
 - Upload file: logo emiten, laporan keuangan, prospektus IPO.
 - `reportCount` emiten selalu 0. Kolom tesis, evaluasi, dan "tema dibuka" di Pengguna selalu 0/kosong. Angka "dipakai N tesis" di Tema selalu `null`.
 - Hapus peran/anggota, reset password admin.

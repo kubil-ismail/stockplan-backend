@@ -16,5 +16,6 @@ router.post('/', requirePerm('em', 'edit'), c.create);
 router.get('/:ticker', requirePerm('em', 'view'), c.show);
 router.patch('/:ticker', requirePerm('em', 'edit'), c.saveDraft);
 router.post('/:ticker/publish', requirePerm('em', 'publish'), c.publish);
+router.delete('/:ticker', requirePerm('em', 'delete'), c.destroy);
 
 module.exports = router;
