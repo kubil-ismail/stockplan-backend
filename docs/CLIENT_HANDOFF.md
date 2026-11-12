@@ -76,7 +76,8 @@ Path API di dokumen backend (`/me`, `/companies`, …) di client selalu dipanggi
 | Watchlist | `/watchlist` | Tersambung, kecuali "Perubahan bisnis" | `GET`/`POST`/`PATCH`/`DELETE /watchlist` |
 | Konfirmasi email | `/konfirmasi-email` | **Stub** | lihat §5 |
 | Lupa password, password baru | `/lupa-password`, `/password-baru` | **Stub** | lihat §5 |
-| Beranda, Tesis, Portofolio | `/beranda`, `/tesis`, `/portofolio` | **Stub** (data contoh) | API belum ada |
+| Beranda, Tesis | `/beranda`, `/tesis` | **Stub** (data contoh) | API belum ada |
+| Portofolio | `/portofolio` | **Stub** (data contoh) | API sudah ada: `GET /portfolio` + 5 aksi (FRONTEND_HANDOFF §3.2). Tanpa tesis dulu: `theses: []` |
 | Notifikasi, ⌘K, Bantuan, Masukan, Langganan | — | **Stub** | API belum ada |
 | Pemeliharaan | `/pemeliharaan` | **Stub** (`lib/maintenance.ts`) | Pengaturan aplikasi admin belum punya endpoint |
 

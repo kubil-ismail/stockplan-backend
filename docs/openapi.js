@@ -42,7 +42,7 @@ const errorResponse = (description, code, message, fields) => ({
 module.exports = {
   openapi: '3.0.3',
   info: { title: 'StockPlan API', version: '0.1.0', description: 'REST API StockPlan. Sesi memakai cookie httpOnly `sid`.' },
-  tags: [{ name: 'Auth' }, { name: 'Profil' }, { name: 'Pengaturan' }, { name: 'Tema bisnis' }, { name: 'Emiten' }, { name: 'Watchlist' }, { name: 'Admin: Auth' }, { name: 'Admin: Emiten' }, { name: 'Admin: Pengguna' }, { name: 'Admin: Tema' }, { name: 'Admin: Akses' }, { name: 'Admin: Riwayat' }, { name: 'Admin: Sinkron' }, { name: 'Admin: Dashboard' }],
+  tags: [{ name: 'Auth' }, { name: 'Profil' }, { name: 'Pengaturan' }, { name: 'Tema bisnis' }, { name: 'Emiten' }, { name: 'Watchlist' }, { name: 'Portofolio' }, { name: 'Admin: Auth' }, { name: 'Admin: Emiten' }, { name: 'Admin: Pengguna' }, { name: 'Admin: Tema' }, { name: 'Admin: Akses' }, { name: 'Admin: Riwayat' }, { name: 'Admin: Sinkron' }, { name: 'Admin: Dashboard' }],
   security: [{ cookieAuth: [] }],
   paths: {
     '/auth/register': {
@@ -992,7 +992,7 @@ module.exports = {
       get: {
         tags: ['Emiten'],
         summary: 'Cari emiten',
-        description: 'Halaman EmitenSearch. Cocok kalau kode diawali `q`, nama mengandung `q`, atau nama industri mengandung `q`. Urutan: kode persis → awalan kode → awalan nama → lainnya, lalu market cap. `sectors` = chip filter dengan jumlah dari semua hasil; `total` juga dihitung sebelum filter sektor. Tanpa `q` tapi dengan `sector` → semua emiten sektor itu (Jelajahi berdasarkan sektor). Tanpa keduanya → hasil kosong (EmitenKosong). Tiap baris membawa `themes` (Tema terkait, hanya tema terbit) dan `inWatchlist`.',
+        description: 'Halaman EmitenSearch. Cocok kalau kode diawali `q`, nama mengandung `q`, atau nama industri mengandung `q`. Urutan: kode persis → awalan kode → awalan nama → lainnya, lalu market cap. `sectors` = chip filter dengan jumlah dari semua hasil; `total` juga dihitung sebelum filter sektor. Tanpa `q` tapi dengan `sector` → semua emiten sektor itu (Jelajahi berdasarkan sektor). Tanpa keduanya → hasil kosong (EmitenKosong). Tiap baris membawa `themes` (Tema terkait, hanya tema terbit) dan `inWatchlist`. Hanya emiten yang sudah terbit. `companies` dipotong 200 baris teratas; `total` dan `sectors` tetap menghitung semua hasil (jadi `total` bisa lebih besar dari `companies.length`), tidak ikut terpotong.',
         parameters: [
           { name: 'q', in: 'query', schema: { type: 'string', maxLength: 50, example: 'bu' } },
           { name: 'sector', in: 'query', schema: { type: 'string', example: 'energi' }, description: 'Slug sektor dari `sectors`' },
@@ -1088,7 +1088,7 @@ module.exports = {
       get: {
         tags: ['Tema bisnis'],
         summary: 'Detail tema (rantai nilai)',
-        description: 'Halaman TemaDetail + TemaDetailTabel + panel emiten, satu panggilan. Hanya tema `published`. `companies` berurutan menurut kemunculan pertama di tahap; ticker tahap tanpa data emiten dibuang. `mcapAsOf` = tanggal harga terbaru di antara emiten yang punya market cap. `viewer.watchlist` = emiten tema ini di watchlist pengguna.',
+        description: 'Halaman TemaDetail + TemaDetailTabel + panel emiten, satu panggilan. Hanya tema `published`. `companies` berurutan menurut kemunculan pertama di tahap; ticker tahap tanpa data emiten dibuang, termasuk emiten yang belum terbit (draf), supaya tidak ada emiten di halaman tema yang `GET /companies/:ticker`-nya 404; jumlah emiten per tahap mengikuti itu. `mcapAsOf` = tanggal harga terbaru di antara emiten yang punya market cap. `viewer.watchlist` = emiten tema ini di watchlist pengguna.',
         parameters: [{ name: 'slug', in: 'path', required: true, schema: { type: 'string', example: 'batubara' } }],
         responses: {
           200: {
@@ -1131,6 +1131,72 @@ module.exports = {
           401: { $ref: '#/components/responses/Unauthenticated' },
           404: errorResponse('Tema tidak ada / belum terbit', 'NOT_FOUND', 'Tema tidak ditemukan.'),
         },
+      },
+    },
+    '/portfolio': {
+      get: {
+        tags: ['Portofolio'], security: [{ cookieAuth: [] }],
+        summary: 'Portofolio saya',
+        description: 'Halaman Portofolio (HANDOFF §6.5): satu panggilan untuk dana tunai, total, emiten, dan riwayat keputusan. **Semua angka berbasis modal** (`lots × 100 × avgPrice`), bukan harga pasar; tidak ada harga realtime. Pengelompokan per tesis menunggu modul Tesis: sementara `theses: []` dan semua emiten berstatus "Tanpa tesis". Setiap perubahan di bawah ini mengembalikan **bentuk yang sama** (snapshot terbaru), jadi client cukup mengganti state-nya. StockPlan tidak memproses transaksi: ini catatan pribadi.',
+        responses: { 200: { description: 'OK', content: { 'application/json': { schema: { $ref: '#/components/schemas/Portfolio' } } } }, 401: { $ref: '#/components/responses/Unauthenticated' } },
+      },
+    },
+    '/portfolio/holdings': {
+      post: {
+        tags: ['Portofolio'], security: [{ cookieAuth: [] }],
+        summary: 'Tambah emiten',
+        description: 'Dialog "Tambah emiten". Hanya emiten **terbit dan sudah tercatat** (bukan IPO). Satu emiten satu baris: kalau sudah ada, `409 ALREADY_HELD` (pakai Catat transaksi). `useCash: true` mengurangi dana tunai sebesar modal; dana kurang → `422` dengan `fields.useCash` dan **tidak ada yang tersimpan**. `useCash` default `false`. Tercatat di riwayat: "BBRI ditambahkan, 10 lot @ Rp4.500". Pesan validasi sama dengan design: `fields.ticker` "Pilih emitennya dulu.", `fields.lots` "Isi jumlah lot dan harga beli.", `fields.useCash` "Dana tunai tidak cukup (sisa Rp8,6 jt).". Lot ≤ 1.000.000 dan harga ≤ Rp10.000.000.',
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['ticker', 'lots', 'avgPrice'], properties: { ticker: { type: 'string', example: 'BBRI' }, lots: { type: 'integer', example: 10 }, avgPrice: { type: 'integer', example: 4500 }, useCash: { type: 'boolean', default: false } } } } } },
+        responses: {
+          201: { description: 'Ditambahkan', content: { 'application/json': { schema: { $ref: '#/components/schemas/Portfolio' } } } },
+          409: errorResponse('Sudah ada', 'ALREADY_HELD', 'Emiten ini sudah ada di portofolio Anda.', { ticker: 'Emiten ini sudah ada di portofolio Anda.' }),
+          422: errorResponse('Tidak valid', 'VALIDATION', 'Dana tunai tidak cukup (sisa Rp5,6 jt).', { useCash: 'Dana tunai tidak cukup (sisa Rp5,6 jt).' }),
+        },
+      },
+    },
+    '/portfolio/holdings/{ticker}': {
+      patch: {
+        tags: ['Portofolio'], security: [{ cookieAuth: [] }],
+        summary: 'Kelola emiten (koreksi lot / harga)',
+        description: 'Dialog "Kelola". Mengoreksi yang tercatat: `lots` dan/atau `avgPrice` (sebagian boleh). **Dana tunai tidak berubah**. Riwayat hanya bertambah kalau modalnya berubah ("PTBA diubah: modal jadi Rp13,4 jt"). Pindah tesis dan target bobot menyusul bersama modul Tesis.',
+        parameters: [{ name: 'ticker', in: 'path', required: true, schema: { type: 'string', example: 'PTBA' } }],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { lots: { type: 'integer', minimum: 1 }, avgPrice: { type: 'integer', minimum: 1 } } } } } },
+        responses: {
+          200: { description: 'Disimpan', content: { 'application/json': { schema: { $ref: '#/components/schemas/Portfolio' } } } },
+          404: errorResponse('Tidak dipegang', 'NOT_FOUND', 'Emiten ini tidak ada di portofolio Anda.'),
+          422: errorResponse('Tidak valid', 'VALIDATION', 'Lot dan harga beli harus lebih dari 0.', { lots: 'Lot dan harga beli harus lebih dari 0.' }),
+        },
+      },
+      delete: {
+        tags: ['Portofolio'], security: [{ cookieAuth: [] }],
+        summary: 'Keluarkan dari portofolio',
+        description: 'Tombol "Keluarkan" → "Ya, keluarkan". `?refund=true` menambahkan modalnya ke dana tunai (mis. kalau sudah dijual di harga beli). Riwayat keputusan emiten itu tetap tersimpan. **Menjawab 200 + snapshot** (bukan 204).',
+        parameters: [
+          { name: 'ticker', in: 'path', required: true, schema: { type: 'string', example: 'UNTR' } },
+          { name: 'refund', in: 'query', schema: { type: 'boolean', default: false } },
+        ],
+        responses: { 200: { description: 'Dikeluarkan', content: { 'application/json': { schema: { $ref: '#/components/schemas/Portfolio' } } } }, 404: errorResponse('Tidak dipegang', 'NOT_FOUND', 'Emiten ini tidak ada di portofolio Anda.') },
+      },
+    },
+    '/portfolio/transactions': {
+      post: {
+        tags: ['Portofolio'], security: [{ cookieAuth: [] }],
+        summary: 'Catat transaksi',
+        description: 'Dialog "Catat transaksi": mencatat beli/jual yang sudah dilakukan di sekuritas. **Beli**: harga rata-rata dihitung tertimbang (dibulatkan). **Jual**: harga rata-rata tetap; menjual semua lot menutup posisi (baris hilang, riwayat tetap). `useCash` (default `false`): beli mengurangi dana tunai, jual menambah nilai penjualan. Biaya beli/jual tidak dihitung (sama dengan pratinjau di dialog). Emiten harus sudah ada di portofolio (`fields.ticker` "Pilih emitennya dulu."); jual lebih dari yang dipegang → `fields.lots` "Anda hanya memegang 70 lot PTBA."; dana kurang → `fields.useCash`. Dana tunai tidak pernah negatif, walau dua permintaan datang bersamaan.',
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['ticker', 'side', 'lots', 'price'], properties: { ticker: { type: 'string', example: 'PTBA' }, side: { type: 'string', enum: ['buy', 'sell'] }, lots: { type: 'integer', example: 10 }, price: { type: 'integer', example: 2600, description: 'Harga per lembar (Rupiah)' }, useCash: { type: 'boolean', default: false } } } } } },
+        responses: {
+          200: { description: 'Dicatat', content: { 'application/json': { schema: { $ref: '#/components/schemas/Portfolio' } } } },
+          422: errorResponse('Tidak valid', 'VALIDATION', 'Anda hanya memegang 70 lot PTBA.', { lots: 'Anda hanya memegang 70 lot PTBA.' }),
+        },
+      },
+    },
+    '/portfolio/cash': {
+      put: {
+        tags: ['Portofolio'], security: [{ cookieAuth: [] }],
+        summary: 'Ubah dana tunai',
+        description: 'Dialog "Dana tunai": mengganti jumlahnya (bilangan bulat ≥ 0). Hanya perubahan nyata yang masuk riwayat ("Dana tunai diperbarui jadi Rp8,6 jt", grup "Dana tunai").',
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['amount'], properties: { amount: { type: 'integer', minimum: 0, example: 8570000 } } } } } },
+        responses: { 200: { description: 'Disimpan', content: { 'application/json': { schema: { $ref: '#/components/schemas/Portfolio' } } } }, 422: errorResponse('Tidak valid', 'VALIDATION', 'Isi dana tunai dengan angka 0 atau lebih.', { amount: 'Isi dana tunai dengan angka 0 atau lebih.' }) },
       },
     },
     '/watchlist': {
@@ -1205,6 +1271,37 @@ module.exports = {
     securitySchemes: { cookieAuth: { type: 'apiKey', in: 'cookie', name: 'sid' }, adminCookie: { type: 'apiKey', in: 'cookie', name: 'asid' }, syncToken: { type: 'http', scheme: 'bearer', description: 'Env `SYNC_TOKEN` (≥ 32 karakter) untuk crawler' } },
     responses: { Unauthenticated: errorResponse('Belum masuk / sesi berakhir', 'UNAUTHENTICATED', 'Sesi tidak valid atau sudah berakhir.') },
     schemas: {
+      PortfolioHolding: {
+        type: 'object',
+        properties: {
+          ticker: { type: 'string', example: 'PTBA' }, name: { type: 'string', example: 'Bukit Asam Tbk', description: 'Sama dengan `ticker` bila emitennya sudah dihapus admin' },
+          logoUrl: { type: 'string', nullable: true },
+          sector: { type: 'object', nullable: true, properties: { slug: { type: 'string' }, name: { type: 'string', example: 'Energi' } } },
+          role: { type: 'string', nullable: true, example: 'Pemilik tambang · PLTU', description: 'Nama tahap di tema terbit pertama yang memuat emiten; tanpa tema = `tagline` emiten; keduanya kosong = null' },
+          stages: { type: 'array', items: { type: 'string', example: 'hulu' }, description: 'Kunci tahap utama di tema itu (chip Hulu/Tengah/Hilir; kunci bisa kustom, judulnya di `GET /themes/:slug` → `groups`)' },
+          thesisId: { type: 'string', nullable: true, description: 'Selalu null sampai modul Tesis dibuat (semua emiten = "Tanpa tesis")' },
+          targetPct: { type: 'number', nullable: true, description: 'Target bobot di tesis; selalu null sampai modul Tesis dibuat' },
+          lots: { type: 'integer', example: 60, description: '1 lot = 100 lembar' }, avgPrice: { type: 'integer', example: 2400, description: 'Harga beli rata-rata per lembar (Rupiah)' },
+          capital: { type: 'integer', example: 14400000, description: 'Modal = `lots × 100 × avgPrice`. Bukan nilai pasar' },
+          status: { type: 'string', enum: ['ok', 'review'], description: '`review` = kondisi tesis terpicu; selalu `ok` sampai modul Tesis dibuat' },
+          addedAt: { type: 'string', format: 'date-time' },
+        },
+      },
+      Portfolio: {
+        type: 'object',
+        properties: {
+          cash: { type: 'integer', example: 8570000, description: 'Dana tunai (Rupiah)' },
+          totals: { type: 'object', properties: { stock: { type: 'integer', description: 'Σ modal semua emiten' }, cash: { type: 'integer' }, total: { type: 'integer', description: 'stock + cash ("Total dana investasi")' } } },
+          theses: { type: 'array', items: { type: 'object' }, description: 'Tesis pengguna untuk pengelompokan. Selalu `[]` sampai modul Tesis dibuat' },
+          holdings: { type: 'array', items: { $ref: '#/components/schemas/PortfolioHolding' }, description: 'Urut menurut waktu ditambahkan. `[]` = PortofolioKosong' },
+          log: { type: 'array', description: 'Riwayat keputusan, terbaru dulu, maks. 50', items: { type: 'object', properties: {
+            id: { type: 'string', format: 'uuid' }, at: { type: 'string', format: 'date-time' },
+            text: { type: 'string', example: 'PTBA ditambahkan, 60 lot @ Rp2.400' },
+            group: { type: 'string', example: 'Tanpa tesis', description: 'Nama tesis, "Tanpa tesis", atau "Dana tunai"' },
+            kind: { type: 'string', enum: ['rv', 'add', 'out', 'neutral'] },
+          } } },
+        },
+      },
       WatchItem: {
         type: 'object',
         properties: {
@@ -1292,7 +1389,7 @@ module.exports = {
                   grossMarginPct: { $ref: '#/components/schemas/Series' },
                 },
               },
-              subsidiaries: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, business: { type: 'string' }, ownershipPct: { type: 'number' }, ticker: { type: 'string' } } } },
+              subsidiaries: { type: 'array', description: 'Anak usaha yang disembunyikan tim di admin ("tampilkan" mati) tidak dikirim. Bisa sampai 30 baris (data BEI, terbesar menurut aset). `ticker` kosong (`""`) = bukan emiten tercatat', items: { type: 'object', properties: { name: { type: 'string' }, business: { type: 'string' }, ownershipPct: { type: 'number' }, ticker: { type: 'string' } } } },
               shareholders: { type: 'object', properties: { items: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, pct: { type: 'number' }, public: { type: 'boolean' } } } }, note: { type: 'string' } } },
               management: { type: 'object', properties: { total: { type: 'integer' }, people: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, role: { type: 'string' } } } } } },
               risks: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, description: { type: 'string' }, level: { type: 'string', enum: ['high', 'medium'] } } } },

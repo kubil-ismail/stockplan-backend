@@ -1,6 +1,6 @@
 'use strict';
 
-const { Op } = require('sequelize');
+const { Op, literal } = require('sequelize');
 const { Company, Sector, Industry, ThemeStage, WatchlistItem, CompanyAlert } = require('../models');
 const companies = require('../lib/companies');
 const themes = require('../lib/themes');
@@ -11,7 +11,8 @@ const refs = [
   { model: Industry, as: 'industry', attributes: ['slug', 'name'] },
 ];
 
-const MAX_MATCHES = 200;
+const MAX_MATCHES = 200; // rows returned by the search; total/sectors still count every match
+const HAS_REPORT = `CASE WHEN jsonb_typeof("Company"."profile"->'reports') = 'array' AND jsonb_array_length("Company"."profile"->'reports') > 0 THEN true ELSE false END`;
 const PEERS = 4;
 const NOT_FOUND = 'Emiten tidak ditemukan.'; // COPY: perlu review
 
@@ -28,7 +29,10 @@ exports.index = async (req, res, next) => {
 
   try {
     const like = companies.escapeLike(q);
+    // Every match is loaded (facets and the order need all of them) but only light columns: `profile` is left out and
+    // hasReport is computed in SQL. Only the returned list is capped.
     const rows = await Company.findAll({
+      attributes: ['ticker', 'name', 'logoUrl', 'status', 'summary', 'sizeClass', 'marketCap', [literal(HAS_REPORT), 'hasReport']],
       where: {
         publishedAt: { [Op.ne]: null },
         ...(q ? {
@@ -41,9 +45,10 @@ exports.index = async (req, res, next) => {
       },
       include: refs,
       subQuery: false,
-      limit: MAX_MATCHES,
+      raw: true,
+      nest: true,
     });
-    const result = companies.searchResult(rows, q, sector);
+    const result = companies.searchResult(rows, q, sector, MAX_MATCHES);
     const tickers = result.companies.map((c) => c.ticker);
     const [stages, watch] = tickers.length ? await Promise.all([
       ThemeStage.findAll({

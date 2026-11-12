@@ -21,7 +21,8 @@ exports.show = async (req, res, next) => {
 
     const tickers = themes.companyOrder(theme.stages);
     const [rows, watch] = await Promise.all([
-      tickers.length ? Company.findAll({ where: { ticker: tickers }, attributes: companyAttrs }) : [],
+      // Draft companies stay hidden: their /companies/:ticker page is a 404, so a theme must not list them either.
+      tickers.length ? Company.findAll({ where: { ticker: tickers, publishedAt: { [Op.ne]: null } }, attributes: companyAttrs }) : [],
       tickers.length ? WatchlistItem.findAll({ where: { userId: req.user.id, ticker: tickers }, attributes: ['ticker'] }) : [],
     ]);
     res.json(themes.themeView(theme, theme.stages, rows, watch.map((w) => w.ticker)));
