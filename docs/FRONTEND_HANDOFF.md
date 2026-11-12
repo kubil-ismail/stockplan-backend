@@ -238,6 +238,7 @@ Perubahan peran berlaku **langsung** di request berikutnya (bukan "di sesi berik
 | AdminRiwayat | `GET /admin/api/history?q=&module=&who=&range=&tab=&page=&pageSize=` | `log:view` | Dikelompokkan per hari. Tiap entri: pelaku, kalimat (`verb`/`target`/`rest`), `changes` (sebelum/sesudah), `canRevert` |
 | | `GET /admin/api/history/export.csv` | `log:view` | Filter sama, maks. 5.000 baris |
 | | `POST /admin/api/history/:id/revert` | `log:edit` + izin modul terkait | `409 CONFLICT` bila data sudah berubah lagi sejak entri itu |
+| AdminDashboard | `GET /admin/api/dashboard` | `dash:view` | Satu panggilan: `kpis`, `queue` (jumlah > 0, urut dampak), `sync.jobs`, `coverage`, `activity`. Blok yang peran tidak boleh lihat (`usr`, `sync`, `tm`, `log`, `em`) bernilai `null` / item dibuang: sembunyikan saja. "Sinkron ulang" = `POST /admin/api/sync/run` |
 | AdminSinkron | `GET /admin/api/sync` | `sync:view` | `stats`, `jobs` (status `running`/`queued`/`failed`/`ok`/`never`, `summary` sudah jadi teks), `failures`, `conflicts` (`changes` = Di StockPlan vs Dari BEI), `history` 14 hari. Poll selama ada job `running`/`queued` |
 | | `POST /admin/api/sync/run { key? }` | `sync:edit` | Masuk antrean crawler, bukan langsung selesai. Tanpa `key` = semua |
 | | `POST /admin/api/sync/failures/:id/retry` | `sync:edit` | "Coba lagi". Baris tetap ada (`retrying: true`) sampai crawler melapor berhasil |
@@ -248,7 +249,8 @@ Pengaman di Akses & peran yang perlu tercermin di UI (server menolaknya dengan 4
 
 ### 4.5 Belum tersedia di API (admin)
 
-- Modul Dashboard, Masukan & laporan, Pengaturan aplikasi (modulnya sudah ada di matriks izin, endpoint-nya belum).
+- Modul Masukan & laporan, Pengaturan aplikasi (modulnya sudah ada di matriks izin, endpoint-nya belum).
+- Dashboard: item antrean "Laporan Data salah dari pengguna" dan "Laporan keuangan belum diproses" serta `kpis.review.fromReports` belum ada (menunggu modul Masukan dan data laporan keuangan).
 - Sinkron data BEI: endpoint ada, tetapi datanya kosong sampai `stock-plan-crawler` diarahkan ke `/admin/api/sync/agent/*` (lihat Swagger, tag Admin: Sinkron). Sebelum itu semua job berstatus `never`.
 - Data BEI (manajemen, pemegang saham, anak usaha, papan + tahun tercatat) **tidak** ditulis otomatis: semua jadi kartu di AdminSinkron dan baru tampil di aplikasi setelah disetujui. `reason` kartu membedakan data baru dan bagian yang pernah diubah tim. UI perlu tombol "Setujui semua" (puluhan kartu per sinkron).
 - Upload file: logo emiten, laporan keuangan, prospektus IPO.

@@ -42,7 +42,7 @@ const errorResponse = (description, code, message, fields) => ({
 module.exports = {
   openapi: '3.0.3',
   info: { title: 'StockPlan API', version: '0.1.0', description: 'REST API StockPlan. Sesi memakai cookie httpOnly `sid`.' },
-  tags: [{ name: 'Auth' }, { name: 'Profil' }, { name: 'Pengaturan' }, { name: 'Tema bisnis' }, { name: 'Emiten' }, { name: 'Watchlist' }, { name: 'Admin: Auth' }, { name: 'Admin: Emiten' }, { name: 'Admin: Pengguna' }, { name: 'Admin: Tema' }, { name: 'Admin: Akses' }, { name: 'Admin: Riwayat' }, { name: 'Admin: Sinkron' }],
+  tags: [{ name: 'Auth' }, { name: 'Profil' }, { name: 'Pengaturan' }, { name: 'Tema bisnis' }, { name: 'Emiten' }, { name: 'Watchlist' }, { name: 'Admin: Auth' }, { name: 'Admin: Emiten' }, { name: 'Admin: Pengguna' }, { name: 'Admin: Tema' }, { name: 'Admin: Akses' }, { name: 'Admin: Riwayat' }, { name: 'Admin: Sinkron' }, { name: 'Admin: Dashboard' }],
   security: [{ cookieAuth: [] }],
   paths: {
     '/auth/register': {
@@ -771,6 +771,47 @@ module.exports = {
           403: errorResponse('Tanpa izin', 'FORBIDDEN', 'Peran Anda tidak punya izin untuk aksi ini.'),
           404: errorResponse('Tidak ada', 'NOT_FOUND', 'Entri tidak ditemukan.'),
           409: errorResponse('Tidak bisa dikembalikan', 'CONFLICT', 'Datanya sudah berubah lagi setelah perubahan ini, jadi tidak bisa dikembalikan otomatis.'),
+        },
+      },
+    },
+    '/admin/api/dashboard': {
+      get: {
+        tags: ['Admin: Dashboard'], security: [{ adminCookie: [] }],
+        summary: 'Dashboard (AdminDashboard)',
+        description: 'Izin `dash:view`. Satu panggilan untuk seluruh layar. Tiap blok juga butuh izin lihat modul asal datanya: `kpis.companies/ready/review`, `queue` (item emiten) dan `kpis`-nya butuh `em:view`; `kpis.users` butuh `usr:view`; `sync` dan item antrean "Perubahan data BEI" butuh `sync:view`; `coverage` dan item antrean tema butuh `tm:view`; `activity` butuh `log:view`. Blok tanpa izin bernilai `null` (item antrean dibuang), jadi UI cukup menyembunyikan yang `null`. **Emiten tercatat** = semua emiten selain status `ipo`; **siap terbit** = `publishStatus: published` (sama dengan tab "Siap terbit" di Data emiten); persen dihitung dari emiten tercatat. `ipoThisMonth` = emiten dengan tanggal pencatatan IPO di bulan ini (Asia/Jakarta). `queue` hanya berisi item yang punya data (jumlah > 0), urut dari level tertinggi lalu jumlah terbanyak; item design "Laporan Data salah dari pengguna" dan "Laporan keuangan belum diproses" belum ada karena modulnya belum dibuat. `kpis.review.fromReports` selalu `null` (belum ada laporan pengguna). `coverage.items`: maks. 6 tema rantai nilai yang punya emiten, tema terbuka dulu; `openable` = `percent` ≥ `threshold` (80). `activity`: 5 entri Riwayat terbaru tanpa catatan masuk/keamanan. `sync.jobs`: semua jadwal sinkron (tombol "Sinkron ulang" = `POST /admin/api/sync/run`).',
+        responses: {
+          200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: {
+            now: { type: 'string', format: 'date-time', description: 'Waktu server, untuk tanggal di header' },
+            lastSyncAt: { type: 'string', format: 'date-time', nullable: true, description: 'Sinkron BEI selesai terakhir (semua jadwal)' },
+            kpis: { type: 'object', properties: {
+              companies: { type: 'object', nullable: true, properties: { total: { type: 'integer', example: 958 }, ipoThisMonth: { type: 'integer', example: 2 } } },
+              ready: { type: 'object', nullable: true, properties: { count: { type: 'integer', example: 412 }, percent: { type: 'integer', example: 43 } } },
+              review: { type: 'object', nullable: true, properties: { count: { type: 'integer', example: 37 }, fromReports: { type: 'integer', nullable: true, description: 'Selalu null untuk saat ini' } } },
+              users: { type: 'object', nullable: true, properties: { total: { type: 'integer', example: 1284 }, newThisWeek: { type: 'integer', example: 86 } } },
+            } },
+            queue: { type: 'array', items: { type: 'object', properties: {
+              key: { type: 'string', enum: ['bei_changes', 'company_review', 'theme_review', 'no_source', 'ipo_new', 'no_summary'] },
+              level: { type: 'string', enum: ['high', 'medium', 'low'] }, levelLabel: { type: 'string', enum: ['Tinggi', 'Sedang', 'Rendah'] },
+              title: { type: 'string', example: 'Sumber pendapatan tanpa dokumen sumber' }, sub: { type: 'string', example: 'Pengguna tidak bisa menelusuri asal angkanya' },
+              count: { type: 'integer', example: 41 }, href: { type: 'string', example: '/admin/emiten?tab=incomplete', description: 'Rute di aplikasi admin' },
+            } } },
+            sync: { type: 'object', nullable: true, properties: { jobs: { type: 'array', items: { type: 'object', properties: {
+              key: { type: 'string' }, name: { type: 'string', example: 'Manajemen' }, lastFinishedAt: { type: 'string', format: 'date-time', nullable: true },
+              status: { type: 'string', enum: ['running', 'queued', 'failed', 'ok', 'never'] }, failed: { type: 'integer' }, note: { type: 'string' },
+              failedTickers: { type: 'array', items: { type: 'string' }, description: 'Maks. 5', example: ['BUMI', 'DEWA', 'PTRO'] }, failMessage: { type: 'string', nullable: true, example: 'Halaman profil BEI tidak bisa dibaca' },
+            } } } } },
+            coverage: { type: 'object', nullable: true, properties: { threshold: { type: 'integer', example: 80 }, items: { type: 'array', items: { type: 'object', properties: {
+              slug: { type: 'string' }, name: { type: 'string', example: 'Batu bara' }, stageCount: { type: 'integer', example: 5 },
+              status: { type: 'string', enum: ['open', 'review', 'draft'] }, statusLabel: { type: 'string', example: 'Terbuka' },
+              ready: { type: 'integer', example: 19 }, total: { type: 'integer', example: 21 }, percent: { type: 'integer', example: 90 }, openable: { type: 'boolean' },
+            } } } } },
+            activity: { type: 'array', nullable: true, items: { type: 'object', properties: {
+              id: { type: 'string', format: 'uuid' }, at: { type: 'string', format: 'date-time' }, actor: { type: 'string', example: 'Rina' },
+              verb: { type: 'string', example: 'memperbarui tren keuangan' }, target: { type: 'string', example: 'BUMI' }, rest: { type: 'string', example: '(draf)' },
+            } } },
+          } } } } },
+          401: { $ref: '#/components/responses/Unauthenticated' },
+          403: errorResponse('Tanpa izin', 'FORBIDDEN', 'Peran Anda tidak punya izin untuk aksi ini.'),
         },
       },
     },

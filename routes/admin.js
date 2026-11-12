@@ -9,6 +9,7 @@ const themesRouter = require('./adminThemes');
 const accessRouter = require('./adminAccess');
 const historyRouter = require('./adminHistory');
 const syncRouter = require('./adminSync');
+const dashboardRouter = require('./adminDashboard');
 
 const router = express.Router();
 
@@ -24,5 +25,6 @@ router.use('/themes', themesRouter);
 router.use('/access', accessRouter);
 router.use('/history', historyRouter);
 router.use('/sync', syncRouter);
+router.use('/dashboard', dashboardRouter);
 
 module.exports = router;
