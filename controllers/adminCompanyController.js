@@ -5,6 +5,7 @@ const { Company, Sector, Industry, Subsector, ThemeStage } = require('../models'
 const co = require('../lib/adminCompanies');
 const companies = require('../lib/companies');
 const { fail } = require('../lib/http');
+const { withSections } = require('../lib/sync');
 
 const NOT_FOUND = 'Emiten tidak ditemukan.'; // COPY: perlu review
 const refs = [
@@ -188,8 +189,9 @@ exports.saveDraft = async (req, res, next) => {
     if (row.status === 'ipo' && !form.ipo) form.ipo = co.emptyForm(true).ipo;
     if (!form.name.trim()) return fail(res, 422, 'VALIDATION', co.MSG.nameRequired, { name: co.MSG.nameRequired });
     if (!(await resolveRefs(form))) return fail(res, 422, 'VALIDATION', co.MSG.unknownSector, { sectorSlug: co.MSG.unknownSector });
-    await row.update({ draft: form, publishStatus: 'draft', updatedByName: req.admin.name });
     const ch = hist.sectionChange(before, Object.fromEntries(Object.keys(values).map((k) => [k, form[k]])));
+    // Sections the team edits stop being overwritten by BEI sync (they become review cards in AdminSinkron).
+    await row.update({ draft: form, publishStatus: 'draft', updatedByName: req.admin.name, teamSections: withSections(row.teamSections, ch.keys) });
     await audit(req, 'company_draft_saved', ticker, {
       summary: { verb: hist.sectionVerb(ch.keys), target: ticker, rest: '(draf)' }, changes: ch.changes,
       revert: ch.keys.length ? { type: 'company_sections', ref: ticker, before: ch.beforePart, after: ch.afterPart } : null,

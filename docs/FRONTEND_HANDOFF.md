@@ -241,7 +241,8 @@ Perubahan peran berlaku **langsung** di request berikutnya (bukan "di sesi berik
 | AdminSinkron | `GET /admin/api/sync` | `sync:view` | `stats`, `jobs` (status `running`/`queued`/`failed`/`ok`/`never`, `summary` sudah jadi teks), `failures`, `conflicts` (`changes` = Di StockPlan vs Dari BEI), `history` 14 hari. Poll selama ada job `running`/`queued` |
 | | `POST /admin/api/sync/run { key? }` | `sync:edit` | Masuk antrean crawler, bukan langsung selesai. Tanpa `key` = semua |
 | | `POST /admin/api/sync/failures/:id/retry` | `sync:edit` | "Coba lagi". Baris tetap ada (`retrying: true`) sampai crawler melapor berhasil |
-| | `POST /admin/api/sync/conflicts/:id/resolve { use: 'bei' \| 'team' }` | `sync:edit` (+ `em:edit` untuk `bei`) | `bei` menulis ke **draf** emiten (perlu Terbitkan), bisa Kembalikan dari Riwayat. `409 ALREADY_RESOLVED` |
+| | `POST /admin/api/sync/conflicts/:id/resolve { use: 'bei' \| 'team' }` | `sync:edit` (+ `em:publish` untuk `bei`) | `bei` = setujui: langsung ke data terbit. `team` = tolak. `409 ALREADY_RESOLVED` |
+| | `POST /admin/api/sync/conflicts/resolve { use, ids? }` | sama | Setujui/tolak banyak sekaligus; tanpa `ids` = semua kartu terbuka (maks. 500) |
 
 Pengaman di Akses & peran yang perlu tercermin di UI (server menolaknya dengan 403/409): tidak bisa mengubah atau menonaktifkan diri sendiri; hanya super admin yang bisa memberi/mencabut peran super admin; minimal satu super admin aktif; izin super admin tidak bisa diubah; tidak bisa mengubah izin peran yang sedang dipegang sendiri.
 
@@ -249,6 +250,7 @@ Pengaman di Akses & peran yang perlu tercermin di UI (server menolaknya dengan 4
 
 - Modul Dashboard, Masukan & laporan, Pengaturan aplikasi (modulnya sudah ada di matriks izin, endpoint-nya belum).
 - Sinkron data BEI: endpoint ada, tetapi datanya kosong sampai `stock-plan-crawler` diarahkan ke `/admin/api/sync/agent/*` (lihat Swagger, tag Admin: Sinkron). Sebelum itu semua job berstatus `never`.
+- Data BEI (manajemen, pemegang saham, anak usaha, papan + tahun tercatat) **tidak** ditulis otomatis: semua jadi kartu di AdminSinkron dan baru tampil di aplikasi setelah disetujui. `reason` kartu membedakan data baru dan bagian yang pernah diubah tim. UI perlu tombol "Setujui semua" (puluhan kartu per sinkron).
 - Upload file: logo emiten, laporan keuangan, prospektus IPO.
 - `reportCount` emiten selalu 0. Kolom tesis, evaluasi, dan "tema dibuka" di Pengguna selalu 0/kosong. Angka "dipakai N tesis" di Tema selalu `null`.
 - Hapus peran/anggota, reset password admin.
@@ -266,6 +268,7 @@ npm install && npm run migrate && npx sequelize-cli db:seed:all && npm run dev  
   `npx sequelize-cli db:seed --seed 20261111000001-admin-users.js`. Masukkan secret ke aplikasi authenticator.
 - **User client**: daftar lewat `POST /auth/register`, lalu ambil tautan konfirmasi dari log server (email belum terkirim). Alternatif: `UPDATE auth_users SET "emailVerified" = true WHERE email = '…';`
 - **Data contoh**: 11 sektor; sub-sektor/industri untuk Energi, Barang Baku, Keuangan, Infrastruktur, dan Teknologi (sektor lain "Segera hadir"). Status data campuran: Siap, Baru (Telekomunikasi, dengan banner), Segera hadir. Industri dengan rantai nilai (halaman `/tema/:slug`): `batubara`, `nikel`, `telekomunikasi`. Nama industri dan porsi/sumber di tahap adalah ilustrasi dev, bukan IDX-IC resmi atau data laporan keuangan. Emiten dari board EmitenSearch; detail halaman lengkap hanya **BUMI** (tercatat) dan **ABNU** (IPO fiktif). Seeder tambahan bisa dijalankan sendiri dan aman diulang: `npx sequelize-cli db:seed --seed 20261112000001-themes-industries.js` (batalkan: `db:seed:undo --seed …`).
+- **Semua emiten BEI (944)**: seeder `20261112000002-idx-companies.js` dari snapshot crawler `seeders/data/idx-companies.json` (bangun ulang: `node bin/build-idx-companies.js <crawler>/dist/idx/minify/company/detail`). Hanya menambah ticker yang belum ada, sebagai **draf** (tidak tampil di client sampai diterbitkan dari Admin Emiten). Isinya nama, sektor, sub-sektor, papan, tahun tercatat, manajemen, pemegang saham, 30 anak usaha terbesar. Jalankan setelah seeder emiten design supaya 35 emiten contoh tetap terbit.
 - Semua tautan email (konfirmasi, atur ulang password, undangan) hanya dicetak ke console server.
 
 ## 6. Kontak dan perubahan

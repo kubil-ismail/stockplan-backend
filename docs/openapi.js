@@ -795,7 +795,7 @@ module.exports = {
               at: { type: 'string', format: 'date-time' }, retrying: { type: 'boolean' },
             } } },
             conflicts: { type: 'array', items: { type: 'object', properties: {
-              id: { type: 'string', format: 'uuid' }, jobKey: { type: 'string' }, ticker: { type: 'string', example: 'ADMR' }, section: { type: 'string', enum: ['group', 'shareholders', 'management'] },
+              id: { type: 'string', format: 'uuid' }, jobKey: { type: 'string' }, ticker: { type: 'string', example: 'ADMR' }, section: { type: 'string', enum: ['group', 'shareholders', 'management', 'listing'] },
               field: { type: 'string', example: 'Anak usaha baru' }, reason: { type: 'string' }, at: { type: 'string', format: 'date-time' },
               changes: { type: 'array', items: { type: 'object', properties: { field: { type: 'string' }, label: { type: 'string' }, before: {}, after: {} } } },
             } } },
@@ -829,11 +829,24 @@ module.exports = {
         },
       },
     },
+    '/admin/api/sync/conflicts/resolve': {
+      post: {
+        tags: ['Admin: Sinkron'], security: [{ adminCookie: [] }],
+        summary: 'Setujui / tolak banyak sekaligus',
+        description: 'Sama dengan resolve satu kartu, untuk banyak kartu. Tanpa `ids` = semua kartu terbuka (maks. 500 per panggilan). Tiap kartu tercatat sendiri di Riwayat. Kartu yang sudah ditinjau admin lain dilewati (`skipped`).',
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['use'], properties: { use: { type: 'string', enum: ['bei', 'team'] }, ids: { type: 'array', maxItems: 500, items: { type: 'string', format: 'uuid' } } } } } } },
+        responses: {
+          200: { description: 'Selesai', content: { 'application/json': { schema: { type: 'object', properties: { resolved: { type: 'integer' }, skipped: { type: 'integer' }, message: { type: 'string', example: '94 perubahan BEI disetujui dan tercatat di Riwayat perubahan' } } } } } },
+          403: errorResponse('Tanpa izin', 'FORBIDDEN', 'Peran Anda tidak punya izin untuk aksi ini.'),
+          422: errorResponse('Isian salah', 'VALIDATION', 'Pilih 1–500 perubahan.', { ids: 'Daftar id tidak valid.' }),
+        },
+      },
+    },
     '/admin/api/sync/conflicts/{id}/resolve': {
       post: {
         tags: ['Admin: Sinkron'], security: [{ adminCookie: [] }],
         summary: 'Pakai data BEI / Pertahankan isian tim',
-        description: 'Izin `sync:edit`; `use: bei` juga butuh `em:edit`. `bei` menulis nilai BEI ke **draf** emiten (status jadi Draf, tetap perlu "Terbitkan") dan tercatat di Riwayat dengan sebelum/sesudah, bisa "Kembalikan". `team` hanya menutup konflik; nilai BEI yang sama tidak akan dimunculkan lagi oleh run berikutnya.',
+        description: 'Izin `sync:edit`; `use: bei` juga butuh `em:publish` karena langsung tampil di aplikasi. `bei` = setujui: nilai BEI ditulis ke data **terbit** (dan ke draf yang sedang terbuka), bagian itu kembali milik BEI, tercatat di Riwayat dengan sebelum/sesudah (bisa "Kembalikan" bila saat itu tidak ada draf terbuka). `team` = tolak: data tidak berubah; nilai BEI yang sama tidak dimunculkan lagi.',
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
         requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['use'], properties: { use: { type: 'string', enum: ['bei', 'team'] } } } } } },
         responses: {
@@ -856,11 +869,33 @@ module.exports = {
         },
       },
     },
+    '/admin/api/sync/agent/companies': {
+      post: {
+        tags: ['Admin: Sinkron'], security: [{ syncToken: [] }],
+        summary: 'Crawler: kirim data profil emiten (mentah)',
+        description: 'Untuk crawler. Body = file hasil crawling **apa adanya** (`{ data: {…} }` atau `{ data: [{…}, …]}`), maks. 100 emiten per panggilan (body maks. 5 MB). Yang dipakai: `commissioners` + `directors` → Manajemen; `shareholders` → Pemegang saham (baris "Masyarakat …" dan 0% dibuang, maks. 20; "Publik (free float)" dihitung ulang); `subsidiaries` → Anak usaha (30 terbesar menurut `total_assets`, `ticker`/`show` isian tim dipertahankan per nama); `board.name` → papan; `ipo_date` → tahun tercatat. Nama, sektor, logo, alamat **tidak** dipakai. Daftar kosong dianggap "tidak ada data". **Tidak ada yang langsung ditulis ke data emiten**: setiap bagian yang berbeda (termasuk `listing` = papan + tahun tercatat) jadi kartu "Perubahan dari BEI yang perlu ditinjau" dan baru tampil di aplikasi setelah admin menyetujui. `reason` membedakan data baru dari BEI dan bagian yang pernah diubah tim. Nilai yang pernah ditolak tidak dimunculkan lagi. Ticker yang tidak ada di database → `unknown` (emiten baru lewat form IPO). Status run (Terakhir, gagal) tetap dilaporkan lewat `jobs/{key}/report`.',
+        requestBody: { required: true, content: { 'application/json': {
+          schema: { type: 'object', required: ['data'], properties: { data: { oneOf: [{ type: 'object' }, { type: 'array', maxItems: 100, items: { type: 'object' } }] } } },
+          example: { data: { ticker: 'AADI', board: { name: 'Utama' }, ipo_date: '2024-12-05', directors: [{ name: 'Julius Aslan', position: { id: 'Direktur Utama' } }], commissioners: [{ name: 'Budi Bowoleksono', position: { id: 'Komisaris Utama' } }], shareholders: [{ name: 'PT Adaro Strategic Investments', type: { id: 'Lebih dari 5%' }, percentage: 41.0965 }], subsidiaries: [{ name: 'PT Adaro Indonesia', type: { id: ['Pertambangan'] }, total_assets: 1815781, ownership_percentage: 88 }] } },
+        } } },
+        responses: {
+          200: { description: 'Diproses per emiten', content: { 'application/json': { schema: { type: 'object', properties: {
+            updated: { type: 'integer', description: 'Selalu 0 (data menunggu persetujuan)' }, review: { type: 'integer' }, unchanged: { type: 'integer' }, unknown: { type: 'integer' }, invalid: { type: 'integer' },
+            results: { type: 'array', items: { type: 'object', properties: {
+              ticker: { type: 'string' }, status: { type: 'string', enum: ['review', 'unchanged', 'unknown', 'invalid'] },
+              review: { type: 'array', items: { type: 'string', enum: ['management', 'shareholders', 'group', 'listing'] }, example: ['management', 'listing'] }, errors: { type: 'object' },
+            } } },
+          } } } } },
+          401: errorResponse('Token salah', 'UNAUTHENTICATED', 'Token sinkron salah.'),
+          422: errorResponse('Body salah', 'VALIDATION', 'Kirim 1–100 emiten di "data".', { data: 'Objek atau daftar.' }),
+        },
+      },
+    },
     '/admin/api/sync/agent/jobs/{key}/report': {
       post: {
         tags: ['Admin: Sinkron'], security: [{ syncToken: [] }],
         summary: 'Crawler: laporkan hasil run',
-        description: 'Untuk crawler. Dipanggil setelah setiap run (terjadwal atau dari antrean). Kegagalan terbuka job ini diganti dengan `failures` (run penuh: semua; `tickers` diisi: hanya ticker itu). Hanya run penuh yang memperbarui kolom "Terakhir". `conflicts`: nilai BEI untuk satu bagian form emiten (`group`, `shareholders`, `management`), divalidasi seperti `PATCH /admin/api/companies/:ticker`; hanya kunci yang dikirim yang dipakai (mis. `group: { subsidiaries }` tidak mengosongkan `group.name`). Kirim daftar lengkap, bukan selisih: `management.people` dari BEI menggantikan seluruh daftar. Konflik dilewati bila nilainya sudah sama dengan isian tim, atau tim sudah memilih "Pertahankan" untuk nilai yang sama. Ticker yang tidak ada di `market_companies` dikembalikan di `skipped`. Body maks. 2 MB.',
+        description: 'Untuk crawler. Dipanggil setelah setiap run (terjadwal atau dari antrean). Data profil emiten dikirim lewat `agent/companies`; endpoint ini untuk status run, kegagalan, dan konflik manual. Kegagalan terbuka job ini diganti dengan `failures` (run penuh: semua; `tickers` diisi: hanya ticker itu). Hanya run penuh yang memperbarui kolom "Terakhir". `conflicts`: nilai BEI untuk satu bagian form emiten (`group`, `shareholders`, `management`), divalidasi seperti `PATCH /admin/api/companies/:ticker`; hanya kunci yang dikirim yang dipakai (mis. `group: { subsidiaries }` tidak mengosongkan `group.name`). Kirim daftar lengkap, bukan selisih: `management.people` dari BEI menggantikan seluruh daftar. Konflik dilewati bila nilainya sudah sama dengan isian tim, atau tim sudah memilih "Pertahankan" untuk nilai yang sama. Ticker yang tidak ada di `market_companies` dikembalikan di `skipped`. Body maks. 2 MB.',
         parameters: [{ name: 'key', in: 'path', required: true, schema: { type: 'string', example: 'mgmt' } }],
         requestBody: { required: true, content: { 'application/json': {
           schema: { type: 'object', required: ['startedAt', 'finishedAt'], properties: {

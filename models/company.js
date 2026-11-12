@@ -26,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
     publishedAt: DataTypes.DATE, // NULL = never published → hidden from customer endpoints
     draft: DataTypes.JSONB,
     updatedByName: DataTypes.STRING,
+    teamSections: DataTypes.JSONB, // form sections edited by the team; BEI sync raises a conflict instead of overwriting
   }, { tableName: 'market_companies' });
 
   Company.associate = (models) => {

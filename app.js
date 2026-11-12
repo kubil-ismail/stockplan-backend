@@ -23,7 +23,7 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
 
 app.use(logger("dev"));
-app.use("/admin/api/sync/agent", express.json({ limit: "2mb" })); // crawler reports can list ~1k failures
+app.use("/admin/api/sync/agent", express.json({ limit: "5mb" })); // crawler: ~1k failures per report, up to 100 raw profiles (~30 KB each) per call
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());

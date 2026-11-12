@@ -13,6 +13,7 @@ const { can } = require('../lib/adminRoles');
 const { escapeLike } = require('../lib/companies');
 const { audit } = require('../lib/audit');
 const { fail } = require('../lib/http');
+const { withSections } = require('../lib/sync');
 
 const PAGE_MAX = 200;
 const CSV_MAX = 5000;
@@ -123,7 +124,7 @@ const REVERTERS = {
     if (!unchanged(current, rev.after)) throw conflict();
     const form = { ...current, ...rev.before };
     if (row.status !== 'ipo') form.ipo = null;
-    await row.update({ draft: form, publishStatus: 'draft', updatedByName: req.admin.name });
+    await row.update({ draft: form, publishStatus: 'draft', updatedByName: req.admin.name, teamSections: withSections(row.teamSections, Object.keys(rev.before)) });
     return { target: row.ticker };
   },
 

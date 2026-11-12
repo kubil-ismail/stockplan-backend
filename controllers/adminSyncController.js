@@ -8,12 +8,16 @@ const co = require('../lib/adminCompanies');
 const hist = require('../lib/adminHistory');
 const { can } = require('../lib/adminRoles');
 const { audit } = require('../lib/audit');
+const companies = require('../lib/companies');
 const { fail } = require('../lib/http');
 
 const isUuid = (s) => /^[0-9a-f-]{36}$/i.test(String(s));
 // Same includes as the company editor, so columnsToForm sees sector/industry.
 const companyRefs = [{ model: Sector, as: 'sector', attributes: ['slug', 'name'] }, { model: Industry, as: 'industry', attributes: ['name'] }];
-const formOf = (row) => row.draft || co.columnsToForm(row);
+const listingOf = (row) => ({ listingBoard: row.listingBoard == null ? null : row.listingBoard, listedYear: row.listedYear == null ? null : row.listedYear });
+// What a BEI card is compared against: the team's working copy (draft, else live) plus the listing columns.
+const formOf = (row) => ({ ...(row.draft || co.columnsToForm(row)), listing: listingOf(row) });
+const FORBIDDEN = 'Peran Anda tidak punya izin untuk aksi ini.'; // COPY: perlu review
 
 // ---- admin ----
 
@@ -77,42 +81,138 @@ exports.retry = async (req, res, next) => {
   }
 };
 
-// POST /admin/api/sync/conflicts/:id/resolve { use: 'bei' | 'team' }
-// bei: writes the BEI value into the company DRAFT (still needs "Terbitkan"), revertable from Riwayat. Needs em:edit too.
-exports.resolve = async (req, res, next) => {
+// Approve (bei) or reject (team) one card inside `transaction`. Returns null when another admin got there first,
+// else the audit entry to write. Approve writes to the LIVE profile (customers see it) and into an open draft, so
+// publishing that draft doesn't undo it; the section is BEI's again. Reject keeps ours; the same BEI value is not raised again.
+async function resolveOne(req, c, use, transaction) {
+  const [claimed] = await SyncConflict.update({ resolvedAt: new Date(), resolution: use, resolvedById: req.admin.id }, { where: { id: c.id, resolvedAt: null }, transaction });
+  if (!claimed) return null;
+  const entry = { summary: { verb: use === 'bei' ? 'menyetujui data BEI untuk' : 'menolak data BEI untuk', target: c.ticker, rest: `· ${c.field}` } }; // COPY: perlu review
+  if (use === 'team') return entry;
+  const row = await Company.findByPk(c.ticker, { include: companyRefs, transaction, lock: { level: transaction.LOCK.UPDATE, of: Company } });
+  const upd = { teamSections: sync.withoutSection(row.teamSections, c.section) };
+  if (c.section === 'listing') {
+    const before = { listing: listingOf(row) };
+    const after = { listing: sync.withBei(before, 'listing', c.value) };
+    Object.assign(upd, after.listing);
+    entry.changes = hist.diffSections(before, after, ['listing']);
+  } else {
+    const live = co.columnsToForm(row);
+    const next = { ...live, [c.section]: sync.withBei(live, c.section, c.value) };
+    Object.assign(upd, co.formToColumns(next, row), { updatedByName: req.admin.name });
+    if (row.draft) upd.draft = { ...row.draft, [c.section]: sync.withBei(row.draft, c.section, c.value) };
+    const ch = hist.sectionChange(live, { [c.section]: next[c.section] });
+    entry.changes = ch.changes;
+    // Riwayat "Kembalikan" restores via a draft; only safe when no other draft was open.
+    if (ch.keys.length && !row.draft) entry.revert = { type: 'company_sections', ref: c.ticker, before: ch.beforePart, after: ch.afterPart };
+  }
+  await row.update(upd, { transaction });
+  return entry;
+}
+
+const checkUse = (req, res) => {
   const use = req.body && req.body.use;
-  if (use !== 'bei' && use !== 'team') return fail(res, 422, 'VALIDATION', sync.MSG.badChoice, { use: sync.MSG.badChoice });
-  if (use === 'bei' && !can(req.adminPerms, 'em', 'edit')) return fail(res, 403, 'FORBIDDEN', 'Peran Anda tidak punya izin untuk aksi ini.'); // COPY: perlu review
+  if (use !== 'bei' && use !== 'team') return void fail(res, 422, 'VALIDATION', sync.MSG.badChoice, { use: sync.MSG.badChoice });
+  // Approving puts data live, so it needs the same right as "Terbitkan".
+  if (use === 'bei' && !can(req.adminPerms, 'em', 'publish')) return void fail(res, 403, 'FORBIDDEN', FORBIDDEN);
+  return use;
+};
+
+// POST /admin/api/sync/conflicts/:id/resolve { use: 'bei' | 'team' } — "Pakai data BEI" / "Pertahankan isian tim".
+exports.resolve = async (req, res, next) => {
+  const use = checkUse(req, res);
+  if (!use) return;
   try {
     const c = isUuid(req.params.id) && (await SyncConflict.findByPk(req.params.id));
     if (!c) return fail(res, 404, 'NOT_FOUND', sync.MSG.conflictNotFound);
-    let logged = null;
-    const ok = await sequelize.transaction(async (transaction) => {
-      // Claim first so two admins can't both resolve it.
-      const [claimed] = await SyncConflict.update({ resolvedAt: new Date(), resolution: use, resolvedById: req.admin.id }, { where: { id: c.id, resolvedAt: null }, transaction });
-      if (!claimed) return false;
-      if (use === 'team') return true;
-      const row = await Company.findByPk(c.ticker, { include: companyRefs, transaction, lock: { level: transaction.LOCK.UPDATE, of: Company } });
-      const before = formOf(row);
-      const ch = hist.sectionChange(before, { [c.section]: sync.withBei(before, c.section, c.value) });
-      if (!ch.keys.length) return true; // team already matches BEI
-      await row.update({ draft: { ...before, ...ch.afterPart }, publishStatus: 'draft', updatedByName: req.admin.name }, { transaction });
-      logged = ch;
-      return true;
-    });
-    if (!ok) return fail(res, 409, 'ALREADY_RESOLVED', sync.MSG.conflictDone);
-    await audit(req, 'sync_conflict_resolved', c.ticker, {
-      summary: { verb: use === 'bei' ? 'memakai data BEI untuk' : 'mempertahankan isian tim untuk', target: c.ticker, rest: `· ${c.field}${logged ? ' (draf)' : ''}` },
-      changes: logged ? logged.changes : null,
-      revert: logged ? { type: 'company_sections', ref: c.ticker, before: logged.beforePart, after: logged.afterPart } : null,
-    });
+    const entry = await sequelize.transaction((t) => resolveOne(req, c, use, t));
+    if (!entry) return fail(res, 409, 'ALREADY_RESOLVED', sync.MSG.conflictDone);
+    await audit(req, 'sync_conflict_resolved', c.ticker, entry);
     res.json({ message: use === 'bei' ? sync.MSG.usedBei(c.ticker) : sync.MSG.keptTeam(c.ticker) });
   } catch (err) {
     next(err);
   }
 };
 
+// POST /admin/api/sync/conflicts/resolve { use, ids?: [uuid] } — bulk "Setujui semua" / "Tolak semua". No ids = every open card.
+// Each card is its own transaction and its own Riwayat entry. Cards already resolved by someone else are skipped.
+exports.resolveMany = async (req, res, next) => {
+  const use = checkUse(req, res);
+  if (!use) return;
+  const ids = req.body.ids;
+  if (ids !== undefined && (!Array.isArray(ids) || !ids.length || ids.length > sync.MAX_BULK || !ids.every(isUuid))) {
+    return fail(res, 422, 'VALIDATION', `Pilih 1–${sync.MAX_BULK} perubahan.`, { ids: 'Daftar id tidak valid.' }); // COPY: perlu review
+  }
+  try {
+    const cards = await SyncConflict.findAll({ where: { resolvedAt: null, ...(ids && { id: ids }) }, order: [['ticker', 'ASC']], limit: sync.MAX_BULK });
+    let resolved = 0;
+    for (const c of cards) {
+      const entry = await sequelize.transaction((t) => resolveOne(req, c, use, t));
+      if (!entry) continue;
+      await audit(req, 'sync_conflict_resolved', c.ticker, entry);
+      resolved += 1;
+    }
+    res.json({ resolved, skipped: cards.length - resolved, message: sync.MSG.bulk(use, resolved) });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // ---- crawler (Bearer SYNC_TOKEN) ----
+
+// Opens (or refreshes) the review card for one BEI section. Returns false when there is nothing to review:
+// the team already has the same value, or already chose to keep theirs over this exact BEI value.
+async function raiseConflict(c, company, jobKey, transaction) {
+  const current = formOf(company);
+  const open = await SyncConflict.findOne({ where: { ticker: c.ticker, section: c.section, resolvedAt: null }, transaction });
+  const same = isDeepStrictEqual(current[c.section], sync.withBei(current, c.section, c.value));
+  const last = !open && !same && (await SyncConflict.findOne({ where: { ticker: c.ticker, section: c.section, resolvedAt: { [Op.ne]: null } }, order: [['resolvedAt', 'DESC']], transaction }));
+  if (same || sync.alreadyKept(last, c.value)) {
+    if (open && same) await open.update({ resolvedAt: new Date(), resolution: 'same' }, { transaction }); // team caught up meanwhile
+    return false;
+  }
+  if (open) await open.update({ jobKey, field: c.field, reason: c.reason, value: c.value }, { transaction });
+  else await SyncConflict.create({ ...c, jobKey }, { transaction });
+  return true;
+}
+
+// One company from the crawler. Nothing is written to the company: every section that differs from ours becomes a
+// card in AdminSinkron and goes live only when an admin approves it ("Pakai data BEI").
+async function ingestCompany(d, ticker, transaction) {
+  const row = await Company.findByPk(ticker, { include: companyRefs, transaction });
+  if (!row) return { ticker, status: 'unknown' };
+  const current = formOf(row);
+  const { sections, columns, errors } = sync.fromCrawler(d, current);
+  if (errors) return { ticker, status: 'invalid', errors };
+  if (row.status !== 'ipo' && Object.keys(columns).length) sections.listing = columns; // IPO rows get their board from the IPO form
+  const review = [];
+  for (const { section, reason } of sync.pendingSections(current, row.teamSections, sections)) {
+    const { job, field } = sync.BEI_SECTIONS[section];
+    if (await raiseConflict({ ticker, section, field, reason, value: sections[section] }, row, job, transaction)) review.push(section);
+  }
+  return { ticker, status: review.length ? 'review' : 'unchanged', review };
+}
+
+// POST /admin/api/sync/agent/companies { data: <crawler object> | [<crawler object>, …] } — raw IDX profile JSON, max 100 per call.
+// Each company is its own transaction, so one bad row doesn't drop the rest. Run status still goes through /report.
+exports.companies = async (req, res, next) => {
+  const raw = req.body && req.body.data;
+  const list = Array.isArray(raw) ? raw : raw && typeof raw === 'object' ? [raw] : [];
+  if (!list.length || list.length > sync.MAX_COMPANIES) return fail(res, 422, 'VALIDATION', `Kirim 1–${sync.MAX_COMPANIES} emiten di "data".`, { data: 'Objek atau daftar.' });
+  try {
+    const results = [];
+    for (const d of list) {
+      const ticker = companies.normTicker(d && d.ticker);
+      if (!companies.isTicker(ticker)) { results.push({ ticker: ticker || null, status: 'invalid', errors: { ticker: 'Ticker tidak valid.' } }); continue; }
+      results.push(await sequelize.transaction((t) => ingestCompany(d, ticker, t)));
+    }
+    const count = (st) => results.filter((r) => r.status === st).length;
+    // `updated` stays for older crawler builds; it is always 0 now that BEI data waits for approval.
+    res.json({ updated: 0, review: count('review'), unchanged: count('unchanged'), unknown: count('unknown'), invalid: count('invalid'), results });
+  } catch (err) {
+    next(err);
+  }
+};
 
 // GET /admin/api/sync/agent/queue — claims every requested job (or a dead run) and returns what to run.
 exports.queue = async (req, res, next) => {
@@ -145,17 +245,7 @@ exports.report = async (req, res, next) => {
       for (const c of report.conflicts) {
         const company = await Company.findByPk(c.ticker, { include: companyRefs, transaction });
         if (!company) { out.skipped.push(c.ticker); continue; }
-        const current = formOf(company);
-        const open = await SyncConflict.findOne({ where: { ticker: c.ticker, section: c.section, resolvedAt: null }, transaction });
-        const same = isDeepStrictEqual(current[c.section], sync.withBei(current, c.section, c.value));
-        const last = !open && !same && (await SyncConflict.findOne({ where: { ticker: c.ticker, section: c.section, resolvedAt: { [Op.ne]: null } }, order: [['resolvedAt', 'DESC']], transaction }));
-        if (same || sync.alreadyKept(last, c.value)) {
-          if (open && same) await open.update({ resolvedAt: new Date(), resolution: 'same' }, { transaction }); // team caught up meanwhile
-          continue;
-        }
-        if (open) await open.update({ jobKey: job.key, field: c.field, reason: c.reason, value: c.value }, { transaction });
-        else await SyncConflict.create({ ...c, jobKey: job.key }, { transaction });
-        out.conflicts += 1;
+        if (await raiseConflict(c, company, job.key, transaction)) out.conflicts += 1;
       }
 
       await job.update({
