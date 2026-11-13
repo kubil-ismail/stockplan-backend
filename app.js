@@ -14,6 +14,7 @@ var sectorsRouter = require("./routes/sectors");
 var companiesRouter = require("./routes/companies");
 var watchlistRouter = require("./routes/watchlist");
 var portfolioRouter = require("./routes/portfolio");
+var dashboardRouter = require("./routes/dashboard");
 var themesRouter = require("./routes/themes");
 var adminRouter = require("./routes/admin");
 
@@ -38,6 +39,7 @@ app.use("/sectors", sectorsRouter);
 app.use("/companies", companiesRouter);
 app.use("/watchlist", watchlistRouter);
 app.use("/portfolio", portfolioRouter);
+app.use("/dashboard", dashboardRouter);
 app.use("/themes", themesRouter);
 app.use("/admin/api", adminRouter);
 

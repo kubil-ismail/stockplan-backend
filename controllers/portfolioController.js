@@ -164,3 +164,6 @@ exports.setCash = async (req, res, next) => {
     await writeLog(req.user.id, portfolio.logCash(amount), t);
   });
 };
+
+// Shared with the client Beranda (allocation donut): the same snapshot the portfolio page shows.
+exports.snapshot = snapshot;

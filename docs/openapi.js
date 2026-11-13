@@ -42,7 +42,7 @@ const errorResponse = (description, code, message, fields) => ({
 module.exports = {
   openapi: '3.0.3',
   info: { title: 'StockPlan API', version: '0.1.0', description: 'REST API StockPlan. Sesi memakai cookie httpOnly `sid`.' },
-  tags: [{ name: 'Auth' }, { name: 'Profil' }, { name: 'Pengaturan' }, { name: 'Tema bisnis' }, { name: 'Emiten' }, { name: 'Watchlist' }, { name: 'Portofolio' }, { name: 'Admin: Auth' }, { name: 'Admin: Emiten' }, { name: 'Admin: Pengguna' }, { name: 'Admin: Tema' }, { name: 'Admin: Akses' }, { name: 'Admin: Riwayat' }, { name: 'Admin: Sinkron' }, { name: 'Admin: Dashboard' }],
+  tags: [{ name: 'Auth' }, { name: 'Profil' }, { name: 'Pengaturan' }, { name: 'Tema bisnis' }, { name: 'Emiten' }, { name: 'Watchlist' }, { name: 'Portofolio' }, { name: 'Beranda' }, { name: 'Admin: Auth' }, { name: 'Admin: Emiten' }, { name: 'Admin: Pengguna' }, { name: 'Admin: Tema' }, { name: 'Admin: Akses' }, { name: 'Admin: Riwayat' }, { name: 'Admin: Sinkron' }, { name: 'Admin: Dashboard' }],
   security: [{ cookieAuth: [] }],
   paths: {
     '/auth/register': {
@@ -1133,6 +1133,54 @@ module.exports = {
         },
       },
     },
+    '/dashboard': {
+      get: {
+        tags: ['Beranda'], security: [{ cookieAuth: [] }],
+        summary: 'Beranda',
+        description: 'Halaman Beranda (HANDOFF §6.1), satu panggilan. **Yang sudah berisi data nyata**: `actions` (suspensi emiten yang Anda pegang), `ipos` (IPO terbit yang tercatat ≤ 14 hari), `schedule` (pencatatan IPO yang Anda minta diingatkan), `allocation` (dari portofolio, berbasis modal; irisan "Emiten" dan "Tema"), dan `dataAsOf`. **Belum ada sumbernya, dikirim kosong supaya bentuknya sudah final**: `changes` ("Perubahan bisnis", menunggu feed keterbukaan BEI), `thesis` ("Kesehatan tesis") dan `allocation.slices.tesis` (menunggu modul Tesis), serta kartu "Kondisi tesis terpicu" dan "Bobot melenceng" di `actions` (butuh tesis dan target bobot). `empty: true` = BerandaKosong (belum memegang emiten; modul Tesis belum ada). Peringatan alokasi: satu emiten > 40% (`warnings.emiten`); satu tema yang memegang 100% (`warnings.tema`, tidak berlaku untuk "Tanpa tema"). Persen alokasi bilangan bulat dan selalu berjumlah 100; maks. 6 irisan, sisanya "Lainnya". Bukan rekomendasi: angka dari modal yang dicatat pengguna, bukan harga pasar.',
+        responses: {
+          200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: {
+            firstName: { type: 'string', example: 'Budi', description: '"Halo, {nama depan}"' },
+            empty: { type: 'boolean' },
+            dataAsOf: { type: 'string', format: 'date-time', nullable: true, description: '"Data BEI per …": sinkron BEI terakhir yang selesai; null = belum pernah' },
+            actions: { type: 'array', description: 'Kartu "Perlu tindakan" yang belum ditandai Selesai. Kelompokkan per `ticker` di client', items: { type: 'object', properties: {
+              id: { type: 'string', example: 'suspension-UNTR-2026-11-03', description: 'Untuk `POST /dashboard/actions/{id}/done`. Kejadian baru pada emiten yang sama = id baru' },
+              ticker: { type: 'string' }, kind: { type: 'string', enum: ['suspension'] }, tone: { type: 'string', enum: ['red', 'amber', 'blue'] }, label: { type: 'string', example: 'Suspensi' },
+              at: { type: 'string', format: 'date', nullable: true, description: 'Tanggal kejadian ("Hari ini")' },
+              title: { type: 'string' }, why: { type: 'string' }, src: { type: 'string', example: 'Pengumuman Bursa · BEI' }, cta: { type: 'string' }, href: { type: 'string', example: '/emiten/UNTR' },
+            } } },
+            schedule: { type: 'array', items: { type: 'object', properties: { kind: { type: 'string', enum: ['ipo_listing'] }, ticker: { type: 'string' }, at: { type: 'string', format: 'date' } } } },
+            changes: { type: 'array', items: { type: 'object' }, description: 'Selalu `[]` untuk saat ini' },
+            ipos: { type: 'array', description: 'IPO terbit yang tercatat 0–14 hari ke depan (zona Asia/Jakarta), terdekat dulu, maks. 10', items: { type: 'object', properties: {
+              ticker: { type: 'string' }, name: { type: 'string' }, logoUrl: { type: 'string', nullable: true },
+              stage: { type: 'string', nullable: true, example: 'Penawaran umum', description: 'Tahap yang sedang berjalan, atau berikutnya' },
+              stageStart: { type: 'string', format: 'date', nullable: true }, stageEnd: { type: 'string', format: 'date', nullable: true },
+              listingDate: { type: 'string', format: 'date' }, daysToListing: { type: 'integer' },
+            } } },
+            thesis: { type: 'object', nullable: true, description: 'Selalu null sampai modul Tesis dibuat' },
+            allocation: { type: 'object', properties: {
+              total: { type: 'integer', description: 'Σ modal saham (tanpa dana tunai)' }, count: { type: 'integer', description: 'Jumlah emiten' },
+              slices: { type: 'object', properties: {
+                emiten: { type: 'array', items: { $ref: '#/components/schemas/AllocationSlice' } },
+                tema: { type: 'array', items: { $ref: '#/components/schemas/AllocationSlice' }, description: 'Tema terbit pertama tiap emiten; tanpa tema = "Tanpa tema"' },
+                tesis: { type: 'array', items: { $ref: '#/components/schemas/AllocationSlice' }, description: 'Selalu `[]` sampai modul Tesis dibuat' },
+              } },
+              warnings: { type: 'object', properties: { emiten: { type: 'string', example: 'PTBA 46%: lebih dari 40% portofolio di satu emiten.' }, tema: { type: 'string' } } },
+            } },
+          } } } } },
+          401: { $ref: '#/components/responses/Unauthenticated' },
+        },
+      },
+    },
+    '/dashboard/actions/{id}/done': {
+      post: {
+        tags: ['Beranda'], security: [{ cookieAuth: [] }],
+        summary: 'Tandai selesai',
+        description: 'Tombol "Selesai": menyembunyikan satu kartu **hanya untuk pengguna ini**. Idempoten (`204` juga untuk kartu yang sudah disembunyikan). `404` untuk id yang bukan kartu emiten yang Anda pegang. Kejadian baru pada emiten yang sama (mis. suspensi dengan tanggal baru) muncul lagi sebagai kartu baru.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', example: 'suspension-UNTR-2026-11-03' } }],
+        responses: { 204: { description: 'Disembunyikan' }, 404: errorResponse('Tidak ada', 'NOT_FOUND', 'Hal ini sudah tidak ada.') },
+      },
+    },
     '/portfolio': {
       get: {
         tags: ['Portofolio'], security: [{ cookieAuth: [] }],
@@ -1271,6 +1319,10 @@ module.exports = {
     securitySchemes: { cookieAuth: { type: 'apiKey', in: 'cookie', name: 'sid' }, adminCookie: { type: 'apiKey', in: 'cookie', name: 'asid' }, syncToken: { type: 'http', scheme: 'bearer', description: 'Env `SYNC_TOKEN` (≥ 32 karakter) untuk crawler' } },
     responses: { Unauthenticated: errorResponse('Belum masuk / sesi berakhir', 'UNAUTHENTICATED', 'Sesi tidak valid atau sudah berakhir.') },
     schemas: {
+      AllocationSlice: {
+        type: 'object',
+        properties: { label: { type: 'string', example: 'PTBA' }, pct: { type: 'integer', example: 46, description: 'Bilangan bulat; semua irisan satu mode berjumlah 100' }, href: { type: 'string', example: '/emiten/PTBA' } },
+      },
       PortfolioHolding: {
         type: 'object',
         properties: {
@@ -1278,6 +1330,7 @@ module.exports = {
           logoUrl: { type: 'string', nullable: true },
           sector: { type: 'object', nullable: true, properties: { slug: { type: 'string' }, name: { type: 'string', example: 'Energi' } } },
           role: { type: 'string', nullable: true, example: 'Pemilik tambang · PLTU', description: 'Nama tahap di tema terbit pertama yang memuat emiten; tanpa tema = `tagline` emiten; keduanya kosong = null' },
+          theme: { type: 'object', nullable: true, description: 'Tema terbit pertama yang memuat emiten (dasar `role`/`stages`; juga alokasi "Tema" di Beranda)', properties: { slug: { type: 'string' }, name: { type: 'string' } } },
           stages: { type: 'array', items: { type: 'string', example: 'hulu' }, description: 'Kunci tahap utama di tema itu (chip Hulu/Tengah/Hilir; kunci bisa kustom, judulnya di `GET /themes/:slug` → `groups`)' },
           thesisId: { type: 'string', nullable: true, description: 'Selalu null sampai modul Tesis dibuat (semua emiten = "Tanpa tesis")' },
           targetPct: { type: 'number', nullable: true, description: 'Target bobot di tesis; selalu null sampai modul Tesis dibuat' },
