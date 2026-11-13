@@ -6,6 +6,7 @@ module.exports = (sequelize, DataTypes) => {
     name: { type: DataTypes.STRING(80), allowNull: false },
     description: { type: DataTypes.STRING(200), allowNull: false, defaultValue: '' },
     schedule: { type: DataTypes.STRING(60), allowNull: false },
+    position: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 }, // display order
     nextRunAt: DataTypes.DATE,
     requestedAt: DataTypes.DATE,
     requestedTickers: DataTypes.JSONB,

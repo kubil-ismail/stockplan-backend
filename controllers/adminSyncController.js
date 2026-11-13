@@ -26,7 +26,7 @@ exports.index = async (req, res, next) => {
   try {
     const now = new Date();
     const [jobs, failures, conflicts, history, companies] = await Promise.all([
-      SyncJob.findAll({ order: [['createdAt', 'ASC'], ['key', 'ASC']] }),
+      SyncJob.findAll({ order: [['position', 'ASC'], ['key', 'ASC']] }),
       SyncFailure.findAll({ where: { resolvedAt: null }, order: [['jobKey', 'ASC'], ['ticker', 'ASC']] }),
       SyncConflict.findAll({ where: { resolvedAt: null }, include: [{ model: Company, as: 'company', include: companyRefs }], order: [['updatedAt', 'DESC']] }),
       sequelize.query(

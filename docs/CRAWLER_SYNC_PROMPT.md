@@ -42,7 +42,7 @@ Respons 200:
 
 ### 2. Laporkan run: `POST /admin/api/sync/agent/jobs/:key/report`
 
-Panggil sekali per job setelah semua batch terkirim. Satu scrape profil mengisi tiga job: `prof` (Profil perusahaan), `mgmt` (Manajemen), dan `sub` (Anak usaha). Kirim laporan yang sama ke ketiganya.
+Panggil sekali per job setelah semua batch terkirim. Daftar job (kunci tetap): `prof` (Profil perusahaan: informasi perusahaan, manajemen, persentase kepemilikan, anak usaha), `px` (Harga penutupan), `kip` (Keterbukaan informasi), `lk` (Laporan keuangan XBRL), `ipo` (Pencatatan & IPO), `logo` (Logo emiten), `special` (UMA, suspensi, pencatatan khusus). Satu scrape profil hanya dilaporkan ke `prof`. Kunci lama `mgmt`, `sub`, dan `idx` sudah tidak ada: melapor ke sana dijawab `404 NOT_FOUND`.
 
 ```json
 {
@@ -61,7 +61,7 @@ Panggil sekali per job setelah semua batch terkirim. Satu scrape profil mengisi 
 
 ### 3. (Fase 2) Antrean dari admin: `GET /admin/api/sync/agent/queue`
 
-Respons: `{ "jobs": [ { "key": "mgmt", "tickers": null }, { "key": "prof", "tickers": ["BUMI"] } ] }`. Panggilan ini meng-*claim* job: job yang diambil **wajib** dilaporkan lewat endpoint nomor 2, kalau tidak statusnya "Berjalan…" selama 2 jam. `tickers: null` = scrape semua, daftar = hanya ticker itu.
+Respons: `{ "jobs": [ { "key": "prof", "tickers": null }, { "key": "logo", "tickers": null } ] }`. Panggilan ini meng-*claim* job: job yang diambil **wajib** dilaporkan lewat endpoint nomor 2, kalau tidak statusnya "Berjalan…" selama 2 jam. `tickers: null` = scrape semua, daftar = hanya ticker itu.
 
 ### Error
 
@@ -87,14 +87,14 @@ Format: `{ "error": { "code", "message", "fields"? } }`.
    - tampilkan ringkasan: updated, review, unchanged, unknown, invalid;
    - file JSON yang rusak dicatat sebagai failure, tidak menghentikan proses.
 5. **Sambungkan ke alur**:
-   - setelah "Company Profile" IDX selesai di `lib/crawler.js`, jalankan push, lalu `reportRun` ke `prof`, `mgmt`, dan `sub`;
+   - setelah "Company Profile" IDX selesai di `lib/crawler.js`, jalankan push, lalu `reportRun` ke `prof` saja;
    - `ok` = jumlah ticker yang berhasil di-scrape **dan** tidak `invalid` saat dikirim; `total` = jumlah ticker yang dicoba.
 6. **Script npm**:
    - `"push": "node --env-file=.env lib/push-cli.js"`: kirim file yang sudah ada tanpa scrape. Berguna sekarang, karena data sudah di `dist/`;
    - tambahkan `--env-file=.env` ke script `build` juga;
    - buat `.env.example` berisi `BACKEND_URL=http://localhost:3000` dan `SYNC_TOKEN=`;
    - pastikan `.env` ada di `.gitignore`.
-7. **(Opsional, fase 2)** `npm run worker`: loop `getQueue()` tiap 60 detik, jalankan scrape untuk job `prof`/`mgmt`/`sub` (dengan `tickers` kalau ada, plus `force`), push, lalu report dengan `tickers` yang sama. Job lain (`px`, `idx`, `kip`, `lk`, `ipo`) belum punya endpoint data. Laporkan sebagai gagal dengan `ticker: null` dan message "Belum didukung crawler", supaya tidak tertahan di "Berjalan…".
+7. **(Opsional, fase 2)** `npm run worker`: loop `getQueue()` tiap 60 detik, jalankan scrape untuk job `prof` (dengan `tickers` kalau ada, plus `force`), push, lalu report dengan `tickers` yang sama. Job lain (`px`, `kip`, `lk`, `ipo`, `logo`, `special`) belum punya endpoint data. Laporkan sebagai gagal dengan `ticker: null` dan message "Belum didukung crawler", supaya tidak tertahan di "Berjalan…".
 
 ## Batasan
 

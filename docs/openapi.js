@@ -796,7 +796,7 @@ module.exports = {
               count: { type: 'integer', example: 41 }, href: { type: 'string', example: '/admin/emiten?tab=incomplete', description: 'Rute di aplikasi admin' },
             } } },
             sync: { type: 'object', nullable: true, properties: { jobs: { type: 'array', items: { type: 'object', properties: {
-              key: { type: 'string' }, name: { type: 'string', example: 'Manajemen' }, lastFinishedAt: { type: 'string', format: 'date-time', nullable: true },
+              key: { type: 'string' }, name: { type: 'string', example: 'Profil perusahaan' }, lastFinishedAt: { type: 'string', format: 'date-time', nullable: true },
               status: { type: 'string', enum: ['running', 'queued', 'failed', 'ok', 'never'] }, failed: { type: 'integer' }, note: { type: 'string' },
               failedTickers: { type: 'array', items: { type: 'string' }, description: 'Maks. 5', example: ['BUMI', 'DEWA', 'PTRO'] }, failMessage: { type: 'string', nullable: true, example: 'Halaman profil BEI tidak bisa dibaca' },
             } } } } },
@@ -819,12 +819,12 @@ module.exports = {
       get: {
         tags: ['Admin: Sinkron'], security: [{ adminCookie: [] }],
         summary: 'Status sinkron BEI (AdminSinkron)',
-        description: 'Izin `sync:view`. Data diisi crawler lewat `/admin/api/sync/agent/*`. `jobs[].status`: `running` (diambil crawler, < 2 jam), `queued` (menunggu crawler), `failed` (ada kegagalan terbuka), `ok`, `never` (belum pernah lapor). `summary` sudah jadi teks ("958 emiten · 1 mnt 12 dtk"). `note` = "N perubahan perlu ditinjau" bila ada konflik terbuka. `failures` = kegagalan terbuka dari run terakhir; `retrying` = sedang/menunggu dicoba ulang. `conflicts[].changes` = baris "Di StockPlan" (`before`) vs "Dari BEI" (`after`), dihitung dari draf/terbit saat ini. `history` = 14 hari (Asia/Jakarta), `failed` = jumlah emiten gagal per hari.',
+        description: 'Izin `sync:view`. Data diisi crawler lewat `/admin/api/sync/agent/*`. `jobs` = 7 jadwal tetap, urut tampil: `prof` (profil perusahaan: informasi, manajemen, persentase kepemilikan, anak usaha), `px` (harga penutupan), `kip` (keterbukaan informasi), `lk` (laporan keuangan XBRL), `ipo` (pencatatan & IPO), `logo` (logo emiten), `special` (UMA, suspensi, pencatatan khusus). Semua kartu tinjauan data profil dari BEI (`conflicts[].jobKey`) milik `prof`. `jobs[].status`: `running` (diambil crawler, < 2 jam), `queued` (menunggu crawler), `failed` (ada kegagalan terbuka), `ok`, `never` (belum pernah lapor). `summary` sudah jadi teks ("958 emiten · 1 mnt 12 dtk"). `note` = "N perubahan perlu ditinjau" bila ada konflik terbuka. `failures` = kegagalan terbuka dari run terakhir; `retrying` = sedang/menunggu dicoba ulang. `conflicts[].changes` = baris "Di StockPlan" (`before`) vs "Dari BEI" (`after`), dihitung dari draf/terbit saat ini. `history` = 14 hari (Asia/Jakarta), `failed` = jumlah emiten gagal per hari.',
         responses: {
           200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: {
             stats: { type: 'object', properties: { companies: { type: 'integer', example: 958, description: 'Emiten tercakup (selain IPO)' }, lastFullSyncAt: { type: 'string', format: 'date-time', nullable: true } } },
             jobs: { type: 'array', items: { type: 'object', properties: {
-              key: { type: 'string', enum: ['prof', 'px', 'sub', 'mgmt', 'idx', 'kip', 'lk', 'ipo'] }, name: { type: 'string', example: 'Manajemen' }, description: { type: 'string' },
+              key: { type: 'string', enum: ['prof', 'px', 'kip', 'lk', 'ipo', 'logo', 'special'] }, name: { type: 'string', example: 'Profil perusahaan' }, description: { type: 'string' },
               schedule: { type: 'string', example: 'Harian 06.00' }, nextRunAt: { type: 'string', format: 'date-time', nullable: true },
               lastStartedAt: { type: 'string', format: 'date-time', nullable: true }, lastFinishedAt: { type: 'string', format: 'date-time', nullable: true },
               summary: { type: 'string', example: '955 dari 958 · 41 dtk' }, note: { type: 'string', example: '1 perubahan perlu ditinjau' },
@@ -851,9 +851,9 @@ module.exports = {
         tags: ['Admin: Sinkron'], security: [{ adminCookie: [] }],
         summary: 'Jalankan sekarang / Sinkron semua sekarang',
         description: 'Izin `sync:edit`. Hanya memasukkan ke antrean; crawler mengambilnya lewat `agent/queue`, lalu status job jadi `running`. Tanpa `key` = semua job. Tercatat di Riwayat (modul Sinkron BEI).',
-        requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { key: { type: 'string', example: 'mgmt' } } } } } },
+        requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { key: { type: 'string', example: 'prof' } } } } } },
         responses: {
-          200: { description: 'Masuk antrean', content: { 'application/json': { schema: { type: 'object', properties: { message: { type: 'string', example: 'Manajemen masuk antrean sinkron.' } } } } } },
+          200: { description: 'Masuk antrean', content: { 'application/json': { schema: { type: 'object', properties: { message: { type: 'string', example: 'Profil perusahaan masuk antrean sinkron.' } } } } } },
           404: errorResponse('Job tidak ada', 'NOT_FOUND', 'Jadwal sinkron tidak ditemukan.'),
         },
       },
@@ -905,7 +905,7 @@ module.exports = {
         summary: 'Crawler: ambil antrean',
         description: 'Untuk crawler, bukan UI. Mengambil (claim) semua job yang diminta admin; job yang sedang jalan < 2 jam tidak diambil lagi. `tickers: null` = run penuh, daftar = hanya ticker itu. Setelah selesai, crawler wajib memanggil `report`. 503 `SYNC_DISABLED` bila `SYNC_TOKEN` belum diisi.',
         responses: {
-          200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: { jobs: { type: 'array', items: { type: 'object', properties: { key: { type: 'string' }, tickers: { type: 'array', nullable: true, items: { type: 'string' } } } } } } }, example: { jobs: [{ key: 'mgmt', tickers: ['BUMI'] }] } } } },
+          200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: { jobs: { type: 'array', items: { type: 'object', properties: { key: { type: 'string' }, tickers: { type: 'array', nullable: true, items: { type: 'string' } } } } } } }, example: { jobs: [{ key: 'prof', tickers: ['BUMI'] }] } } } },
           401: errorResponse('Token salah', 'UNAUTHENTICATED', 'Token sinkron salah.'),
         },
       },
@@ -937,7 +937,7 @@ module.exports = {
         tags: ['Admin: Sinkron'], security: [{ syncToken: [] }],
         summary: 'Crawler: laporkan hasil run',
         description: 'Untuk crawler. Dipanggil setelah setiap run (terjadwal atau dari antrean). Data profil emiten dikirim lewat `agent/companies`; endpoint ini untuk status run, kegagalan, dan konflik manual. Kegagalan terbuka job ini diganti dengan `failures` (run penuh: semua; `tickers` diisi: hanya ticker itu). Hanya run penuh yang memperbarui kolom "Terakhir". `conflicts`: nilai BEI untuk satu bagian form emiten (`group`, `shareholders`, `management`), divalidasi seperti `PATCH /admin/api/companies/:ticker`; hanya kunci yang dikirim yang dipakai (mis. `group: { subsidiaries }` tidak mengosongkan `group.name`). Kirim daftar lengkap, bukan selisih: `management.people` dari BEI menggantikan seluruh daftar. Konflik dilewati bila nilainya sudah sama dengan isian tim, atau tim sudah memilih "Pertahankan" untuk nilai yang sama. Ticker yang tidak ada di `market_companies` dikembalikan di `skipped`. Body maks. 2 MB.',
-        parameters: [{ name: 'key', in: 'path', required: true, schema: { type: 'string', example: 'mgmt' } }],
+        parameters: [{ name: 'key', in: 'path', required: true, schema: { type: 'string', example: 'prof' } }],
         requestBody: { required: true, content: { 'application/json': {
           schema: { type: 'object', required: ['startedAt', 'finishedAt'], properties: {
             startedAt: { type: 'string', format: 'date-time' }, finishedAt: { type: 'string', format: 'date-time' }, nextRunAt: { type: 'string', format: 'date-time', nullable: true },

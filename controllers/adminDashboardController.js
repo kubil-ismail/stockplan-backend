@@ -50,7 +50,7 @@ async function coverage() {
 
 async function syncBlock(now) {
   const [jobs, failures, conflicts] = await Promise.all([
-    SyncJob.findAll({ order: [['createdAt', 'ASC'], ['key', 'ASC']] }),
+    SyncJob.findAll({ order: [['position', 'ASC'], ['key', 'ASC']] }),
     SyncFailure.findAll({ where: { resolvedAt: null }, attributes: ['jobKey', 'ticker', 'message'], order: [['ticker', 'ASC']], raw: true }),
     SyncConflict.count({ where: { resolvedAt: null }, group: ['jobKey'] }),
   ]);
